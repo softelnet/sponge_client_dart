@@ -26,13 +26,13 @@ abstract class TypeConverter {
   final Map<DataTypeKind, UnitTypeConverter> _registry = Map();
 
   /// Marshals the [value] as [type].
-  Future<dynamic> marshal<T, D extends DataType<T>>(D type, T value) async =>
+  Future<dynamic> marshal<T, D extends DataType>(D type, T value) async =>
       value != null
           ? await _getUnitConverter(type).marshal(this, type, value)
           : null;
 
   /// Unmarshals the [value] as [type].
-  Future<T> unmarshal<T, D extends DataType<T>>(D type, dynamic value) async =>
+  Future<T> unmarshal<T, D extends DataType>(D type, dynamic value) async =>
       value != null
           ? await _getUnitConverter(type).unmarshal(this, type, value)
           : null;
@@ -52,7 +52,7 @@ abstract class TypeConverter {
   UnitTypeConverter unregister(DataTypeKind typeKind) =>
       _registry.remove(typeKind);
 
-  UnitTypeConverter<T, D> _getUnitConverter<T, D extends DataType<T>>(D type) =>
+  UnitTypeConverter<T, D> _getUnitConverter<T, D extends DataType>(D type) =>
       checkNotNull(_registry[type.kind],
           message: 'Unsupported type ${type.kind}');
 }
@@ -78,7 +78,7 @@ class DefaultTypeConverter extends TypeConverter {
 }
 
 /// A unit type converter.
-abstract class UnitTypeConverter<T, D extends DataType<T>> {
+abstract class UnitTypeConverter<T, D extends DataType> {
   UnitTypeConverter(this.typeKind);
 
   /// The data type kind.

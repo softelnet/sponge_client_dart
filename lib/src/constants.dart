@@ -1,0 +1,36 @@
+// Copyright 2018 The Sponge authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+/// The Sponge client constants.
+abstract class SpongeClientConstants {
+  static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.5';
+
+  static const int API_VERSION = 1;
+  static const String APPLICATION_JSON_VALUE = 'application/json';
+  static const int DEFAULT_PORT = 1836;
+  static const String DEFAULT_PATH = 'sponge.json/v$API_VERSION';
+
+  static const String OPERATION_VERSION = 'version';
+  static const String OPERATION_LOGIN = 'login';
+  static const String OPERATION_LOGOUT = 'logout';
+  static const String OPERATION_KNOWLEDGE_BASES = 'knowledgeBases';
+  static const String OPERATION_ACTIONS = 'actions';
+  static const String OPERATION_CALL = 'call';
+  static const String OPERATION_SEND = 'send';
+  static const String OPERATION_RELOAD = 'reload';
+
+  static const String DEFAULT_ERROR_CODE = 'SPONGE001';
+  static const String ERROR_CODE_INVALID_AUTH_TOKEN = 'SPONGE002';
+  static const String ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION = 'SPONGE003';
+}

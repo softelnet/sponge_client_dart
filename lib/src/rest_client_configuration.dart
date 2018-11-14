@@ -41,21 +41,22 @@ class SpongeRestClientConfiguration {
   /// The flag telling if the client should automatically relogin when an auth token expires.
   bool relogin;
 
-  /// The flag telling if the client should request verification of a knowledge base 
+  /// The flag telling if the client should request verification of a knowledge base
   /// version on the server.
   bool verifyKnowledgeBaseVersion;
 
   /// The flag telling if the client should use the action meta cache.
   bool useActionMetaCache;
 
-  /// The maximum size of the action meta cache. The default value (-1) implies that 
+  /// The maximum size of the action meta cache. The default value (-1) implies that
   /// there is no maximum size.
   int actionMetaCacheMaxSize;
 
-  /// The flag that instructs the client to throw an exception when a response is an error response. Defaults to `true`.
+  /// The flag that instructs the client to throw an exception when a response is an error response.
+  /// Defaults to `true`.
   /// Setting this value to `false` makes sense only when using the client API methods `*ByRequest()`.
   bool throwExceptionOnErrorResponse;
-  
+
   /// Returns true if the connection URL is HTTPS.
   bool get secure => url != null && url.toLowerCase().startsWith('https');
 }

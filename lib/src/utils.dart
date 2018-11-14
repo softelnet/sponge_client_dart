@@ -12,25 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:async';
-import 'dart:io';
-import 'dart:typed_data';
-
 import 'package:sponge_client_dart/src/constants.dart';
 
 /// A set of utility methods.
 class SpongeUtils {
-
   /// Obfuscates a password in the JSON text of a request or response.
   static String obfuscatePassword(String text) =>
       text?.replaceAll(RegExp(r'"password":".*"'), '"password":"***"');
 
   /// Returns `true` if the HTTP [code] is success.
   static bool isHttpSuccess(int code) => 200 <= code && code <= 299;
-
-  /// Reads a file to bytes.
-  static FutureOr<Uint8List> readFileAsBytes(String file) async =>
-    Uint8List.fromList(await File(file).readAsBytes());
 
   /// Returns `true` if the Sponge server version [serverVersion] is compatible with the client.
   static bool isServerVersionCompatible(String serverVersion) =>

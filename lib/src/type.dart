@@ -33,34 +33,34 @@ enum DataTypeKind {
 }
 
 DataType _typeFromJson(Map<String, dynamic> json) {
-    DataTypeKind kind = DataType.fromJsonDataTypeKind(json['kind']);
-    switch (kind) {
-      case DataTypeKind.ACTION:
-        return ActionType.fromJson(json);
-      case DataTypeKind.ANY:
-        return AnyType.fromJson(json);
-      case DataTypeKind.BINARY:
-        return BinaryType.fromJson(json);
-      case DataTypeKind.BOOLEAN:
-        return BooleanType.fromJson(json);
-      case DataTypeKind.INTEGER:
-        return IntegerType.fromJson(json);
-      case DataTypeKind.LIST:
-        return ListType.fromJson(json);
-      case DataTypeKind.MAP:
-        return MapType.fromJson(json);
-      case DataTypeKind.NUMBER:
-        return NumberType.fromJson(json);
-      case DataTypeKind.OBJECT:
-        return ObjectType.fromJson(json);
-      case DataTypeKind.STRING:
-        return StringType.fromJson(json);
-      case DataTypeKind.VOID:
-        return VoidType.fromJson(json);
-    }
-
-    throw Exception('Unsupported type kind $kind');
+  DataTypeKind kind = DataType.fromJsonDataTypeKind(json['kind']);
+  switch (kind) {
+    case DataTypeKind.ACTION:
+      return ActionType.fromJson(json);
+    case DataTypeKind.ANY:
+      return AnyType.fromJson(json);
+    case DataTypeKind.BINARY:
+      return BinaryType.fromJson(json);
+    case DataTypeKind.BOOLEAN:
+      return BooleanType.fromJson(json);
+    case DataTypeKind.INTEGER:
+      return IntegerType.fromJson(json);
+    case DataTypeKind.LIST:
+      return ListType.fromJson(json);
+    case DataTypeKind.MAP:
+      return MapType.fromJson(json);
+    case DataTypeKind.NUMBER:
+      return NumberType.fromJson(json);
+    case DataTypeKind.OBJECT:
+      return ObjectType.fromJson(json);
+    case DataTypeKind.STRING:
+      return StringType.fromJson(json);
+    case DataTypeKind.VOID:
+      return VoidType.fromJson(json);
   }
+
+  throw Exception('Unsupported type kind $kind');
+}
 
 /// A data type. Used for example in action arguments metadata.
 class DataType<T> {

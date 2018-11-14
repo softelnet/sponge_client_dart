@@ -180,9 +180,8 @@ class SpongeRestClient {
   }
 
   /// Sends the `login` request to the server and returns the auth token. See [loginByRequest].
-  Future<String> login() async => (await loginByRequest(LoginRequest(
-          _configuration.username,
-          _configuration.password)))
+  Future<String> login() async => (await loginByRequest(
+          LoginRequest(_configuration.username, _configuration.password)))
       .authToken;
 
   /// Sends the `logout` request to the server and returns the response.

@@ -133,8 +133,7 @@ void main() {
     });
     test('testCallBinaryArgAndResult', () async {
       var client = await getClient();
-      Uint8List image =
-          await SpongeUtils.readFileAsBytes('test/resources/image.png');
+      Uint8List image = Uint8List.fromList(await File('test/resources/image.png').readAsBytes());
       Uint8List resultImage = await client.call('EchoImage', [image]);
       expect(image, equals(resultImage));
     });

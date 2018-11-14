@@ -14,7 +14,11 @@
 
 /// A Sponge client exception.
 class SpongeClientException implements Exception {
-  const SpongeClientException([this.errorCode, this.errorMessage, this.detailedErrorMessage]);
+  const SpongeClientException([
+    this.errorCode,
+    this.errorMessage,
+    this.detailedErrorMessage,
+  ]);
 
   final String errorCode;
   final String errorMessage;
@@ -26,12 +30,18 @@ class SpongeClientException implements Exception {
 
 /// A Sponge client exception for incorrect knowledge base version.
 class IncorrectKnowledgeBaseVersionException extends SpongeClientException {
-  const IncorrectKnowledgeBaseVersionException([String errorCode, String errorMessage, String detailedErrorMessage])
-      : super(errorCode, errorMessage, detailedErrorMessage);
+  const IncorrectKnowledgeBaseVersionException([
+    String errorCode,
+    String errorMessage,
+    String detailedErrorMessage,
+  ]) : super(errorCode, errorMessage, detailedErrorMessage);
 }
 
 /// A Sponge client exception for invalid auth token.
 class InvalidAuthTokenException extends SpongeClientException {
-  const InvalidAuthTokenException([String errorCode, String errorMessage, String detailedErrorMessage])
-      : super(errorCode, errorMessage, detailedErrorMessage);
+  const InvalidAuthTokenException([
+    String errorCode,
+    String errorMessage,
+    String detailedErrorMessage,
+  ]) : super(errorCode, errorMessage, detailedErrorMessage);
 }

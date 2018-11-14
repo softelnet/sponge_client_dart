@@ -55,8 +55,7 @@ class ActionCallResponse extends SpongeResponse {
   dynamic result;
 
   factory ActionCallResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(
-          ActionCallResponse(json['result']), json);
+      SpongeResponse.setupFromJson(ActionCallResponse(json['result']), json);
 }
 
 /// A get actions response.
@@ -99,8 +98,7 @@ class GetVersionResponse extends SpongeResponse {
   String version;
 
   factory GetVersionResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(
-          GetVersionResponse(json['version']), json);
+      SpongeResponse.setupFromJson(GetVersionResponse(json['version']), json);
 }
 
 /// A login response.
@@ -138,6 +136,5 @@ class SendEventResponse extends SpongeResponse {
   String eventId;
 
   factory SendEventResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(
-          SendEventResponse(json['eventId']), json);
+      SpongeResponse.setupFromJson(SendEventResponse(json['eventId']), json);
 }

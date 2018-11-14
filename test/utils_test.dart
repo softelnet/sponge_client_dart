@@ -12,19 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:typed_data';
-
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('Utils', () {
-    test('readFileAsBytes', () async {
-      Uint8List data =
-          await SpongeUtils.readFileAsBytes('test/resources/image.png');
-      expect(data.length, equals(287));
-    });
     test('obfuscatePassword', () {
       expect(
           SpongeUtils.obfuscatePassword(

@@ -26,14 +26,16 @@ abstract class TypeConverter {
   final Map<DataTypeKind, UnitTypeConverter> _registry = Map();
 
   /// Marshals the [value] as [type].
-  Future<dynamic> marshal<T, D extends DataType<T>>(D type, T value) async => value != null
-      ? await _getUnitConverter(type).marshal(this, type, value)
-      : null;
+  Future<dynamic> marshal<T, D extends DataType<T>>(D type, T value) async =>
+      value != null
+          ? await _getUnitConverter(type).marshal(this, type, value)
+          : null;
 
   /// Unmarshals the [value] as [type].
-  Future<T> unmarshal<T, D extends DataType<T>>(D type, dynamic value) async => value != null
-      ? await _getUnitConverter(type).unmarshal(this, type, value)
-      : null;
+  Future<T> unmarshal<T, D extends DataType<T>>(D type, dynamic value) async =>
+      value != null
+          ? await _getUnitConverter(type).unmarshal(this, type, value)
+          : null;
 
   /// Registers the unit type converter.
   void register(UnitTypeConverter unitConverter) {
@@ -83,17 +85,15 @@ abstract class UnitTypeConverter<T, D extends DataType<T>> {
   final DataTypeKind typeKind;
 
   /// Marshals the [value] as [type].
-  /// 
+  ///
   /// The [value] will never be null here.
-  Future<dynamic> marshal(
-          TypeConverter converter, D type, T value) async =>
+  Future<dynamic> marshal(TypeConverter converter, D type, T value) async =>
       value;
 
   /// Unmarshals the [value] as [type].
-  /// 
+  ///
   /// The [value] will never be null here.
-  Future<T> unmarshal(
-          TypeConverter converter, D type, dynamic value) async =>
+  Future<T> unmarshal(TypeConverter converter, D type, dynamic value) async =>
       value;
 }
 

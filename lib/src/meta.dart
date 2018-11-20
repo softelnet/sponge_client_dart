@@ -118,7 +118,7 @@ class ActionMeta {
   final ActionResultMeta resultMeta;
 
   /// The action label.
-  String get label => '${knowledgeBase?.label}: ${displayName ?? name}';
+  String get label => displayName ?? name;
 
   factory ActionMeta.fromJson(Map<String, dynamic> json) {
     return json != null

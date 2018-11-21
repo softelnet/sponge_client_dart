@@ -66,21 +66,21 @@ void main() {
       var client = await getClient();
       List<ActionMeta> actions = await client.getActions();
       expect(actions.length,
-          equals(TestConstants.ANONYMOUS_ALL_ACTION_COUNT));
+          equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testActionsParamArgMetadataRequiredTrue', () async {
       var client = await getClient();
       List<ActionMeta> actions =
           await client.getActions(metadataRequired: true);
       expect(actions.length,
-          equals(TestConstants.ACTIONS_WITH_METADATA_COUNT));
+          equals(TestConstants.ANONYMOUS_ACTIONS_WITH_METADATA_COUNT));
     });
     test('testActionsParamArgMetadataRequiredFalse', () async {
       var client = await getClient();
       List<ActionMeta> actions =
           await client.getActions(metadataRequired: false);
       expect(actions.length,
-          equals(TestConstants.ANONYMOUS_ALL_ACTION_COUNT));
+          equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testActionsNameRegExp', () async {
       var client = await getClient();
@@ -263,12 +263,12 @@ void main() {
         ..relogin = true;
       expect(await client.login(), isNotNull);
       expect((await client.getActions()).length,
-          equals(TestConstants.ADMIN_ALL_ACTION_COUNT));
+          equals(TestConstants.ADMIN_ACTIONS_COUNT));
 
       sleep(Duration(seconds: 3));
 
       expect((await client.getActions()).length,
-          equals(TestConstants.ADMIN_ALL_ACTION_COUNT));
+          equals(TestConstants.ADMIN_ACTIONS_COUNT));
     });
     test('testAuthTokeExpirationNoRelogin', () async {
       var client = await getClient();
@@ -278,13 +278,13 @@ void main() {
         ..relogin = false;
       expect(await client.login(), isNotNull);
       expect((await client.getActions()).length,
-          equals(TestConstants.ADMIN_ALL_ACTION_COUNT));
+          equals(TestConstants.ADMIN_ACTIONS_COUNT));
 
       sleep(Duration(seconds: 3));
 
       try {
         expect((await client.getActions()).length,
-            equals(TestConstants.ADMIN_ALL_ACTION_COUNT));
+            equals(TestConstants.ADMIN_ACTIONS_COUNT));
         fail('$InvalidAuthTokenException expected');
       } catch (e) {
         expect(e is InvalidAuthTokenException, isTrue);
@@ -382,14 +382,14 @@ void main() {
         ..configuration.username = 'john'
         ..configuration.password = 'password';
       expect((await client.getActions()).length,
-          equals(TestConstants.ADMIN_ALL_ACTION_COUNT));
+          equals(TestConstants.ADMIN_ACTIONS_COUNT));
     });
     test('testRestActionsUser2', () async {
       var client = await getClient()
         ..configuration.username = 'joe'
         ..configuration.password = 'password';
       expect((await client.getActions()).length,
-          equals(TestConstants.ANONYMOUS_ALL_ACTION_COUNT));
+          equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testLogin', () async {
       var client = await getClient()
@@ -398,7 +398,7 @@ void main() {
 
       expect(await client.login(), isNotNull);
       expect((await client.getActions()).length,
-          equals(TestConstants.ADMIN_ALL_ACTION_COUNT));
+          equals(TestConstants.ADMIN_ACTIONS_COUNT));
 
       client
         ..configuration.username = null
@@ -407,7 +407,7 @@ void main() {
 
       // Allowed anonymous access.
       expect((await client.getActions()).length,
-          equals(TestConstants.ANONYMOUS_ALL_ACTION_COUNT));
+          equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testLogout', () async {
       var client = await getClient()

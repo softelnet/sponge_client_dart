@@ -71,9 +71,7 @@ class SpongeRestClient {
     // Must be isolate-safe.
     String authToken = _currentAuthToken;
     if (authToken != null) {
-      if (request.authToken == null) {
-        request.authToken = authToken;
-      }
+        request.authToken ??= authToken;
     } else {
       if (_configuration.username != null && request.username == null) {
         request.username = _configuration.username;

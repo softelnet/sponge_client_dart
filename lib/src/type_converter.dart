@@ -77,7 +77,8 @@ class DefaultTypeConverter extends TypeConverter {
   }
 }
 
-/// A unit type converter.
+/// An unit type converter. All implementations should be stateless because one instance is shared
+/// by different invocations of [marshal] and [unmarshal] methods.
 abstract class UnitTypeConverter<T, D extends DataType> {
   UnitTypeConverter(this.typeKind);
 

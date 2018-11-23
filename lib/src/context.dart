@@ -12,15 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'src/constants.dart';
-export 'src/context.dart';
-export 'src/exception.dart';
-export 'src/listener.dart';
-export 'src/meta.dart';
-export 'src/request.dart';
-export 'src/response.dart';
-export 'src/rest_client.dart';
-export 'src/rest_client_configuration.dart';
-export 'src/type.dart';
-export 'src/type_converter.dart';
-export 'src/utils.dart';
+import 'package:sponge_client_dart/src/listener.dart';
+
+class SpongeRequestContext {
+  SpongeRequestContext({this.onRequestSerializedListener, this.onResponseDeserializedListener});
+
+  OnRequestSerializedListener onRequestSerializedListener;
+  OnResponseDeserializedListener onResponseDeserializedListener;
+}

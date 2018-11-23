@@ -19,9 +19,11 @@ import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:quiver/cache.dart';
 import 'package:quiver/check.dart';
+import 'package:sponge_client_dart/src/context.dart';
 import 'package:sponge_client_dart/src/rest_client_configuration.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/exception.dart';
+import 'package:sponge_client_dart/src/listener.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/request.dart';
 import 'package:sponge_client_dart/src/response.dart';
@@ -59,10 +61,30 @@ class SpongeRestClient {
 
   final Lock _lock = Lock(reentrant: true);
 
+  final List<OnRequestSerializedListener> _onRequestSerializedListeners = [];
+
+  final List<OnResponseDeserializedListener> _onResponseDeserializedListeners =
+      [];
+
+  void addOnRequestSerializedListener(OnRequestSerializedListener listener) =>
+      _onRequestSerializedListeners.add(listener);
+
+  bool removeOnRequestSerializedListener(
+          OnRequestSerializedListener listener) =>
+      _onRequestSerializedListeners.remove(listener);
+
+  void addOnResponseDeserializedListener(
+          OnResponseDeserializedListener listener) =>
+      _onResponseDeserializedListeners.add(listener);
+
+  bool removeOnResponseDeserializedListener(
+          OnResponseDeserializedListener listener) =>
+      _onResponseDeserializedListeners.remove(listener);
+
   String _getUrl(String operation) =>
       _url + (_url.endsWith('/') ? '' : '/') + operation;
 
-  T _prepareRequest<T extends SpongeRequest>(T request) {
+  T _setupRequest<T extends SpongeRequest>(T request) {
     if (_configuration.useRequestId) {
       int newRequestId = ++_currentRequestId;
       request.id = '$newRequestId';
@@ -71,7 +93,7 @@ class SpongeRestClient {
     // Must be isolate-safe.
     String authToken = _currentAuthToken;
     if (authToken != null) {
-        request.authToken ??= authToken;
+      request.authToken ??= authToken;
     } else {
       if (_configuration.username != null && request.username == null) {
         request.username = _configuration.username;
@@ -84,7 +106,7 @@ class SpongeRestClient {
     return request;
   }
 
-  R _prepareResponse<R extends SpongeResponse>(R response) {
+  R _setupResponse<R extends SpongeResponse>(R response) {
     if (response.errorCode != null) {
       _logger.fine(() =>
           'Error response (${response.errorCode}): ${response.errorMessage}\n${response.detailedErrorMessage ?? ""}');
@@ -109,10 +131,12 @@ class SpongeRestClient {
   }
 
   Future<SpongeResponse> _execute(String operation, SpongeRequest request,
-      _ResponseFromJsonCallback fromJson) async {
+      _ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
+    context ??= SpongeRequestContext();
+
     try {
-      return _prepareResponse(
-          await _doExecute(operation, _prepareRequest(request), fromJson));
+      return _setupResponse(await _doExecute(
+          operation, _setupRequest(request), fromJson, context));
     } on InvalidAuthTokenException {
       // Relogin if set up and necessary.
       if (_currentAuthToken != null && _configuration.relogin) {
@@ -121,20 +145,45 @@ class SpongeRestClient {
         // Clear the request auth token.
         request.authToken = null;
 
-        return _prepareResponse(
-            await _doExecute(operation, _prepareRequest(request), fromJson));
+        return _setupResponse(await _doExecute(
+            operation, _setupRequest(request), fromJson, context));
       } else {
         rethrow;
       }
     }
   }
 
+  void _fireOnRequestSerializedListener(
+      SpongeRequest request, SpongeRequestContext context, String requestBody) {
+    if (context.onRequestSerializedListener != null) {
+      context.onRequestSerializedListener(request, requestBody);
+    }
+    _onRequestSerializedListeners
+        .where((listener) => listener != null)
+        .forEach((listener) => listener(request, requestBody));
+  }
+
+  void _fireOnResponseDeserializedListener(
+      SpongeRequest request,
+      SpongeRequestContext context,
+      SpongeResponse response,
+      String responseBody) {
+    if (context.onResponseDeserializedListener != null) {
+      context.onResponseDeserializedListener(request, response, responseBody);
+    }
+    _onResponseDeserializedListeners
+        .where((listener) => listener != null)
+        .forEach((listener) => listener(request, response, responseBody));
+  }
+
   Future<SpongeResponse> _doExecute(String operation, SpongeRequest request,
-      _ResponseFromJsonCallback fromJson) async {
+      _ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
     String requestBody = json.encode(request.toJson());
 
     _logger.finer(() =>
         'REST API $operation request: ${SpongeUtils.obfuscatePassword(requestBody)}');
+
+    _fireOnRequestSerializedListener(request, context, requestBody);
 
     Response httpResponse = await post(_getUrl(operation),
         headers: {'Content-type': SpongeClientConstants.APPLICATION_JSON_VALUE},
@@ -149,14 +198,22 @@ class SpongeRestClient {
       throw Exception('HTTP error (status code ${httpResponse.statusCode})');
     }
 
-    return fromJson(json.decode(httpResponse.body));
+    String responseBody = httpResponse.body;
+    SpongeResponse response;
+    try {
+      response = fromJson(json.decode(responseBody));
+    } finally {
+      _fireOnResponseDeserializedListener(
+          request, context, response, responseBody);
+    }
+    return response;
   }
 
   /// Sends the `version` request to the server and returns the response.
-  Future<GetVersionResponse> getVersionByRequest(
-          GetVersionRequest request) async =>
+  Future<GetVersionResponse> getVersionByRequest(GetVersionRequest request,
+          {SpongeRequestContext context}) async =>
       await _execute(SpongeClientConstants.OPERATION_VERSION, request,
-          (json) => GetVersionResponse.fromJson(json));
+          (json) => GetVersionResponse.fromJson(json), context);
 
   /// Sends the `version` request to the server and returns the version.
   Future<String> getVersion() async =>
@@ -164,13 +221,15 @@ class SpongeRestClient {
 
   /// Sends the `login` request to the server and returns the response. Sets the auth token
   /// in the client for further requests.
-  Future<LoginResponse> loginByRequest(LoginRequest request) async {
+  Future<LoginResponse> loginByRequest(LoginRequest request,
+      {SpongeRequestContext context}) async {
     return await _lock.synchronized(() async {
       _currentAuthToken = null;
       LoginResponse response = await _execute(
           SpongeClientConstants.OPERATION_LOGIN,
           request,
-          (json) => LoginResponse.fromJson(json));
+          (json) => LoginResponse.fromJson(json),
+          context);
       _currentAuthToken = response.authToken;
 
       return response;
@@ -184,12 +243,14 @@ class SpongeRestClient {
 
   /// Sends the `logout` request to the server and returns the response.
   /// Clears the auth token in the client.
-  Future<LogoutResponse> logoutByRequest(LogoutRequest request) async {
+  Future<LogoutResponse> logoutByRequest(LogoutRequest request,
+      {SpongeRequestContext context}) async {
     return await _lock.synchronized(() async {
       LogoutResponse response = await _execute(
           SpongeClientConstants.OPERATION_LOGOUT,
           request,
-          (json) => LogoutResponse.fromJson(json));
+          (json) => LogoutResponse.fromJson(json),
+          context);
       _currentAuthToken = null;
 
       return response;
@@ -203,9 +264,10 @@ class SpongeRestClient {
 
   /// Sends the `knowledgeBases` request to the server and returns the response.
   Future<GetKnowledgeBasesResponse> getKnowledgeBasesByRequest(
-          GetKnowledgeBasesRequest request) async =>
+          GetKnowledgeBasesRequest request,
+          {SpongeRequestContext context}) async =>
       await _execute(SpongeClientConstants.OPERATION_KNOWLEDGE_BASES, request,
-          (json) => GetKnowledgeBasesResponse.fromJson(json));
+          (json) => GetKnowledgeBasesResponse.fromJson(json), context);
 
   /// Sends the `knowledgeBases` request to the server and returns the list of available
   /// knowledge bases metadata.
@@ -215,9 +277,9 @@ class SpongeRestClient {
 
   /// Sends the `actions` request to the server and returns the response. This method may populate
   /// the action metadata cache.
-  Future<GetActionsResponse> getActionsByRequest(
-          GetActionsRequest request) async =>
-      await _doGetActionsByRequest(request, populateCache: true);
+  Future<GetActionsResponse> getActionsByRequest(GetActionsRequest request,
+          {SpongeRequestContext context}) async =>
+      await _doGetActionsByRequest(request, true, context);
 
   /// Sends the `actions` request to the server and returns the list of available actions metadata.
   Future<List<ActionMeta>> getActions(
@@ -227,11 +289,12 @@ class SpongeRestClient {
           .actions;
 
   Future<GetActionsResponse> _doGetActionsByRequest(GetActionsRequest request,
-      {bool populateCache = true}) async {
+      bool populateCache, SpongeRequestContext context) async {
     GetActionsResponse response = await _execute(
         SpongeClientConstants.OPERATION_ACTIONS,
         request,
-        (json) => GetActionsResponse.fromJson(json));
+        (json) => GetActionsResponse.fromJson(json),
+        context);
 
     if (response.actions != null) {
       // Unmarshal defaultValues in action meta.
@@ -270,9 +333,10 @@ class SpongeRestClient {
     }
   }
 
-  Future<ActionMeta> _fetchActionMeta(String actionName) async {
+  Future<ActionMeta> _fetchActionMeta(
+      String actionName, SpongeRequestContext context) async {
     var request = GetActionsRequest(metadataRequired: true, name: actionName);
-    var response = await _doGetActionsByRequest(request, populateCache: false);
+    var response = await _doGetActionsByRequest(request, false, context);
 
     return response.actions?.singleWhere((_) => true, orElse: () => null);
   }
@@ -284,7 +348,7 @@ class SpongeRestClient {
   /// If you want to prevent fetching metadata from the server, set [allowFetchMetadata] to `false`.
   /// The default value is `true`.
   Future<ActionMeta> getActionMeta(String actionName,
-      [bool allowFetchMetadata = true]) async {
+      {bool allowFetchMetadata = true, SpongeRequestContext context}) async {
     allowFetchMetadata = allowFetchMetadata ?? true;
     if (_configuration.useActionMetaCache && _actionMetaCache != null) {
       ActionMeta actionMeta = await _actionMetaCache.get(actionName);
@@ -292,10 +356,13 @@ class SpongeRestClient {
       return actionMeta ??
           (allowFetchMetadata
               ? await _actionMetaCache.get(actionName,
-                  ifAbsent: (name) async => await _fetchActionMeta(name))
+                  ifAbsent: (name) async =>
+                      await _fetchActionMeta(name, context))
               : null);
     } else {
-      return allowFetchMetadata ? await _fetchActionMeta(actionName) : null;
+      return allowFetchMetadata
+          ? await _fetchActionMeta(actionName, context)
+          : null;
     }
   }
 
@@ -313,20 +380,23 @@ class SpongeRestClient {
   /// metadata is `null` or is not in the cache, the marshaling of arguments and unmarshaling of the result
   /// will be suppressed.
   Future<ActionCallResponse> callByRequest(ActionCallRequest request,
-          [ActionMeta actionMeta, bool allowFetchMetadata = true]) async =>
+          {ActionMeta actionMeta,
+          bool allowFetchMetadata = true,
+          SpongeRequestContext context}) async =>
       await _doCallByRequest(
-          actionMeta ?? await getActionMeta(request.name, allowFetchMetadata),
-          request);
+          actionMeta ?? await getActionMeta(request.name, allowFetchMetadata: allowFetchMetadata),
+          request,
+          context);
 
   /// Sends the `call` request to the server and returns the response. See [callByRequest].
   Future<dynamic> call(String actionName, List args,
           [ActionMeta actionMeta, bool allowFetchMetadata = true]) async =>
       (await callByRequest(ActionCallRequest(actionName, args: args),
-              actionMeta, allowFetchMetadata))
+              actionMeta: actionMeta, allowFetchMetadata: allowFetchMetadata))
           .result;
 
-  Future<ActionCallResponse> _doCallByRequest(
-      ActionMeta actionMeta, ActionCallRequest request) async {
+  Future<ActionCallResponse> _doCallByRequest(ActionMeta actionMeta,
+      ActionCallRequest request, SpongeRequestContext context) async {
     // Conditionally set the verification of the knowledge base version on the server side.
     if (_configuration.verifyKnowledgeBaseVersion &&
         actionMeta != null &&
@@ -345,7 +415,8 @@ class SpongeRestClient {
     ActionCallResponse response = await _execute(
         SpongeClientConstants.OPERATION_CALL,
         request,
-        (json) => ActionCallResponse.fromJson(json));
+        (json) => ActionCallResponse.fromJson(json),
+        context);
 
     await _unmarshalCallResult(actionMeta, response);
 
@@ -412,9 +483,10 @@ class SpongeRestClient {
   }
 
   /// Sends the `send` request to the server and returns the response.
-  Future<SendEventResponse> sendByRequest(SendEventRequest request) async =>
+  Future<SendEventResponse> sendByRequest(SendEventRequest request,
+          {SpongeRequestContext context}) async =>
       await _execute(SpongeClientConstants.OPERATION_SEND, request,
-          (json) => SendEventResponse.fromJson(json));
+          (json) => SendEventResponse.fromJson(json), context);
 
   /// Sends the event named [eventName] with optional [attributes] to the server.
   Future<String> send(String eventName,
@@ -423,9 +495,10 @@ class SpongeRestClient {
           .eventId;
 
   /// Sends the `reload` request to the server and returns the response.
-  Future<ReloadResponse> reloadByRequest(ReloadRequest request) async =>
+  Future<ReloadResponse> reloadByRequest(ReloadRequest request,
+          {SpongeRequestContext context}) async =>
       await _execute(SpongeClientConstants.OPERATION_RELOAD, request,
-          (json) => ReloadResponse.fromJson(json));
+          (json) => ReloadResponse.fromJson(json), context);
 
   /// Sends the `reload` request to the server.
   Future<Null> reload() async {

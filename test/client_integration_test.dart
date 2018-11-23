@@ -18,6 +18,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart';
 import 'package:sponge_client_dart/src/constants.dart';
+import 'package:sponge_client_dart/src/context.dart';
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/request.dart';
@@ -65,8 +66,7 @@ void main() {
     test('testActions', () async {
       var client = await getClient();
       List<ActionMeta> actions = await client.getActions();
-      expect(actions.length,
-          equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
+      expect(actions.length, equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testActionsParamArgMetadataRequiredTrue', () async {
       var client = await getClient();
@@ -79,8 +79,7 @@ void main() {
       var client = await getClient();
       List<ActionMeta> actions =
           await client.getActions(metadataRequired: false);
-      expect(actions.length,
-          equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
+      expect(actions.length, equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testActionsNameRegExp', () async {
       var client = await getClient();
@@ -127,13 +126,14 @@ void main() {
         expect(e is IncorrectKnowledgeBaseVersionException, isTrue);
         expect(
             e.errorCode,
-            equals(
-                SpongeClientConstants.ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION));
+            equals(SpongeClientConstants
+                .ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION));
       }
     });
     test('testCallBinaryArgAndResult', () async {
       var client = await getClient();
-      Uint8List image = Uint8List.fromList(await File('test/resources/image.png').readAsBytes());
+      Uint8List image = Uint8List.fromList(
+          await File('test/resources/image.png').readAsBytes());
       Uint8List resultImage = await client.call('EchoImage', [image]);
       expect(image, equals(resultImage));
     });
@@ -202,17 +202,17 @@ void main() {
     test('testActionCacheOn', () async {
       var client = await getClient();
       String actionName = 'UpperCase';
-      expect(await client.getActionMeta(actionName, false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
 
       ActionMeta actionMeta = await client.getActionMeta(actionName);
       expect(actionMeta, isNotNull);
-      expect(await client.getActionMeta(actionName, false), isNotNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNotNull);
 
       expect(identical(actionMeta, await client.getActionMeta(actionName)),
           isTrue);
 
       await client.clearCache();
-      expect(await client.getActionMeta(actionName, false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
       expect(identical(actionMeta, await client.getActionMeta(actionName)),
           isFalse);
       expect(await client.getActionMeta(actionName), isNotNull);
@@ -233,23 +233,23 @@ void main() {
     test('testActionCacheOnGetActions', () async {
       var client = await getClient();
       String actionName = 'UpperCase';
-      expect(await client.getActionMeta(actionName, false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
 
       await client.getActions();
-      expect(await client.getActionMeta(actionName, false), isNotNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNotNull);
 
       expect(await client.getActionMeta(actionName), isNotNull);
 
       await client.clearCache();
-      expect(await client.getActionMeta(actionName, false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
 
       await client.getActions();
-      expect(await client.getActionMeta(actionName, false), isNotNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNotNull);
     });
     test('testFetchActionMeta', () async {
       var client = await getClient();
       String actionName = 'UpperCase';
-      expect(await client.getActionMeta(actionName, false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
       expect(await client.getActionMeta(actionName), isNotNull);
     });
   });
@@ -288,8 +288,8 @@ void main() {
         fail('$InvalidAuthTokenException expected');
       } catch (e) {
         expect(e is InvalidAuthTokenException, isTrue);
-        expect(
-            e.errorCode, equals(SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN));
+        expect(e.errorCode,
+            equals(SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN));
       }
     });
   });
@@ -448,17 +448,85 @@ void main() {
       var client = await getClient();
       var requestBody = '{"error_property":""}';
       Response httpResponse = await post('${client.configuration.url}/actions',
-          headers: {'Content-type': SpongeClientConstants.APPLICATION_JSON_VALUE},
+          headers: {
+            'Content-type': SpongeClientConstants.APPLICATION_JSON_VALUE
+          },
           body: requestBody);
 
       expect(httpResponse.statusCode, equals(200));
-      var apiResponse =
-          SpongeResponse.fromJson(json.decode(httpResponse.body));
-      expect(apiResponse.errorCode, equals(SpongeClientConstants.DEFAULT_ERROR_CODE));
+      var apiResponse = SpongeResponse.fromJson(json.decode(httpResponse.body));
+      expect(apiResponse.errorCode,
+          equals(SpongeClientConstants.DEFAULT_ERROR_CODE));
       expect(
           apiResponse.errorMessage
               .contains('Unrecognized field "error_property"'),
           isTrue);
+    });
+  });
+
+  // Tests mirroring ClientListenerTest.java.
+  group('REST API Client listener', () {
+    String normalizeJson(String json) => json.replaceAll(RegExp(r'\s'), '');
+
+    test('testGlobalListeners', () async {
+      var client = await getClient();
+
+      List<String> requestStringList = [];
+      List<String> responseStringList = [];
+
+      client
+        ..addOnRequestSerializedListener(
+            (request, requestString) => requestStringList.add(requestString))
+        ..addOnResponseDeserializedListener(
+            (request, response, responseString) =>
+                responseStringList.add(responseString));
+
+      await client.getVersion();
+      String version = await client.getVersion();
+      await client.getVersion();
+
+      expect(SpongeUtils.isServerVersionCompatible(version), isTrue);
+      expect(requestStringList.length, equals(3));
+      expect(responseStringList.length, equals(3));
+      expect(
+          normalizeJson(requestStringList[0]),
+          equals(
+              '{"id":null,"username":null,"password":null,"authToken":null}'));
+      expect(
+          normalizeJson(responseStringList[0]),
+          equals(
+              '{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"version":"$version"}'));
+    });
+    test('testOneRequestListeners', () async {
+      var client = await getClient();
+
+      String actualRequestString;
+      String actualResponseString;
+
+      await client.getVersion();
+
+      SpongeRequestContext context = SpongeRequestContext()
+        ..onRequestSerializedListener =
+            ((request, requestString) => actualRequestString = requestString)
+        ..onResponseDeserializedListener =
+            ((request, response, responseString) =>
+                actualResponseString = responseString);
+      var version =
+          (await client.getVersionByRequest(GetVersionRequest(), context: context))
+              .version;
+
+      expect(SpongeUtils.isServerVersionCompatible(version), isTrue);
+
+      await client.getVersion();
+
+      expect(
+          normalizeJson(actualRequestString),
+          equals(
+              '{"id":null,"username":null,"password":null,"authToken":null}'));
+      expect(
+          normalizeJson(actualResponseString),
+          equals(
+              '{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"version":"$version"}'));
     });
   });
 }

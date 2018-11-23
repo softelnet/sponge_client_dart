@@ -12,15 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-export 'src/constants.dart';
-export 'src/context.dart';
-export 'src/exception.dart';
-export 'src/listener.dart';
-export 'src/meta.dart';
-export 'src/request.dart';
-export 'src/response.dart';
-export 'src/rest_client.dart';
-export 'src/rest_client_configuration.dart';
-export 'src/type.dart';
-export 'src/type_converter.dart';
-export 'src/utils.dart';
+import 'package:sponge_client_dart/src/request.dart';
+import 'package:sponge_client_dart/src/response.dart';
+
+/// A callback that will be invoked when the request is serialized. Remember to obfuscate
+/// the password if the [requestString] is to be shown.
+typedef void OnRequestSerializedListener(SpongeRequest request, String requestString);
+
+/// A callback that will be invoked when the response is deserialized.
+typedef void OnResponseDeserializedListener(SpongeRequest request, SpongeResponse response, String responseString);

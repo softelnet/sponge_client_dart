@@ -1,3 +1,7 @@
+## 1.6.0 (not released yet)
+
+* Added a context and listeners to the REST API client.
+
 ## 1.5.1 (2018-11-14)
 
 * Removed `dart:io` dependency.

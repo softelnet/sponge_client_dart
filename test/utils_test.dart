@@ -23,6 +23,18 @@ void main() {
           SpongeUtils.obfuscatePassword(
               '{"username":"test","password":"secret"}'),
           equals('{"username":"test","password":"***"}'));
+      expect(SpongeUtils.obfuscatePassword('{"username":null,"password":null}'),
+          equals('{"username":null,"password":null}'));
+      expect(
+          SpongeUtils.obfuscatePassword(
+              '{"username":null,"password":null,"object":{"name":"value"}}'),
+          equals(
+              '{"username":null,"password":null,"object":{"name":"value"}}'));
+      expect(
+          SpongeUtils.obfuscatePassword(
+              '{"id":null,"username":"test","password":"password","authToken":null,"name":"TestAction","args":["TEST",null],"version":null}'),
+          equals(
+              '{"id":null,"username":"test","password":"***","authToken":null,"name":"TestAction","args":["TEST",null],"version":null}'));
     });
     test('isHttpSuccess', () {
       expect(SpongeUtils.isHttpSuccess(200), isTrue);

@@ -371,20 +371,22 @@ class SpongeRestClient {
   /// Marshals the arguments and unmarshals the result using a best effort strategy, i.e. when a metadata
   /// is defined.
   ///
-  /// If the action metadata [actionMeta] is not `null`, it will be used for marshaling and unmarshaling.
+  /// If the action metadata [actionMeta] is not `null`, it will be used for marshalling and unmarshalling.
   /// If the [actionMeta] is `null`, this method may fetch the action metadata from the server if the action
   /// metadata cache is turned off or is not populated.
   ///
   /// If [allowFetchMetadata] is `true` (the default value), the action metadata (if `null`) may be fetched
   /// from the server by sending an additional request. If [allowFetchMetadata] is `false` and the action
-  /// metadata is `null` or is not in the cache, the marshaling of arguments and unmarshaling of the result
+  /// metadata is `null` or is not in the cache, the marshalling of arguments and unmarshalling of the result
   /// will be suppressed.
   Future<ActionCallResponse> callByRequest(ActionCallRequest request,
           {ActionMeta actionMeta,
           bool allowFetchMetadata = true,
           SpongeRequestContext context}) async =>
       await _doCallByRequest(
-          actionMeta ?? await getActionMeta(request.name, allowFetchMetadata: allowFetchMetadata),
+          actionMeta ??
+              await getActionMeta(request.name,
+                  allowFetchMetadata: allowFetchMetadata),
           request,
           context);
 

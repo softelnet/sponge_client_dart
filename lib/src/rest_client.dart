@@ -186,7 +186,7 @@ class SpongeRestClient {
     _fireOnRequestSerializedListener(request, context, requestBody);
 
     Response httpResponse = await post(_getUrl(operation),
-        headers: {'Content-type': SpongeClientConstants.APPLICATION_JSON_VALUE},
+        headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
         body: requestBody);
 
     _logger.finer(() =>

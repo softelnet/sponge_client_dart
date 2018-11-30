@@ -181,6 +181,13 @@ void main() {
         fail('$SpongeClientException expected');
       }
     });
+    test('testCallContentCharset', () async {
+      var client = await getClient();
+      var arg1 = 'íñäöüèąśęćżźółń';
+      var result = await client.call('UpperCase', [arg1]);
+      expect(result is String, isTrue);
+      expect(result, equals(arg1.toUpperCase()));
+    });
   });
   group('REST API Client send', () {
     test('testSend', () async {
@@ -202,17 +209,20 @@ void main() {
     test('testActionCacheOn', () async {
       var client = await getClient();
       String actionName = 'UpperCase';
-      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
+          isNull);
 
       ActionMeta actionMeta = await client.getActionMeta(actionName);
       expect(actionMeta, isNotNull);
-      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNotNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
+          isNotNull);
 
       expect(identical(actionMeta, await client.getActionMeta(actionName)),
           isTrue);
 
       await client.clearCache();
-      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
+          isNull);
       expect(identical(actionMeta, await client.getActionMeta(actionName)),
           isFalse);
       expect(await client.getActionMeta(actionName), isNotNull);
@@ -233,23 +243,28 @@ void main() {
     test('testActionCacheOnGetActions', () async {
       var client = await getClient();
       String actionName = 'UpperCase';
-      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
+          isNull);
 
       await client.getActions();
-      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNotNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
+          isNotNull);
 
       expect(await client.getActionMeta(actionName), isNotNull);
 
       await client.clearCache();
-      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
+          isNull);
 
       await client.getActions();
-      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNotNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
+          isNotNull);
     });
     test('testFetchActionMeta', () async {
       var client = await getClient();
       String actionName = 'UpperCase';
-      expect(await client.getActionMeta(actionName, allowFetchMetadata: false), isNull);
+      expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
+          isNull);
       expect(await client.getActionMeta(actionName), isNotNull);
     });
   });
@@ -449,7 +464,7 @@ void main() {
       var requestBody = '{"error_property":""}';
       Response httpResponse = await post('${client.configuration.url}/actions',
           headers: {
-            'Content-type': SpongeClientConstants.APPLICATION_JSON_VALUE
+            'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON
           },
           body: requestBody);
 
@@ -511,9 +526,9 @@ void main() {
         ..onResponseDeserializedListener =
             ((request, response, responseString) =>
                 actualResponseString = responseString);
-      var version =
-          (await client.getVersionByRequest(GetVersionRequest(), context: context))
-              .version;
+      var version = (await client.getVersionByRequest(GetVersionRequest(),
+              context: context))
+          .version;
 
       expect(SpongeUtils.isServerVersionCompatible(version), isTrue);
 

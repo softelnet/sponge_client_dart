@@ -43,8 +43,14 @@ class SpongeRequest {
   }
 }
 
+/// An action execution related request.
+abstract class ActionExecutionRequest {
+    String get name;
+    int version;
+}
+
 /// An action call request.
-class ActionCallRequest extends SpongeRequest {
+class ActionCallRequest extends SpongeRequest implements ActionExecutionRequest {
   ActionCallRequest(
     this.name, {
     this.args,
@@ -131,3 +137,25 @@ class SendEventRequest extends SpongeRequest {
       'attributes': attributes,
     });
 }
+
+/// An action arguments initial values request.
+class GetActionArgsInitialValuesRequest extends SpongeRequest implements ActionExecutionRequest {
+  GetActionArgsInitialValuesRequest(
+    this.name, {
+    this.version,
+  });
+
+  /// The action name.
+  final String name;
+
+  /// The expected knowledge base version (optional).
+  int version;
+
+  @override
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'name': name,
+      'version': version,
+    });
+}
+

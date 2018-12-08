@@ -333,6 +333,35 @@ class SpongeRestClient {
     }
   }
 
+  Future<Null> _unmarshalActionArgsInitialValues(
+      ActionMeta actionMeta, Map<String, InitialValue> initialValues) async {
+    if (initialValues == null || actionMeta.argsMeta == null) {
+      return;
+    }
+
+    Map<String, ActionArgMeta> argMetaLookupMap = Map.fromIterable(
+        actionMeta.argsMeta,
+        key: (argMeta) => argMeta.name,
+        value: (argMeta) => argMeta);
+
+    for (var entry in initialValues.entries) {
+      InitialValue initialValue = entry.value;
+      var argMeta = argMetaLookupMap[entry.key];
+
+      initialValue.value =
+          await _typeConverter.unmarshal(argMeta.type, initialValue.value);
+
+      if (initialValue.valueSet != null) {
+        List unmarshalledValueSet = [];
+        for (var value in initialValue.valueSet) {
+          unmarshalledValueSet
+              .add(await _typeConverter.unmarshal(argMeta.type, value));
+        }
+        initialValue.valueSet = unmarshalledValueSet;
+      }
+    }
+  }
+
   Future<ActionMeta> _fetchActionMeta(
       String actionName, SpongeRequestContext context) async {
     var request = GetActionsRequest(metadataRequired: true, name: actionName);
@@ -397,8 +426,8 @@ class SpongeRestClient {
               actionMeta: actionMeta, allowFetchMetadata: allowFetchMetadata))
           .result;
 
-  Future<ActionCallResponse> _doCallByRequest(ActionMeta actionMeta,
-      ActionCallRequest request, SpongeRequestContext context) async {
+  void _setupActionExecutionRequest(
+      ActionMeta actionMeta, ActionExecutionRequest request) {
     // Conditionally set the verification of the knowledge base version on the server side.
     if (_configuration.verifyKnowledgeBaseVersion &&
         actionMeta != null &&
@@ -409,6 +438,11 @@ class SpongeRestClient {
     checkArgument(actionMeta == null || actionMeta.name == request.name,
         message: 'Action name ${actionMeta?.name} in the metadata doesn'
             't match the action name ${request?.name} in the request');
+  }
+
+  Future<ActionCallResponse> _doCallByRequest(ActionMeta actionMeta,
+      ActionCallRequest request, SpongeRequestContext context) async {
+    _setupActionExecutionRequest(actionMeta, request);
 
     _validateCallArgs(actionMeta, request.args);
 
@@ -483,6 +517,38 @@ class SpongeRestClient {
     response.result = await _typeConverter.unmarshal(
         actionMeta.resultMeta.type, response.result);
   }
+
+  /// Sends the `actionArgsInitialValues` request to the server. Fetches the computed initial values of the action arguments
+  /// for the server.
+  Future<GetActionArgsInitialValuesResponse>
+      getActionArgsInitialValuesByRequest(
+          GetActionArgsInitialValuesRequest request,
+          {SpongeRequestContext context}) async {
+    // If there is no ActionMeta in the cache, it won't be fetched from the server (which will prevent the knowledge
+    // base version verification at this point).
+    ActionMeta actionMeta = await getActionMeta(request.name);
+    _setupActionExecutionRequest(actionMeta, request);
+
+    GetActionArgsInitialValuesResponse response = await _execute(
+        SpongeClientConstants.OPERATION_ACTION_ARGS_INITIAL_VALUES,
+        request,
+        (json) => GetActionArgsInitialValuesResponse.fromJson(json),
+        context);
+
+    if (actionMeta != null) {
+      await _unmarshalActionArgsInitialValues(
+          actionMeta, response.initialValues);
+    }
+
+    return response;
+  }
+
+  /// Fetches the computed initial values of the action arguments for the server.
+  Future<Map<String, InitialValue>> getActionArgsInitialValues(
+          String actionName) async =>
+      (await getActionArgsInitialValuesByRequest(
+              GetActionArgsInitialValuesRequest(actionName)))
+          .initialValues;
 
   /// Sends the `send` request to the server and returns the response.
   Future<SendEventResponse> sendByRequest(SendEventRequest request,

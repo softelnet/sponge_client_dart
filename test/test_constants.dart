@@ -13,7 +13,7 @@
 // limitations under the License.
 
 class TestConstants {
-  static const int ADMIN_ACTIONS_COUNT = 13;
+  static const int ADMIN_ACTIONS_COUNT = 14;
   static const int ANONYMOUS_ACTIONS_COUNT = ADMIN_ACTIONS_COUNT - 1;
   static const int ANONYMOUS_ACTIONS_WITH_METADATA_COUNT =
       ANONYMOUS_ACTIONS_COUNT - 1;

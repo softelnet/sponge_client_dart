@@ -33,8 +33,10 @@ import 'complex_object.dart';
 import 'logger_configuration.dart';
 import 'test_constants.dart';
 
-/// This integration test requires sponge-examples-project-rest-api-client-test-service/RestApiClientTestServiceMain
-/// running on the localhost.
+/// This integration test requires the sponge-examples-project-rest-api-client-test-service/RestApiClientTestServiceMain
+/// service running on the localhost.
+/// 
+/// Note: No other tests should be running using this service at the same time.
 void main() {
   configLogger();
 
@@ -187,6 +189,38 @@ void main() {
       var result = await client.call('UpperCase', [arg1]);
       expect(result is String, isTrue);
       expect(result, equals(arg1.toUpperCase()));
+    });
+    test('testActionArgsInitialValues', () async {
+      var client = await getClient();
+      var actionName = 'SetActuator';
+
+      expect((await client.getActionMeta(actionName)).anyArgInitialProvider,
+          isTrue);
+
+      // Reset the test state.
+      await client.call(actionName, ['A', false, 1, 1]);
+
+      var initialValues = await client.getActionArgsInitialValues(actionName);
+      expect(initialValues['actuator1'].value, equals('A'));
+      expect(initialValues['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(initialValues['actuator2'].value, equals(false));
+      expect(initialValues['actuator2'].valueSet, isNull);
+      expect(initialValues['actuator3'].value, equals(1));
+      expect(initialValues['actuator3'].valueSet, isNull);
+      expect(initialValues['actuator4'], isNull);
+      expect(initialValues.containsKey('actuator4'), isFalse);
+
+      await client.call(actionName, ['B', true, 5, 10]);
+
+      initialValues = await client.getActionArgsInitialValues(actionName);
+      expect(initialValues['actuator1'].value, equals('B'));
+      expect(initialValues['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(initialValues['actuator2'].value, equals(true));
+      expect(initialValues['actuator2'].valueSet, isNull);
+      expect(initialValues['actuator3'].value, equals(5));
+      expect(initialValues['actuator3'].valueSet, isNull);
+      expect(initialValues['actuator4'], isNull);
+      expect(initialValues.containsKey('actuator4'), isFalse);
     });
   });
   group('REST API Client send', () {
@@ -463,9 +497,7 @@ void main() {
       var client = await getClient();
       var requestBody = '{"error_property":""}';
       Response httpResponse = await post('${client.configuration.url}/actions',
-          headers: {
-            'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON
-          },
+          headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
           body: requestBody);
 
       expect(httpResponse.statusCode, equals(200));

@@ -94,6 +94,7 @@ class ActionMeta {
     Map<String, Object> features,
     this.argsMeta,
     this.resultMeta,
+    this.anyArgInitialProvider,
   }) : this.features = features ?? Map();
 
   /// The action name.
@@ -117,6 +118,9 @@ class ActionMeta {
   /// The action result metadata (optional).
   final ActionResultMeta resultMeta;
 
+  /// The flag that tells if any of the arguments has an initial value provider.
+  final bool anyArgInitialProvider;
+
   /// The action label.
   String get label => displayName ?? name;
 
@@ -132,6 +136,7 @@ class ActionMeta {
                 ?.map((arg) => ActionArgMeta.fromJson(arg))
                 ?.toList(),
             resultMeta: ActionResultMeta.fromJson(json['resultMeta']),
+            anyArgInitialProvider: json['anyArgInitialProvider'],
           )
         : null;
   }
@@ -171,4 +176,20 @@ class KnowledgeBaseMeta {
           )
         : null;
   }
+}
+
+/// An initial value.
+class InitialValue<T> {
+  InitialValue({this.value, this.valueSet});
+
+  /// The value.
+  T value;
+
+  /// The value set. For example it may be a list of string values to choose from.
+  List<T> valueSet;
+
+  factory InitialValue.fromJson(Map<String, dynamic> json) => InitialValue(
+        value: json['value'],
+        valueSet: json['valueSet'],
+      );
 }

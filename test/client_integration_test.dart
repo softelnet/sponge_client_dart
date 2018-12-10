@@ -139,14 +139,6 @@ void main() {
       Uint8List resultImage = await client.call('EchoImage', [image]);
       expect(image, equals(resultImage));
     });
-    test('testCallWithActionTypeArg', () async {
-      var client = await getClient();
-      ActionMeta actionMeta = await client.getActionMeta('ActionTypeAction');
-      List values = await client
-          .call((actionMeta.argsMeta[0].type as ActionType).actionName, []);
-      expect(await client.call('ActionTypeAction', [values.last]),
-          equals('value3'));
-    });
     test('testCallLanguageError', () async {
       var client = await getClient();
       try {
@@ -210,7 +202,7 @@ void main() {
       await client.call(actionName, ['A', false, 1, 1]);
 
       Map<String, ArgValue> providedArgs =
-          await client.provideActionArgs(actionName, null, null);
+          await client.provideActionArgs(actionName);
       expect(providedArgs.length, equals(3));
       expect(providedArgs['actuator1'], isNotNull);
       expect(providedArgs['actuator1'].value, equals('A'));
@@ -225,7 +217,7 @@ void main() {
 
       await client.call(actionName, ['B', true, 5, 10]);
 
-      providedArgs = await client.provideActionArgs(actionName, null, null);
+      providedArgs = await client.provideActionArgs(actionName);
       expect(providedArgs.length, equals(3));
       expect(providedArgs['actuator1'], isNotNull);
       expect(providedArgs['actuator1'].value, equals('B'));
@@ -237,6 +229,13 @@ void main() {
       expect(providedArgs['actuator3'].value, equals(5));
       expect(providedArgs['actuator3'].valueSet, isNull);
       expect(providedArgs['actuator4'], isNull);
+    });
+    test('testProvideActionArgByAction', () async {
+      var client = await getClient();
+      ActionMeta actionMeta = await client.getActionMeta('ProvideByAction');
+      List values = (await client.provideActionArgs(actionMeta.name))['value'].valueSet;
+      expect(await client.call(actionMeta.name, [values.last]),
+          equals('value3'));
     });
   });
   group('REST API Client send', () {

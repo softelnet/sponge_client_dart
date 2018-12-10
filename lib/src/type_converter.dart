@@ -62,7 +62,6 @@ class DefaultTypeConverter extends TypeConverter {
   DefaultTypeConverter() {
     // Register default unit converters.
     registerAll([
-      ActionTypeUnitConverter(),
       AnyTypeUnitConverter(),
       BinaryTypeUnitConverter(),
       BooleanTypeUnitConverter(),
@@ -96,10 +95,6 @@ abstract class UnitTypeConverter<T, D extends DataType> {
   /// The [value] will never be null here.
   Future<T> unmarshal(TypeConverter converter, D type, dynamic value) async =>
       value;
-}
-
-class ActionTypeUnitConverter extends UnitTypeConverter<dynamic, ActionType> {
-  ActionTypeUnitConverter() : super(DataTypeKind.ACTION);
 }
 
 class AnyTypeUnitConverter extends UnitTypeConverter<dynamic, AnyType> {

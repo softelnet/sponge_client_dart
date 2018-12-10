@@ -554,7 +554,10 @@ class SpongeRestClient {
 
   /// Fetches the provided action arguments from the server.
   Future<Map<String, ArgValue>> provideActionArgs(
-          String actionName, Set<String> argNames, Map<String, Object> current) async =>
+    String actionName, {
+    Set<String> argNames,
+    Map<String, Object> current,
+  }) async =>
       (await provideActionArgsByRequest(
               ProvideActionArgsRequest(actionName, argNames, current)))
           .provided;

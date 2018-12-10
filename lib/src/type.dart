@@ -19,7 +19,6 @@ import 'package:quiver/check.dart';
 
 /// A data type kind.
 enum DataTypeKind {
-  ACTION,
   ANY,
   BINARY,
   BOOLEAN,
@@ -35,8 +34,6 @@ enum DataTypeKind {
 DataType _typeFromJson(Map<String, dynamic> json) {
   DataTypeKind kind = DataType.fromJsonDataTypeKind(json['kind']);
   switch (kind) {
-    case DataTypeKind.ACTION:
-      return ActionType.fromJson(json);
     case DataTypeKind.ANY:
       return AnyType.fromJson(json);
     case DataTypeKind.BINARY:
@@ -114,18 +111,6 @@ class DataType<T> {
 
   static String _getDataTypeKindValue(DataTypeKind kind) =>
       kind.toString().split('.')[1];
-}
-
-/// A type that is a result of the given action, e.g. a list of string values. It allows using a result
-/// of one action to be a type for another action argument or result.
-class ActionType extends DataType<dynamic> {
-  ActionType(this.actionName) : super(DataTypeKind.ACTION);
-
-  /// The action name.
-  final String actionName;
-
-  factory ActionType.fromJson(Map<String, dynamic> json) =>
-      DataType.fromJsonBase(ActionType(json['actionName']), json);
 }
 
 /// Any type. It may be used in situations when type is not important.

@@ -35,7 +35,7 @@ import 'test_constants.dart';
 
 /// This integration test requires the sponge-examples-project-rest-api-client-test-service/RestApiClientTestServiceMain
 /// service running on the localhost.
-/// 
+///
 /// Note: No other tests should be running using this service at the same time.
 void main() {
   configLogger();
@@ -190,37 +190,53 @@ void main() {
       expect(result is String, isTrue);
       expect(result, equals(arg1.toUpperCase()));
     });
-    test('testActionArgsInitialValues', () async {
+    test('testProvideActionArgs', () async {
       var client = await getClient();
       var actionName = 'SetActuator';
 
-      expect((await client.getActionMeta(actionName)).anyArgInitialProvider,
-          isTrue);
+      List<ActionArgMeta> argsMeta =
+          (await client.getActionMeta(actionName)).argsMeta;
+
+      expect(argsMeta[0].provided, isTrue);
+      expect(argsMeta[0].depends?.length, equals(0));
+      expect(argsMeta[1].provided, isTrue);
+      expect(argsMeta[1].depends?.length, equals(0));
+      expect(argsMeta[2].provided, isTrue);
+      expect(argsMeta[2].depends?.length, equals(0));
+      expect(argsMeta[3].provided, isFalse);
+      expect(argsMeta[3].depends?.length, equals(0));
 
       // Reset the test state.
       await client.call(actionName, ['A', false, 1, 1]);
 
-      var initialValues = await client.getActionArgsInitialValues(actionName);
-      expect(initialValues['actuator1'].value, equals('A'));
-      expect(initialValues['actuator1'].valueSet, equals(['A', 'B', 'C']));
-      expect(initialValues['actuator2'].value, equals(false));
-      expect(initialValues['actuator2'].valueSet, isNull);
-      expect(initialValues['actuator3'].value, equals(1));
-      expect(initialValues['actuator3'].valueSet, isNull);
-      expect(initialValues['actuator4'], isNull);
-      expect(initialValues.containsKey('actuator4'), isFalse);
+      Map<String, ArgValue> providedArgs =
+          await client.provideActionArgs(actionName, null, null);
+      expect(providedArgs.length, equals(3));
+      expect(providedArgs['actuator1'], isNotNull);
+      expect(providedArgs['actuator1'].value, equals('A'));
+      expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(providedArgs['actuator2'], isNotNull);
+      expect(providedArgs['actuator2'].value, equals(false));
+      expect(providedArgs['actuator2'].valueSet, isNull);
+      expect(providedArgs['actuator3'], isNotNull);
+      expect(providedArgs['actuator3'].value, equals(1));
+      expect(providedArgs['actuator3'].valueSet, isNull);
+      expect(providedArgs['actuator4'], isNull);
 
       await client.call(actionName, ['B', true, 5, 10]);
 
-      initialValues = await client.getActionArgsInitialValues(actionName);
-      expect(initialValues['actuator1'].value, equals('B'));
-      expect(initialValues['actuator1'].valueSet, equals(['A', 'B', 'C']));
-      expect(initialValues['actuator2'].value, equals(true));
-      expect(initialValues['actuator2'].valueSet, isNull);
-      expect(initialValues['actuator3'].value, equals(5));
-      expect(initialValues['actuator3'].valueSet, isNull);
-      expect(initialValues['actuator4'], isNull);
-      expect(initialValues.containsKey('actuator4'), isFalse);
+      providedArgs = await client.provideActionArgs(actionName, null, null);
+      expect(providedArgs.length, equals(3));
+      expect(providedArgs['actuator1'], isNotNull);
+      expect(providedArgs['actuator1'].value, equals('B'));
+      expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(providedArgs['actuator2'], isNotNull);
+      expect(providedArgs['actuator2'].value, equals(true));
+      expect(providedArgs['actuator2'].valueSet, isNull);
+      expect(providedArgs['actuator3'], isNotNull);
+      expect(providedArgs['actuator3'].value, equals(5));
+      expect(providedArgs['actuator3'].valueSet, isNull);
+      expect(providedArgs['actuator4'], isNull);
     });
   });
   group('REST API Client send', () {

@@ -333,31 +333,26 @@ class SpongeRestClient {
     }
   }
 
-  Future<Null> _unmarshalActionArgsInitialValues(
-      ActionMeta actionMeta, Map<String, InitialValue> initialValues) async {
-    if (initialValues == null || actionMeta.argsMeta == null) {
+  Future<Null> unmarshalProvidedActionArgValues(
+      ActionMeta actionMeta, Map<String, ArgValue> argValues) async {
+    if (argValues == null || actionMeta.argsMeta == null) {
       return;
     }
 
-    Map<String, ActionArgMeta> argMetaLookupMap = Map.fromIterable(
-        actionMeta.argsMeta,
-        key: (argMeta) => argMeta.name,
-        value: (argMeta) => argMeta);
+    for (var entry in argValues.entries) {
+      ArgValue argValue = entry.value;
+      var argMeta = actionMeta.getArgMeta(entry.key);
 
-    for (var entry in initialValues.entries) {
-      InitialValue initialValue = entry.value;
-      var argMeta = argMetaLookupMap[entry.key];
+      argValue.value =
+          await _typeConverter.unmarshal(argMeta.type, argValue.value);
 
-      initialValue.value =
-          await _typeConverter.unmarshal(argMeta.type, initialValue.value);
-
-      if (initialValue.valueSet != null) {
+      if (argValue.valueSet != null) {
         List unmarshalledValueSet = [];
-        for (var value in initialValue.valueSet) {
+        for (var value in argValue.valueSet) {
           unmarshalledValueSet
               .add(await _typeConverter.unmarshal(argMeta.type, value));
         }
-        initialValue.valueSet = unmarshalledValueSet;
+        argValue.valueSet = unmarshalledValueSet;
       }
     }
   }
@@ -446,7 +441,7 @@ class SpongeRestClient {
 
     _validateCallArgs(actionMeta, request.args);
 
-    request.args = await _marshalCallArgs(actionMeta, request.args);
+    request.args = await _marshalActionCallArgs(actionMeta, request.args);
 
     ActionCallResponse response = await _execute(
         SpongeClientConstants.OPERATION_CALL,
@@ -454,7 +449,7 @@ class SpongeRestClient {
         (json) => ActionCallResponse.fromJson(json),
         context);
 
-    await _unmarshalCallResult(actionMeta, response);
+    await _unmarshalActionCallResult(actionMeta, response);
 
     return response;
   }
@@ -493,7 +488,7 @@ class SpongeRestClient {
   }
 
   // Marshals the action call arguments.
-  Future<List> _marshalCallArgs(ActionMeta actionMeta, List args) async {
+  Future<List> _marshalActionCallArgs(ActionMeta actionMeta, List args) async {
     if (args == null || actionMeta?.argsMeta == null) {
       return args;
     }
@@ -507,8 +502,24 @@ class SpongeRestClient {
     return result;
   }
 
+  Future<Map<String, Object>> _marshalProvideActionArgsCurrent(
+      ActionMeta actionMeta, Map<String, Object> current) async {
+    if (current == null || actionMeta?.argsMeta == null) {
+      return current;
+    }
+
+    Map<String, Object> marshalled = {};
+    for (var entry in current.entries) {
+      var name = entry.key;
+      marshalled[name] = await _typeConverter.marshal(
+          actionMeta.getArgMeta(name).type, entry.value);
+    }
+
+    return marshalled;
+  }
+
   /// Unmarshals the action call result.
-  Future<Null> _unmarshalCallResult(
+  Future<Null> _unmarshalActionCallResult(
       ActionMeta actionMeta, ActionCallResponse response) async {
     if (actionMeta?.resultMeta == null || response.result == null) {
       return;
@@ -518,37 +529,35 @@ class SpongeRestClient {
         actionMeta.resultMeta.type, response.result);
   }
 
-  /// Sends the `actionArgsInitialValues` request to the server. Fetches the computed initial values of the action arguments
-  /// for the server.
-  Future<GetActionArgsInitialValuesResponse>
-      getActionArgsInitialValuesByRequest(
-          GetActionArgsInitialValuesRequest request,
-          {SpongeRequestContext context}) async {
-    // If there is no ActionMeta in the cache, it won't be fetched from the server (which will prevent the knowledge
-    // base version verification at this point).
+  /// Sends the `actionArgs` request to the server. Fetches the provided action arguments from the server.
+  Future<ProvideActionArgsResponse> provideActionArgsByRequest(
+      ProvideActionArgsRequest request,
+      {SpongeRequestContext context}) async {
     ActionMeta actionMeta = await getActionMeta(request.name);
     _setupActionExecutionRequest(actionMeta, request);
 
-    GetActionArgsInitialValuesResponse response = await _execute(
-        SpongeClientConstants.OPERATION_ACTION_ARGS_INITIAL_VALUES,
+    request.current =
+        await _marshalProvideActionArgsCurrent(actionMeta, request.current);
+
+    ProvideActionArgsResponse response = await _execute(
+        SpongeClientConstants.OPERATION_ACTION_ARGS,
         request,
-        (json) => GetActionArgsInitialValuesResponse.fromJson(json),
+        (json) => ProvideActionArgsResponse.fromJson(json),
         context);
 
     if (actionMeta != null) {
-      await _unmarshalActionArgsInitialValues(
-          actionMeta, response.initialValues);
+      await unmarshalProvidedActionArgValues(actionMeta, response.provided);
     }
 
     return response;
   }
 
-  /// Fetches the computed initial values of the action arguments for the server.
-  Future<Map<String, InitialValue>> getActionArgsInitialValues(
-          String actionName) async =>
-      (await getActionArgsInitialValuesByRequest(
-              GetActionArgsInitialValuesRequest(actionName)))
-          .initialValues;
+  /// Fetches the provided action arguments from the server.
+  Future<Map<String, ArgValue>> provideActionArgs(
+          String actionName, Set<String> argNames, Map<String, Object> current) async =>
+      (await provideActionArgsByRequest(
+              ProvideActionArgsRequest(actionName, argNames, current)))
+          .provided;
 
   /// Sends the `send` request to the server and returns the response.
   Future<SendEventResponse> sendByRequest(SendEventRequest request,

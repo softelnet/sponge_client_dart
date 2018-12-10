@@ -45,12 +45,13 @@ class SpongeRequest {
 
 /// An action execution related request.
 abstract class ActionExecutionRequest {
-    String get name;
-    int version;
+  String get name;
+  int version;
 }
 
 /// An action call request.
-class ActionCallRequest extends SpongeRequest implements ActionExecutionRequest {
+class ActionCallRequest extends SpongeRequest
+    implements ActionExecutionRequest {
   ActionCallRequest(
     this.name, {
     this.args,
@@ -138,15 +139,24 @@ class SendEventRequest extends SpongeRequest {
     });
 }
 
-/// An action arguments initial values request.
-class GetActionArgsInitialValuesRequest extends SpongeRequest implements ActionExecutionRequest {
-  GetActionArgsInitialValuesRequest(
-    this.name, {
+/// A provide action arguments request.
+class ProvideActionArgsRequest extends SpongeRequest
+    implements ActionExecutionRequest {
+  ProvideActionArgsRequest(
+    this.name,
+    this.argNames,
+    this.current, {
     this.version,
   });
 
   /// The action name.
   final String name;
+
+  /// The names of action arguments to provide.
+  final Set<String> argNames;
+
+  /// The current values of action arguments in a client code.
+  Map<String, Object> current;
 
   /// The expected knowledge base version (optional).
   int version;
@@ -155,7 +165,8 @@ class GetActionArgsInitialValuesRequest extends SpongeRequest implements ActionE
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'name': name,
+      'argNames': argNames,
+      'current': current,
       'version': version,
     });
 }
-

@@ -23,6 +23,8 @@ class ActionArgMeta {
     this.displayName,
     this.description,
     this.optional = false,
+    this.provided = false,
+    this.depends,
   });
 
   /// The argument name.
@@ -40,6 +42,12 @@ class ActionArgMeta {
   /// The flag specifying if this argument is optional.
   final bool optional;
 
+  /// Provided argument.
+  final bool provided;
+
+  /// Argument depends on others arguments.
+  final List<String> depends;
+
   /// The argument label (the display name or the name).
   String get label => displayName ?? name;
 
@@ -51,6 +59,8 @@ class ActionArgMeta {
             displayName: json['displayName'],
             description: json['description'],
             optional: json['optional'],
+            provided: json['provided'],
+            depends: (json['depends'] as List)?.cast<String>()?.toList(),
           )
         : null;
   }
@@ -94,7 +104,6 @@ class ActionMeta {
     Map<String, Object> features,
     this.argsMeta,
     this.resultMeta,
-    this.anyArgInitialProvider,
   }) : this.features = features ?? Map();
 
   /// The action name.
@@ -118,9 +127,6 @@ class ActionMeta {
   /// The action result metadata (optional).
   final ActionResultMeta resultMeta;
 
-  /// The flag that tells if any of the arguments has an initial value provider.
-  final bool anyArgInitialProvider;
-
   /// The action label.
   String get label => displayName ?? name;
 
@@ -136,9 +142,18 @@ class ActionMeta {
                 ?.map((arg) => ActionArgMeta.fromJson(arg))
                 ?.toList(),
             resultMeta: ActionResultMeta.fromJson(json['resultMeta']),
-            anyArgInitialProvider: json['anyArgInitialProvider'],
           )
         : null;
+  }
+
+  ActionArgMeta getArgMeta(String argName) {
+    ActionArgMeta argMeta = argsMeta
+        .firstWhere((argMeta) => argMeta.name == argName, orElse: () => null);
+    if (argMeta == null) {
+      throw Exception('Metadata for argument $argName not found');
+    }
+
+    return argMeta;
   }
 }
 
@@ -178,17 +193,17 @@ class KnowledgeBaseMeta {
   }
 }
 
-/// An initial value.
-class InitialValue<T> {
-  InitialValue({this.value, this.valueSet});
+/// An argument value and a possible value set.
+class ArgValue<T> {
+  ArgValue({this.value, this.valueSet});
 
   /// The value.
   T value;
 
-  /// The value set. For example it may be a list of string values to choose from.
+  /// The possible value set. For example it may be a list of string values to choose from.
   List<T> valueSet;
 
-  factory InitialValue.fromJson(Map<String, dynamic> json) => InitialValue(
+  factory ArgValue.fromJson(Map<String, dynamic> json) => ArgValue(
         value: json['value'],
         valueSet: json['valueSet'],
       );

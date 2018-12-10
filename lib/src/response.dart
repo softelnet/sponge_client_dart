@@ -139,14 +139,14 @@ class SendEventResponse extends SpongeResponse {
       SpongeResponse.setupFromJson(SendEventResponse(json['eventId']), json);
 }
 
-/// An action arguments initial values response.
-class GetActionArgsInitialValuesResponse extends SpongeResponse {
-  GetActionArgsInitialValuesResponse(this.initialValues);
+/// A provide action arguments response.
+class ProvideActionArgsResponse extends SpongeResponse {
+  ProvideActionArgsResponse(this.provided);
 
-  /// The action arguments initial values.
-  Map<String, InitialValue> initialValues;
+  /// The provided action arguments.
+  Map<String, ArgValue> provided;
 
-  factory GetActionArgsInitialValuesResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(GetActionArgsInitialValuesResponse((json['initialValues'] as Map)?.map(
-        (argName, initialValueJson) => MapEntry(argName, InitialValue.fromJson(initialValueJson)))), json);
+  factory ProvideActionArgsResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(ProvideActionArgsResponse((json['provided'] as Map)?.map(
+        (argName, argValueJson) => MapEntry(argName, ArgValue.fromJson(argValueJson)))), json);
 }

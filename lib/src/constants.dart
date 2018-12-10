@@ -28,7 +28,7 @@ abstract class SpongeClientConstants {
   static const String OPERATION_ACTIONS = 'actions';
   static const String OPERATION_CALL = 'call';
   static const String OPERATION_SEND = 'send';
-  static const String OPERATION_ACTION_ARGS_INITIAL_VALUES = 'actionArgsInitialValues';
+  static const String OPERATION_ACTION_ARGS = "actionArgs";
 
   static const String OPERATION_RELOAD = 'reload';
 

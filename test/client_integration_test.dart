@@ -236,12 +236,92 @@ void main() {
       expect(providedArgs['actuator3'].valuePresent, isTrue);
       expect(providedArgs['actuator4'], isNull);
     });
+    test('testProvideActionArgsDepends', () async {
+      var client = await getClient();
+      String actionName = 'SetActuatorDepends';
+
+      // Reset the test state.
+      await client.call(actionName, ['A', false, 1, 1, 'X']);
+
+      List<ActionArgMeta> argsMeta =
+          (await client.getActionMeta(actionName)).argsMeta;
+
+      expect(argsMeta[0].provided, isTrue);
+      expect(argsMeta[0].depends?.length, equals(0));
+      expect(argsMeta[1].provided, isTrue);
+      expect(argsMeta[1].depends?.length, equals(0));
+      expect(argsMeta[2].provided, isTrue);
+      expect(argsMeta[2].depends?.length, equals(0));
+      expect(argsMeta[3].provided, isFalse);
+      expect(argsMeta[3].depends?.length, equals(0));
+      expect(argsMeta[4].provided, isTrue);
+      expect(argsMeta[4].depends?.length, equals(1));
+      expect(argsMeta[4].depends, equals(['actuator1']));
+
+      Map<String, ArgValue> providedArgs =
+          await client.provideActionArgs(actionName, argNames: ['actuator1']);
+      expect(providedArgs.length, equals(1));
+      expect(providedArgs['actuator1'], isNotNull);
+      var actuator1value = providedArgs['actuator1'].value;
+      expect(actuator1value, equals('A'));
+      expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(providedArgs['actuator1'].valuePresent, isTrue);
+
+      providedArgs = await client.provideActionArgs(actionName,
+          argNames: ['actuator2', 'actuator3', 'actuator5'],
+          current: {'actuator1': actuator1value});
+
+      expect(providedArgs.length, equals(3));
+      expect(providedArgs['actuator2'], isNotNull);
+      expect(providedArgs['actuator2'].value, equals(false));
+      expect(providedArgs['actuator2'].valueSet, isNull);
+      expect(providedArgs['actuator2'].valuePresent, isTrue);
+      expect(providedArgs['actuator3'], isNotNull);
+      expect(providedArgs['actuator3'].value, equals(1));
+      expect(providedArgs['actuator3'].valueSet, isNull);
+      expect(providedArgs['actuator3'].valuePresent, isTrue);
+      expect(providedArgs['actuator4'], isNull);
+      expect(providedArgs['actuator5'], isNotNull);
+      expect(providedArgs['actuator5'].value, equals('X'));
+      expect(providedArgs['actuator5'].valueSet, equals(['X', 'Y', 'Z', 'A']));
+      expect(providedArgs['actuator5'].valuePresent, isTrue);
+
+      await client.call(actionName, ['B', true, 5, 10, 'Y']);
+
+      providedArgs =
+          await client.provideActionArgs(actionName, argNames: ['actuator1']);
+      expect(providedArgs.length, equals(1));
+      expect(providedArgs['actuator1'], isNotNull);
+      actuator1value = providedArgs['actuator1'].value;
+      expect(actuator1value, equals('B'));
+      expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(providedArgs['actuator1'].valuePresent, isTrue);
+
+      providedArgs = await client.provideActionArgs(actionName,
+          argNames: ['actuator2', 'actuator3', 'actuator5'],
+          current: {'actuator1': actuator1value});
+      expect(providedArgs.length, equals(3));
+      expect(providedArgs['actuator2'], isNotNull);
+      expect(providedArgs['actuator2'].value, equals(true));
+      expect(providedArgs['actuator2'].valueSet, isNull);
+      expect(providedArgs['actuator2'].valuePresent, isTrue);
+      expect(providedArgs['actuator3'], isNotNull);
+      expect(providedArgs['actuator3'].value, equals(5));
+      expect(providedArgs['actuator3'].valueSet, isNull);
+      expect(providedArgs['actuator3'].valuePresent, isTrue);
+      expect(providedArgs['actuator4'], isNull);
+      expect(providedArgs['actuator5'], isNotNull);
+      expect(providedArgs['actuator5'].value, equals('Y'));
+      expect(providedArgs['actuator5'].valueSet, equals(['X', 'Y', 'Z', 'B']));
+      expect(providedArgs['actuator5'].valuePresent, isTrue);
+    });
     test('testProvideActionArgByAction', () async {
       var client = await getClient();
       ActionMeta actionMeta = await client.getActionMeta('ProvideByAction');
-      List values = (await client.provideActionArgs(actionMeta.name))['value'].valueSet;
-      expect(await client.call(actionMeta.name, [values.last]),
-          equals('value3'));
+      List values =
+          (await client.provideActionArgs(actionMeta.name))['value'].valueSet;
+      expect(
+          await client.call(actionMeta.name, [values.last]), equals('value3'));
     });
   });
   group('REST API Client send', () {

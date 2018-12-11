@@ -191,15 +191,19 @@ void main() {
 
       expect(argsMeta[0].provided, isTrue);
       expect(argsMeta[0].depends?.length, equals(0));
+      expect(argsMeta[0].readOnly, isFalse);
       expect(argsMeta[1].provided, isTrue);
       expect(argsMeta[1].depends?.length, equals(0));
+      expect(argsMeta[1].readOnly, isFalse);
       expect(argsMeta[2].provided, isTrue);
       expect(argsMeta[2].depends?.length, equals(0));
+      expect(argsMeta[2].readOnly, isTrue);
       expect(argsMeta[3].provided, isFalse);
       expect(argsMeta[3].depends?.length, equals(0));
+      expect(argsMeta[3].readOnly, isFalse);
 
       // Reset the test state.
-      await client.call(actionName, ['A', false, 1, 1]);
+      await client.call(actionName, ['A', false, null, 1]);
 
       Map<String, ArgValue> providedArgs =
           await client.provideActionArgs(actionName);
@@ -213,12 +217,13 @@ void main() {
       expect(providedArgs['actuator2'].valueSet, isNull);
       expect(providedArgs['actuator2'].valuePresent, isTrue);
       expect(providedArgs['actuator3'], isNotNull);
-      expect(providedArgs['actuator3'].value, equals(1));
+      // The value of actuator3 should not be asserted because it is read only in this test. 
+      /// Other tests may change its value.
       expect(providedArgs['actuator3'].valueSet, isNull);
       expect(providedArgs['actuator3'].valuePresent, isTrue);
       expect(providedArgs['actuator4'], isNull);
 
-      await client.call(actionName, ['B', true, 5, 10]);
+      await client.call(actionName, ['B', true, null, 10]);
 
       providedArgs = await client.provideActionArgs(actionName);
       expect(providedArgs.length, equals(3));
@@ -231,7 +236,8 @@ void main() {
       expect(providedArgs['actuator2'].valueSet, isNull);
       expect(providedArgs['actuator2'].valuePresent, isTrue);
       expect(providedArgs['actuator3'], isNotNull);
-      expect(providedArgs['actuator3'].value, equals(5));
+      // The value of actuator3 should not be asserted because it is read only in this test. 
+      /// Other tests may change its value.
       expect(providedArgs['actuator3'].valueSet, isNull);
       expect(providedArgs['actuator3'].valuePresent, isTrue);
       expect(providedArgs['actuator4'], isNull);

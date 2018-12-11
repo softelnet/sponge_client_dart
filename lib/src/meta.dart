@@ -25,6 +25,7 @@ class ActionArgMeta {
     this.optional = false,
     this.provided = false,
     this.depends,
+    this.readOnly,
   });
 
   /// The argument name.
@@ -48,6 +49,9 @@ class ActionArgMeta {
   /// Argument depends on others arguments.
   final List<String> depends;
 
+  /// Read only argument.
+  final bool readOnly;
+
   /// The argument label (the display name or the name).
   String get label => displayName ?? name;
 
@@ -61,6 +65,7 @@ class ActionArgMeta {
             optional: json['optional'],
             provided: json['provided'],
             depends: (json['depends'] as List)?.cast<String>()?.toList(),
+            readOnly: json['readOnly'],
           )
         : null;
   }

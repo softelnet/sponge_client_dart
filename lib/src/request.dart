@@ -153,7 +153,7 @@ class ProvideActionArgsRequest extends SpongeRequest
   final String name;
 
   /// The names of action arguments to provide.
-  final Set<String> argNames;
+  final List<String> argNames;
 
   /// The current values of action arguments in a client code.
   Map<String, Object> current;

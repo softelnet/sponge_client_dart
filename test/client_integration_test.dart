@@ -207,12 +207,15 @@ void main() {
       expect(providedArgs['actuator1'], isNotNull);
       expect(providedArgs['actuator1'].value, equals('A'));
       expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(providedArgs['actuator1'].valuePresent, isTrue);
       expect(providedArgs['actuator2'], isNotNull);
       expect(providedArgs['actuator2'].value, equals(false));
       expect(providedArgs['actuator2'].valueSet, isNull);
+      expect(providedArgs['actuator2'].valuePresent, isTrue);
       expect(providedArgs['actuator3'], isNotNull);
       expect(providedArgs['actuator3'].value, equals(1));
       expect(providedArgs['actuator3'].valueSet, isNull);
+      expect(providedArgs['actuator3'].valuePresent, isTrue);
       expect(providedArgs['actuator4'], isNull);
 
       await client.call(actionName, ['B', true, 5, 10]);
@@ -222,12 +225,15 @@ void main() {
       expect(providedArgs['actuator1'], isNotNull);
       expect(providedArgs['actuator1'].value, equals('B'));
       expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(providedArgs['actuator1'].valuePresent, isTrue);
       expect(providedArgs['actuator2'], isNotNull);
       expect(providedArgs['actuator2'].value, equals(true));
       expect(providedArgs['actuator2'].valueSet, isNull);
+      expect(providedArgs['actuator2'].valuePresent, isTrue);
       expect(providedArgs['actuator3'], isNotNull);
       expect(providedArgs['actuator3'].value, equals(5));
       expect(providedArgs['actuator3'].valueSet, isNull);
+      expect(providedArgs['actuator3'].valuePresent, isTrue);
       expect(providedArgs['actuator4'], isNull);
     });
     test('testProvideActionArgByAction', () async {

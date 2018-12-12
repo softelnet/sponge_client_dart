@@ -439,7 +439,7 @@ class SpongeRestClient {
       ActionCallRequest request, SpongeRequestContext context) async {
     _setupActionExecutionRequest(actionMeta, request);
 
-    _validateCallArgs(actionMeta, request.args);
+    validateCallArgs(actionMeta, request.args);
 
     request.args = await _marshalActionCallArgs(actionMeta, request.args);
 
@@ -454,8 +454,9 @@ class SpongeRestClient {
     return response;
   }
 
-  /// Validates the action call arguments.
-  void _validateCallArgs(ActionMeta actionMeta, List args) {
+  /// Validates the action call arguments. This method is invoked internally by the `call` methods. 
+  /// Throws exception on validation failure.
+  void validateCallArgs(ActionMeta actionMeta, List args) {
     if (actionMeta?.argsMeta == null) {
       return;
     }

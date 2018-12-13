@@ -142,7 +142,7 @@ void main() {
     test('testCallLanguageError', () async {
       var client = await getClient();
       try {
-        await client.call('LangErrorAction', []);
+        await client.call('LangErrorAction');
         fail('$SpongeClientException expected');
       } on SpongeClientException catch (e) {
         expect(e.errorCode, equals(SpongeClientConstants.DEFAULT_ERROR_CODE));
@@ -161,7 +161,7 @@ void main() {
     test('testCallKnowledgeBaseError', () async {
       var client = await getClient();
       try {
-        await client.call('KnowledgeBaseErrorAction', []);
+        await client.call('KnowledgeBaseErrorAction');
         fail('$SpongeClientException expected');
       } on SpongeClientException catch (e) {
         expect(e.errorCode, equals(SpongeClientConstants.DEFAULT_ERROR_CODE));

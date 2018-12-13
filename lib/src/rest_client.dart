@@ -415,8 +415,8 @@ class SpongeRestClient {
           context);
 
   /// Sends the `call` request to the server and returns the response. See [callByRequest].
-  Future<dynamic> call(String actionName, List args,
-          [ActionMeta actionMeta, bool allowFetchMetadata = true]) async =>
+  Future<dynamic> call(String actionName, [List args,
+          ActionMeta actionMeta, bool allowFetchMetadata = true]) async =>
       (await callByRequest(ActionCallRequest(actionName, args: args),
               actionMeta: actionMeta, allowFetchMetadata: allowFetchMetadata))
           .result;

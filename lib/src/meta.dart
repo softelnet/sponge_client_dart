@@ -200,7 +200,7 @@ class KnowledgeBaseMeta {
 
 /// An argument value and a possible value set.
 class ArgValue<T> {
-  ArgValue({this.value, this.valuePresent, this.valueSet});
+  ArgValue({this.value, this.valuePresent, this.valueSet, this.valueSetDisplayNames});
 
   /// The value.
   T value;
@@ -212,9 +212,13 @@ class ArgValue<T> {
   /// If the value set is present is is not `null`.
   List<T> valueSet;
 
+  /// The value set display names.
+  List<String> valueSetDisplayNames;
+
   factory ArgValue.fromJson(Map<String, dynamic> json) => ArgValue(
         value: json['value'],
         valuePresent: json['valuePresent'],
         valueSet: json['valueSet'],
+        valueSetDisplayNames: (json['valueSetDisplayNames'] as List)?.cast(),
       );
 }

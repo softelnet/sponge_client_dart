@@ -25,7 +25,8 @@ class ActionArgMeta {
     this.optional = false,
     this.provided = false,
     this.depends,
-    this.readOnly,
+    this.readOnly = false,
+    this.overwrite = false,
   });
 
   /// The argument name.
@@ -52,6 +53,9 @@ class ActionArgMeta {
   /// Read only argument.
   final bool readOnly;
 
+  /// A flag specifying if the provided value of this argument should overwrite the value set in a client code.
+  final bool overwrite;
+
   /// The argument label (the display name or the name).
   String get label => displayName ?? name;
 
@@ -62,10 +66,11 @@ class ActionArgMeta {
             type: DataType.fromJson(json['type']),
             displayName: json['displayName'],
             description: json['description'],
-            optional: json['optional'],
-            provided: json['provided'],
+            optional: json['optional'] ?? false,
+            provided: json['provided'] ?? false,
             depends: (json['depends'] as List)?.cast<String>()?.toList(),
-            readOnly: json['readOnly'],
+            readOnly: json['readOnly'] ?? false,
+            overwrite: json['overwrite'] ?? false,
           )
         : null;
   }
@@ -200,7 +205,11 @@ class KnowledgeBaseMeta {
 
 /// An argument value and a possible value set.
 class ArgValue<T> {
-  ArgValue({this.value, this.valuePresent, this.valueSet, this.valueSetDisplayNames});
+  ArgValue(
+      {this.value,
+      this.valuePresent,
+      this.valueSet,
+      this.valueSetDisplayNames});
 
   /// The value.
   T value;

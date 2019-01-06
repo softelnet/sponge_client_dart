@@ -16,9 +16,11 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:quiver/check.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 
 /// A data type kind.
 enum DataTypeKind {
+  ANNOTATED,
   ANY,
   BINARY,
   BOOLEAN,
@@ -34,6 +36,8 @@ enum DataTypeKind {
 DataType _typeFromJson(Map<String, dynamic> json) {
   DataTypeKind kind = DataType.fromJsonDataTypeKind(json['kind']);
   switch (kind) {
+    case DataTypeKind.ANNOTATED:
+      return AnnotatedType.fromJson(json);
     case DataTypeKind.ANY:
       return AnyType.fromJson(json);
     case DataTypeKind.BINARY:
@@ -113,7 +117,18 @@ class DataType<T> {
       kind.toString().split('.')[1];
 }
 
-/// Any type. It may be used in situations when type is not important.
+/// An annotated type. This type requires a `valueType` parameter, which is is a type of an annotated value.
+class AnnotatedType extends DataType<AnnotatedValue> {
+  AnnotatedType(this.valueType) : super(DataTypeKind.ANNOTATED);
+
+  /// The annotated value type.
+  final DataType valueType;
+
+  factory AnnotatedType.fromJson(Map<String, dynamic> json) => DataType.fromJsonBase(
+      AnnotatedType(DataType.fromJson(json['valueType'])), json);
+}
+
+/// An any type. It may be used in situations when type is not important.
 class AnyType extends DataType<dynamic> {
   AnyType() : super(DataTypeKind.ANY);
 

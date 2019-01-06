@@ -19,6 +19,7 @@ import 'dart:typed_data';
 import 'package:logging/logging.dart';
 import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 
 /// A type converter.
 abstract class TypeConverter {
@@ -62,6 +63,7 @@ class DefaultTypeConverter extends TypeConverter {
   DefaultTypeConverter() {
     // Register default unit converters.
     registerAll([
+      AnnotatedTypeUnitConverter(),
       AnyTypeUnitConverter(),
       BinaryTypeUnitConverter(),
       BooleanTypeUnitConverter(),
@@ -95,6 +97,26 @@ abstract class UnitTypeConverter<T, D extends DataType> {
   /// The [value] will never be null here.
   Future<T> unmarshal(TypeConverter converter, D type, dynamic value) async =>
       value;
+}
+
+class AnnotatedTypeUnitConverter
+    extends UnitTypeConverter<AnnotatedValue, AnnotatedType> {
+  AnnotatedTypeUnitConverter() : super(DataTypeKind.ANNOTATED);
+
+  @override
+  Future<dynamic> marshal(TypeConverter converter, AnnotatedType type,
+          AnnotatedValue value) async =>
+      AnnotatedValue(await converter.marshal(type.valueType, value.value),
+              value.features)
+          .toJson();
+
+  @override
+  Future<AnnotatedValue> unmarshal(
+      TypeConverter converter, AnnotatedType type, dynamic value) async {
+    var result = AnnotatedValue.fromJson(value);
+    result.value = await converter.unmarshal(type.valueType, result.value);
+    return result;
+  }
 }
 
 class AnyTypeUnitConverter extends UnitTypeConverter<dynamic, AnyType> {

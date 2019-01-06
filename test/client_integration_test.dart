@@ -26,6 +26,7 @@ import 'package:sponge_client_dart/src/response.dart';
 import 'package:sponge_client_dart/src/rest_client.dart';
 import 'package:sponge_client_dart/src/rest_client_configuration.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:test/test.dart';
 
@@ -181,6 +182,15 @@ void main() {
       var result = await client.call('UpperCase', [arg1]);
       expect(result is String, isTrue);
       expect(result, equals(arg1.toUpperCase()));
+    });
+    test('testCallAnnotatedType', () async {
+      var client = await getClient();
+      var annotatedArg = AnnotatedValue(true, {'argFeature1':'argFeature1Value1'});
+      AnnotatedValue result = await client.call('AnnotatedTypeAction', [annotatedArg]);
+      expect(result.value, equals('RESULT'));
+      expect(result.features.length, equals(2));
+      expect(result.features['feature1'], equals('value1'));
+      expect(result.features['argFeature1'], equals('argFeature1Value1'));
     });
     test('testProvideActionArgs', () async {
       var client = await getClient();

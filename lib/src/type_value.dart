@@ -1,4 +1,4 @@
-// Copyright 2018 The Sponge authors.
+// Copyright 2019 The Sponge authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,9 +12,27 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-class TestConstants {
-  static const int ADMIN_ACTIONS_COUNT = 16;
-  static const int ANONYMOUS_ACTIONS_COUNT = ADMIN_ACTIONS_COUNT - 1;
-  static const int ANONYMOUS_ACTIONS_WITH_METADATA_COUNT =
-      ANONYMOUS_ACTIONS_COUNT - 1;
+class AnnotatedValue {
+  AnnotatedValue(
+    this.value,
+    Map<String, Object> features,
+  ) : this.features = features ?? {};
+
+  /// The value.
+  dynamic value;
+
+  /// The annotated type features as a map of names to values.
+  final Map<String, Object> features;
+
+  factory AnnotatedValue.fromJson(Map<String, dynamic> json) => AnnotatedValue(
+        json['value'],
+        json['features'],
+      );
+
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'features': features,
+    };
+  }
 }

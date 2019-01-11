@@ -4,4 +4,4 @@ This is the Sponge REST API client for Dart.
 
 See `example/example.dart`.
 
-For more information on Sponge see http://sponge.openksavi.org.
+For more information on Sponge see https://sponge.openksavi.org.

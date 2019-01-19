@@ -15,18 +15,53 @@
 import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 
+/// A provided argument specification.
+class ArgProvided {
+  ArgProvided({
+    this.value,
+    this.valueSet,
+    this.depends,
+    this.readOnly = false,
+    this.overwrite = false,
+  });
+
+  /// The flag specifying if this argument value is provided.
+  bool value;
+
+  /// The flag specifying if this argument value set is provided.
+  bool valueSet;
+
+  /// The list of attribute names that this provided attribute depends on.
+  final List<String> depends;
+
+  /// The flag specifying if this provided argument is read only.
+  final bool readOnly;
+
+  /// The flag specifying if the provided value of this argument should overwrite the value set in a client code.
+  final bool overwrite;
+
+  factory ArgProvided.fromJson(Map<String, dynamic> json) {
+    return json != null
+        ? ArgProvided(
+            value: json['value'],
+            valueSet: json['valueSet'],
+            depends: (json['depends'] as List)?.cast<String>()?.toList(),
+            readOnly: json['readOnly'] ?? false,
+            overwrite: json['overwrite'] ?? false,
+          )
+        : null;
+  }
+}
+
 /// An action argument metadata.
-class ActionArgMeta {
-  ActionArgMeta({
+class ArgMeta {
+  ArgMeta({
     @required this.name,
     @required this.type,
     this.displayName,
     this.description,
     this.optional = false,
-    this.provided = false,
-    this.depends,
-    this.readOnly = false,
-    this.overwrite = false,
+    this.provided,
   });
 
   /// The argument name.
@@ -44,33 +79,21 @@ class ActionArgMeta {
   /// The flag specifying if this argument is optional.
   final bool optional;
 
-  /// Provided argument.
-  final bool provided;
-
-  /// Argument depends on others arguments.
-  final List<String> depends;
-
-  /// Read only argument.
-  final bool readOnly;
-
-  /// A flag specifying if the provided value of this argument should overwrite the value set in a client code.
-  final bool overwrite;
+  /// The provided argument specification. Defaults to `null`.
+  final ArgProvided provided;
 
   /// The argument label (the display name or the name).
   String get label => displayName ?? name;
 
-  factory ActionArgMeta.fromJson(Map<String, dynamic> json) {
+  factory ArgMeta.fromJson(Map<String, dynamic> json) {
     return json != null
-        ? ActionArgMeta(
+        ? ArgMeta(
             name: json['name'],
             type: DataType.fromJson(json['type']),
             displayName: json['displayName'],
             description: json['description'],
             optional: json['optional'] ?? false,
-            provided: json['provided'] ?? false,
-            depends: (json['depends'] as List)?.cast<String>()?.toList(),
-            readOnly: json['readOnly'] ?? false,
-            overwrite: json['overwrite'] ?? false,
+            provided: ArgProvided.fromJson(json['provided']),
           )
         : null;
   }
@@ -132,7 +155,7 @@ class ActionMeta {
   final Map<String, Object> features;
 
   /// The action arguments metadata (optional).
-  final List<ActionArgMeta> argsMeta;
+  final List<ArgMeta> argsMeta;
 
   /// The action result metadata (optional).
   final ActionResultMeta resultMeta;
@@ -149,16 +172,16 @@ class ActionMeta {
             knowledgeBase: KnowledgeBaseMeta.fromJson(json['knowledgeBase']),
             features: json['features'] ?? Map(),
             argsMeta: (json['argsMeta'] as List)
-                ?.map((arg) => ActionArgMeta.fromJson(arg))
+                ?.map((arg) => ArgMeta.fromJson(arg))
                 ?.toList(),
             resultMeta: ActionResultMeta.fromJson(json['resultMeta']),
           )
         : null;
   }
 
-  ActionArgMeta getArgMeta(String argName) {
-    ActionArgMeta argMeta = argsMeta
-        .firstWhere((argMeta) => argMeta.name == argName, orElse: () => null);
+  ArgMeta getArgMeta(String argName) {
+    ArgMeta argMeta = argsMeta.firstWhere((argMeta) => argMeta.name == argName,
+        orElse: () => null);
     if (argMeta == null) {
       throw Exception('Metadata for argument $argName not found');
     }

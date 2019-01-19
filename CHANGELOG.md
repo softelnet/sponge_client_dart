@@ -1,3 +1,8 @@
+## 1.7.0 (not released yet)
+
+* API change: The `ActionArgMeta` class renamed to `ArgMeta`.
+* API change: A provided argument specification in now placed in the `ArgProvided` class, not directly in the `ArgMeta` as before.
+  
 ## 1.6.0 (2019-01-11)
 
 * A new REST API operation `actionArgs` that fetches the provided action arguments from the server. There is a possibility to provide action argument values and possible value sets in the action configuration. It makes easier creating a generic UI for an action call that reads and presents the actual state of the entities that are to be changed by the action and its arguments.

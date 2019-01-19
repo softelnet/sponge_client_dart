@@ -196,21 +196,22 @@ void main() {
       var client = await getClient();
       var actionName = 'SetActuator';
 
-      List<ActionArgMeta> argsMeta =
+      List<ArgMeta> argsMeta =
           (await client.getActionMeta(actionName)).argsMeta;
 
-      expect(argsMeta[0].provided, isTrue);
-      expect(argsMeta[0].depends?.length, equals(0));
-      expect(argsMeta[0].readOnly, isFalse);
-      expect(argsMeta[1].provided, isTrue);
-      expect(argsMeta[1].depends?.length, equals(0));
-      expect(argsMeta[1].readOnly, isFalse);
-      expect(argsMeta[2].provided, isTrue);
-      expect(argsMeta[2].depends?.length, equals(0));
-      expect(argsMeta[2].readOnly, isTrue);
-      expect(argsMeta[3].provided, isFalse);
-      expect(argsMeta[3].depends?.length, equals(0));
-      expect(argsMeta[3].readOnly, isFalse);
+      expect(argsMeta[0].provided.value, isTrue);
+      expect(argsMeta[0].provided.valueSet, isTrue);
+      expect(argsMeta[0].provided.depends?.length, equals(0));
+      expect(argsMeta[0].provided.readOnly, isFalse);
+      expect(argsMeta[1].provided.value, isTrue);
+      expect(argsMeta[1].provided.valueSet, isFalse);
+      expect(argsMeta[1].provided.depends?.length, equals(0));
+      expect(argsMeta[1].provided.readOnly, isFalse);
+      expect(argsMeta[2].provided.value, isTrue);
+      expect(argsMeta[2].provided.valueSet, isFalse);
+      expect(argsMeta[2].provided.depends?.length, equals(0));
+      expect(argsMeta[2].provided.readOnly, isTrue);
+      expect(argsMeta[3].provided, isNull);
 
       // Reset the test state.
       await client.call(actionName, ['A', false, null, 1]);
@@ -259,20 +260,23 @@ void main() {
       // Reset the test state.
       await client.call(actionName, ['A', false, 1, 1, 'X']);
 
-      List<ActionArgMeta> argsMeta =
+      List<ArgMeta> argsMeta =
           (await client.getActionMeta(actionName)).argsMeta;
 
-      expect(argsMeta[0].provided, isTrue);
-      expect(argsMeta[0].depends?.length, equals(0));
-      expect(argsMeta[1].provided, isTrue);
-      expect(argsMeta[1].depends?.length, equals(0));
-      expect(argsMeta[2].provided, isTrue);
-      expect(argsMeta[2].depends?.length, equals(0));
-      expect(argsMeta[3].provided, isFalse);
-      expect(argsMeta[3].depends?.length, equals(0));
-      expect(argsMeta[4].provided, isTrue);
-      expect(argsMeta[4].depends?.length, equals(1));
-      expect(argsMeta[4].depends, equals(['actuator1']));
+      expect(argsMeta[0].provided.value, isTrue);
+      expect(argsMeta[0].provided.valueSet, isTrue);
+      expect(argsMeta[0].provided.depends?.length, equals(0));
+      expect(argsMeta[1].provided.value, isTrue);
+      expect(argsMeta[1].provided.valueSet, isFalse);
+      expect(argsMeta[1].provided.depends?.length, equals(0));
+      expect(argsMeta[2].provided.value, isTrue);
+      expect(argsMeta[2].provided.valueSet, isFalse);
+      expect(argsMeta[2].provided.depends?.length, equals(0));
+      expect(argsMeta[3].provided, isNull);
+      expect(argsMeta[4].provided.value, isTrue);
+      expect(argsMeta[4].provided.valueSet, isTrue);
+      expect(argsMeta[4].provided.depends?.length, equals(1));
+      expect(argsMeta[4].provided.depends, equals(['actuator1']));
 
       Map<String, ArgValue> providedArgs =
           await client.provideActionArgs(actionName, argNames: ['actuator1']);

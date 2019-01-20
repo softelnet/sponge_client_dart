@@ -2,6 +2,7 @@
 
 * API change: The `ActionArgMeta` class renamed to `ArgMeta`.
 * API change: A provided argument specification in now placed in the `ArgProvided` class, not directly in the `ArgMeta` as before.
+* API change: Removed `ArgValue.valueSetDisplayNames` because of a new support for a labeled value set.
   
 ## 1.6.0 (2019-01-11)
 

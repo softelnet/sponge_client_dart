@@ -185,8 +185,10 @@ void main() {
     });
     test('testCallAnnotatedType', () async {
       var client = await getClient();
-      var annotatedArg = AnnotatedValue(true, {'argFeature1':'argFeature1Value1'});
-      AnnotatedValue result = await client.call('AnnotatedTypeAction', [annotatedArg]);
+      var annotatedArg =
+          AnnotatedValue(true, {'argFeature1': 'argFeature1Value1'});
+      AnnotatedValue result =
+          await client.call('AnnotatedTypeAction', [annotatedArg]);
       expect(result.value, equals('RESULT'));
       expect(result.features.length, equals(2));
       expect(result.features['feature1'], equals('value1'));
@@ -228,7 +230,7 @@ void main() {
       expect(providedArgs['actuator2'].valueSet, isNull);
       expect(providedArgs['actuator2'].valuePresent, isTrue);
       expect(providedArgs['actuator3'], isNotNull);
-      // The value of actuator3 should not be asserted because it is read only in this test. 
+      // The value of actuator3 should not be asserted because it is read only in this test.
       /// Other tests may change its value.
       expect(providedArgs['actuator3'].valueSet, isNull);
       expect(providedArgs['actuator3'].valuePresent, isTrue);
@@ -247,7 +249,7 @@ void main() {
       expect(providedArgs['actuator2'].valueSet, isNull);
       expect(providedArgs['actuator2'].valuePresent, isTrue);
       expect(providedArgs['actuator3'], isNotNull);
-      // The value of actuator3 should not be asserted because it is read only in this test. 
+      // The value of actuator3 should not be asserted because it is read only in this test.
       /// Other tests may change its value.
       expect(providedArgs['actuator3'].valueSet, isNull);
       expect(providedArgs['actuator3'].valuePresent, isTrue);
@@ -285,6 +287,15 @@ void main() {
       var actuator1value = providedArgs['actuator1'].value;
       expect(actuator1value, equals('A'));
       expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      var actuator1LabeledValueSet = providedArgs['actuator1'].labeledValueSet;
+      expect(actuator1LabeledValueSet.length, equals(3));
+      expect(actuator1LabeledValueSet[0].value, equals('A'));
+      expect(actuator1LabeledValueSet[0].label, equals('Value A'));
+      expect(actuator1LabeledValueSet[1].value, equals('B'));
+      expect(actuator1LabeledValueSet[1].label, equals('Value B'));
+      expect(actuator1LabeledValueSet[2].value, equals('C'));
+      expect(actuator1LabeledValueSet[2].label, equals('Value C'));
+
       expect(providedArgs['actuator1'].valuePresent, isTrue);
 
       providedArgs = await client.provideActionArgs(actionName,

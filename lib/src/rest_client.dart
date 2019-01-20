@@ -28,6 +28,7 @@ import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/request.dart';
 import 'package:sponge_client_dart/src/response.dart';
 import 'package:sponge_client_dart/src/type_converter.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -346,13 +347,10 @@ class SpongeRestClient {
       argValue.value =
           await _typeConverter.unmarshal(argMeta.type, argValue.value);
 
-      if (argValue.valueSet != null) {
-        List unmarshalledValueSet = [];
-        for (var value in argValue.valueSet) {
-          unmarshalledValueSet
-              .add(await _typeConverter.unmarshal(argMeta.type, value));
+      if (argValue.labeledValueSet != null) {
+        for (var labeledValue in argValue.labeledValueSet) {
+          labeledValue.value = await _typeConverter.unmarshal(argMeta.type, labeledValue.value);
         }
-        argValue.valueSet = unmarshalledValueSet;
       }
     }
   }

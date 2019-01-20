@@ -12,6 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// A labeled value.
+class LabeledValue<T> {
+  LabeledValue(this.value, this.label);
+
+  /// The value.
+  T value;
+
+  /// The optional value label.
+  String label;
+
+  factory LabeledValue.fromJson(Map<String, dynamic> json) =>
+      LabeledValue(json['value'], json['label']);
+}
+
+/// An argument value and a possible value set.
+class ArgValue<T> {
+  ArgValue({
+    this.value,
+    this.valuePresent,
+    this.labeledValueSet,
+  });
+
+  /// The value.
+  T value;
+
+  /// If the value is present this flag is `true`.
+  bool valuePresent;
+
+  /// The possible value set with optional labels. For example it may be a list of string values to choose from.
+  /// If there is no value set for this argument, this property should is `null`.
+  List<LabeledValue<T>> labeledValueSet;
+
+  /// The utility getter for the possible value set without labels. 
+  List<T> get valueSet => labeledValueSet?.map((labeledValue) => labeledValue.value)?.toList();
+
+  factory ArgValue.fromJson(Map<String, dynamic> json) => ArgValue(
+        value: json['value'],
+        valuePresent: json['valuePresent'],
+        labeledValueSet: (json['labeledValueSet'] as List)
+            ?.map((arg) => LabeledValue.fromJson(arg))
+            ?.toList(),
+      );
+}
+
 class AnnotatedValue {
   AnnotatedValue(
     this.value,

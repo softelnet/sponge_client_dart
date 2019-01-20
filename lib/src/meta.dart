@@ -225,32 +225,3 @@ class KnowledgeBaseMeta {
         : null;
   }
 }
-
-/// An argument value and a possible value set.
-class ArgValue<T> {
-  ArgValue(
-      {this.value,
-      this.valuePresent,
-      this.valueSet,
-      this.valueSetDisplayNames});
-
-  /// The value.
-  T value;
-
-  /// If the value is present this flag is `true`.
-  bool valuePresent;
-
-  /// The possible value set. For example it may be a list of string values to choose from.
-  /// If the value set is present is is not `null`.
-  List<T> valueSet;
-
-  /// The value set display names.
-  List<String> valueSetDisplayNames;
-
-  factory ArgValue.fromJson(Map<String, dynamic> json) => ArgValue(
-        value: json['value'],
-        valuePresent: json['valuePresent'],
-        valueSet: json['valueSet'],
-        valueSetDisplayNames: (json['valueSetDisplayNames'] as List)?.cast(),
-      );
-}

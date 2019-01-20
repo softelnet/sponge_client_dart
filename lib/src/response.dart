@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:sponge_client_dart/src/meta.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 
 /// A base response.
 class SpongeResponse {

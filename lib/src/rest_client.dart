@@ -482,7 +482,7 @@ class SpongeRestClient {
       var meta = actionMeta.argsMeta[i];
       checkArgument(meta.optional || meta.type.nullable || args[i] != null,
           message:
-              'Action argument ${meta.displayName ?? meta.name} is not set');
+              'Action argument ${meta.label ?? meta.name} is not set');
     }
   }
 

@@ -58,7 +58,7 @@ class ArgMeta {
   ArgMeta({
     @required this.name,
     @required this.type,
-    this.displayName,
+    this.label,
     this.description,
     this.optional = false,
     this.provided,
@@ -70,8 +70,8 @@ class ArgMeta {
   /// The argument data type.
   final DataType type;
 
-  /// The argument display name.
-  final String displayName;
+  /// The argument label.
+  final String label;
 
   /// The argument description.
   final String description;
@@ -82,15 +82,12 @@ class ArgMeta {
   /// The provided argument specification. Defaults to `null`.
   final ArgProvided provided;
 
-  /// The argument label (the display name or the name).
-  String get label => displayName ?? name;
-
   factory ArgMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ArgMeta(
             name: json['name'],
             type: DataType.fromJson(json['type']),
-            displayName: json['displayName'],
+            label: json['label'],
             description: json['description'],
             optional: json['optional'] ?? false,
             provided: ArgProvided.fromJson(json['provided']),
@@ -103,15 +100,15 @@ class ArgMeta {
 class ActionResultMeta {
   ActionResultMeta({
     @required this.type,
-    this.displayName,
+    this.label,
     this.description,
   });
 
   /// The result data type.
   final DataType type;
 
-  /// The result display name.
-  final String displayName;
+  /// The result label.
+  final String label;
 
   /// The result description.
   final String description;
@@ -120,7 +117,7 @@ class ActionResultMeta {
     return json != null
         ? ActionResultMeta(
             type: DataType.fromJson(json['type']),
-            displayName: json['displayName'],
+            label: json['label'],
             description: json['description'],
           )
         : null;
@@ -131,7 +128,7 @@ class ActionResultMeta {
 class ActionMeta {
   ActionMeta({
     @required this.name,
-    this.displayName,
+    this.label,
     this.description,
     @required this.knowledgeBase,
     Map<String, Object> features,
@@ -142,8 +139,8 @@ class ActionMeta {
   /// The action name.
   final String name;
 
-  /// The action display name (optional).
-  final String displayName;
+  /// The action label (optional).
+  final String label;
 
   /// The action description (optional).
   final String description;
@@ -160,14 +157,11 @@ class ActionMeta {
   /// The action result metadata (optional).
   final ActionResultMeta resultMeta;
 
-  /// The action label.
-  String get label => displayName ?? name;
-
   factory ActionMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ActionMeta(
             name: json['name'],
-            displayName: json['displayName'],
+            label: json['label'],
             description: json['description'],
             knowledgeBase: KnowledgeBaseMeta.fromJson(json['knowledgeBase']),
             features: json['features'] ?? Map(),
@@ -194,7 +188,7 @@ class ActionMeta {
 class KnowledgeBaseMeta {
   KnowledgeBaseMeta({
     @required this.name,
-    this.displayName,
+    this.label,
     this.description,
     this.version,
   });
@@ -202,8 +196,8 @@ class KnowledgeBaseMeta {
   /// The knowledge base name.
   final String name;
 
-  /// The knowledge base display name (optional).
-  final String displayName;
+  /// The knowledge base label (optional).
+  final String label;
 
   /// The knowledge base description (optional).
   final String description;
@@ -211,14 +205,11 @@ class KnowledgeBaseMeta {
   /// The knowledge base version (optional).
   int version;
 
-  /// The knowledge base label (the display name or the name).
-  String get label => displayName ?? name;
-
   factory KnowledgeBaseMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? KnowledgeBaseMeta(
             name: json['name'],
-            displayName: json['displayName'],
+            label: json['label'],
             description: json['description'],
             version: json['version'],
           )

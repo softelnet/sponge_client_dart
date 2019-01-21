@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:sponge_client_dart/src/meta.dart';
+
 /// A base request.
 class SpongeRequest {
   SpongeRequest({
@@ -46,7 +48,7 @@ class SpongeRequest {
 /// An action execution related request.
 abstract class ActionExecutionRequest {
   String get name;
-  int version;
+  ProcessorQualifiedVersion qualifiedVersion;
 }
 
 /// An action call request.
@@ -55,7 +57,7 @@ class ActionCallRequest extends SpongeRequest
   ActionCallRequest(
     this.name, {
     this.args,
-    this.version,
+    this.qualifiedVersion,
   });
 
   /// The action name.
@@ -64,15 +66,15 @@ class ActionCallRequest extends SpongeRequest
   /// The action arguments (optional).
   List args;
 
-  /// The expected knowledge base version (optional).
-  int version;
+  /// The action expected qualified version (optional).
+  ProcessorQualifiedVersion qualifiedVersion;
 
   @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'name': name,
       'args': args,
-      'version': version,
+      'qualifiedVersion': qualifiedVersion,
     });
 }
 
@@ -146,7 +148,7 @@ class ProvideActionArgsRequest extends SpongeRequest
     this.name,
     this.argNames,
     this.current, {
-    this.version,
+    this.qualifiedVersion,
   });
 
   /// The action name.
@@ -158,8 +160,8 @@ class ProvideActionArgsRequest extends SpongeRequest
   /// The current values of action arguments in a client code.
   Map<String, Object> current;
 
-  /// The expected knowledge base version (optional).
-  int version;
+  /// The action expected qualified version (optional).
+  ProcessorQualifiedVersion qualifiedVersion;
 
   @override
   Map<String, dynamic> toJson() => super.toJson()
@@ -167,6 +169,6 @@ class ProvideActionArgsRequest extends SpongeRequest
       'name': name,
       'argNames': argNames,
       'current': current,
-      'version': version,
+      'qualifiedVersion': qualifiedVersion,
     });
 }

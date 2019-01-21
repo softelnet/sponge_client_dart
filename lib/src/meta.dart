@@ -124,6 +124,34 @@ class ActionResultMeta {
   }
 }
 
+/// A processor qualified version.
+class ProcessorQualifiedVersion {
+  ProcessorQualifiedVersion(this.knowledgeBaseVersion, this.processorVersion);
+
+  /// The optional knowledge base version.
+  int knowledgeBaseVersion;
+
+  /// The optional processor version.
+  int processorVersion;
+
+  factory ProcessorQualifiedVersion.fromJson(Map<String, dynamic> json) {
+    return json != null
+        ? ProcessorQualifiedVersion(
+            json['knowledgeBaseVersion'], json['processorVersion'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() => {
+        'knowledgeBaseVersion': knowledgeBaseVersion,
+        'processorVersion': processorVersion,
+      };
+
+  @override
+  String toString() =>
+      (knowledgeBaseVersion != null ? '$knowledgeBaseVersion.' : '') +
+      '$processorVersion';
+}
+
 /// An action metadata.
 class ActionMeta {
   ActionMeta({
@@ -134,6 +162,7 @@ class ActionMeta {
     Map<String, Object> features,
     this.argsMeta,
     this.resultMeta,
+    this.qualifiedVersion,
   }) : this.features = features ?? Map();
 
   /// The action name.
@@ -157,6 +186,9 @@ class ActionMeta {
   /// The action result metadata (optional).
   final ActionResultMeta resultMeta;
 
+  /// The action qualified version.
+  ProcessorQualifiedVersion qualifiedVersion;
+
   factory ActionMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ActionMeta(
@@ -169,6 +201,8 @@ class ActionMeta {
                 ?.map((arg) => ArgMeta.fromJson(arg))
                 ?.toList(),
             resultMeta: ActionResultMeta.fromJson(json['resultMeta']),
+            qualifiedVersion:
+                ProcessorQualifiedVersion.fromJson(json['qualifiedVersion']),
           )
         : null;
   }

@@ -20,7 +20,7 @@ class SpongeRestClientConfiguration {
     this.password,
     this.useRequestId = false,
     this.relogin = true,
-    this.verifyKnowledgeBaseVersion = true,
+    this.verifyProcessorVersion = true,
     this.useActionMetaCache = true,
     this.actionMetaCacheMaxSize = -1,
     this.throwExceptionOnErrorResponse = true,
@@ -41,9 +41,9 @@ class SpongeRestClientConfiguration {
   /// The flag telling if the client should automatically relogin when an auth token expires.
   bool relogin;
 
-  /// The flag telling if the client should request verification of a knowledge base
+  /// The flag telling if the client should request verification of a processor
   /// version on the server.
-  bool verifyKnowledgeBaseVersion;
+  bool verifyProcessorVersion;
 
   /// The flag telling if the client should use the action meta cache.
   bool useActionMetaCache;

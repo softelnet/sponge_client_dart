@@ -120,13 +120,17 @@ void main() {
       var client = await getClient();
       var arg1 = 'test1';
       var actionMeta = await client.getActionMeta('UpperCase');
-      actionMeta.knowledgeBase.version = 2;
+      actionMeta.qualifiedVersion = ProcessorQualifiedVersion(1, 1);
 
       try {
         await client.call('UpperCase', [arg1]);
         fail('$IncorrectKnowledgeBaseVersionException expected');
       } catch (e) {
         expect(e is IncorrectKnowledgeBaseVersionException, isTrue);
+        expect(
+            (e as IncorrectKnowledgeBaseVersionException).errorMessage,
+            equals(
+                'The expected action qualified version (1.1) differs from the actual (2.2)'));
         expect(
             e.errorCode,
             equals(SpongeClientConstants

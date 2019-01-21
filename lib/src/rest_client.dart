@@ -349,7 +349,8 @@ class SpongeRestClient {
 
       if (argValue.labeledValueSet != null) {
         for (var labeledValue in argValue.labeledValueSet) {
-          labeledValue.value = await _typeConverter.unmarshal(argMeta.type, labeledValue.value);
+          labeledValue.value =
+              await _typeConverter.unmarshal(argMeta.type, labeledValue.value);
         }
       }
     }
@@ -413,24 +414,27 @@ class SpongeRestClient {
           context);
 
   /// Sends the `call` request to the server and returns the response. See [callByRequest].
-  Future<dynamic> call(String actionName, [List args,
-          ActionMeta actionMeta, bool allowFetchMetadata = true]) async =>
+  Future<dynamic> call(String actionName,
+          [List args,
+          ActionMeta actionMeta,
+          bool allowFetchMetadata = true]) async =>
       (await callByRequest(ActionCallRequest(actionName, args: args),
               actionMeta: actionMeta, allowFetchMetadata: allowFetchMetadata))
           .result;
 
   void _setupActionExecutionRequest(
       ActionMeta actionMeta, ActionExecutionRequest request) {
-    // Conditionally set the verification of the knowledge base version on the server side.
-    if (_configuration.verifyKnowledgeBaseVersion &&
+    // Conditionally set the verification of the processor qualified version on the server side.
+    if (_configuration.verifyProcessorVersion &&
         actionMeta != null &&
-        request.version == null) {
-      request.version = actionMeta.knowledgeBase?.version;
+        request.qualifiedVersion == null) {
+      request.qualifiedVersion = actionMeta.qualifiedVersion;
     }
 
     checkArgument(actionMeta == null || actionMeta.name == request.name,
-        message: 'Action name ${actionMeta?.name} in the metadata doesn'
-            't match the action name ${request?.name} in the request');
+        message:
+            'Action name ${actionMeta?.name} in the metadata doesn\'t match '
+            'the action name ${request?.name} in the request');
   }
 
   Future<ActionCallResponse> _doCallByRequest(ActionMeta actionMeta,
@@ -452,7 +456,7 @@ class SpongeRestClient {
     return response;
   }
 
-  /// Validates the action call arguments. This method is invoked internally by the `call` methods. 
+  /// Validates the action call arguments. This method is invoked internally by the `call` methods.
   /// Throws exception on validation failure.
   void validateCallArgs(ActionMeta actionMeta, List args) {
     if (actionMeta?.argsMeta == null) {
@@ -481,8 +485,7 @@ class SpongeRestClient {
     for (int i = 0; i < actionMeta.argsMeta.length; i++) {
       var meta = actionMeta.argsMeta[i];
       checkArgument(meta.optional || meta.type.nullable || args[i] != null,
-          message:
-              'Action argument ${meta.label ?? meta.name} is not set');
+          message: 'Action argument ${meta.label ?? meta.name} is not set');
     }
   }
 

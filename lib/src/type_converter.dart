@@ -107,7 +107,9 @@ class AnnotatedTypeUnitConverter
   Future<dynamic> marshal(TypeConverter converter, AnnotatedType type,
           AnnotatedValue value) async =>
       AnnotatedValue(await converter.marshal(type.valueType, value.value),
-              value.features)
+              label: value.label,
+              description: value.description,
+              features: value.features)
           .toJson();
 
   @override

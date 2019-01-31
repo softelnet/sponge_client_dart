@@ -190,7 +190,7 @@ void main() {
     test('testCallAnnotatedType', () async {
       var client = await getClient();
       var annotatedArg =
-          AnnotatedValue(true, {'argFeature1': 'argFeature1Value1'});
+          AnnotatedValue(true, features: {'argFeature1': 'argFeature1Value1'});
       AnnotatedValue result =
           await client.call('AnnotatedTypeAction', [annotatedArg]);
       expect(result.value, equals('RESULT'));
@@ -291,14 +291,14 @@ void main() {
       var actuator1value = providedArgs['actuator1'].value;
       expect(actuator1value, equals('A'));
       expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
-      var actuator1LabeledValueSet = providedArgs['actuator1'].labeledValueSet;
-      expect(actuator1LabeledValueSet.length, equals(3));
-      expect(actuator1LabeledValueSet[0].value, equals('A'));
-      expect(actuator1LabeledValueSet[0].label, equals('Value A'));
-      expect(actuator1LabeledValueSet[1].value, equals('B'));
-      expect(actuator1LabeledValueSet[1].label, equals('Value B'));
-      expect(actuator1LabeledValueSet[2].value, equals('C'));
-      expect(actuator1LabeledValueSet[2].label, equals('Value C'));
+      var actuator1AnnotatedValueSet = providedArgs['actuator1'].annotatedValueSet;
+      expect(actuator1AnnotatedValueSet.length, equals(3));
+      expect(actuator1AnnotatedValueSet[0].value, equals('A'));
+      expect(actuator1AnnotatedValueSet[0].label, equals('Value A'));
+      expect(actuator1AnnotatedValueSet[1].value, equals('B'));
+      expect(actuator1AnnotatedValueSet[1].label, equals('Value B'));
+      expect(actuator1AnnotatedValueSet[2].value, equals('C'));
+      expect(actuator1AnnotatedValueSet[2].label, equals('Value C'));
 
       expect(providedArgs['actuator1'].valuePresent, isTrue);
 

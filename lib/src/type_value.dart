@@ -26,12 +26,49 @@ class LabeledValue<T> {
       LabeledValue(json['value'], json['label']);
 }
 
+class AnnotatedValue<T> {
+  AnnotatedValue(
+    this.value, {
+    this.label,
+    this.description,
+    Map<String, Object> features,
+  }) : this.features = features ?? {};
+
+  /// The value.
+  dynamic value;
+
+  /// The optional value label.
+  String label;
+
+  /// The optional value description.
+  String description;
+
+  /// The annotated type features as a map of names to values.
+  final Map<String, Object> features;
+
+  factory AnnotatedValue.fromJson(Map<String, dynamic> json) => AnnotatedValue(
+        json['value'],
+        label: json['label'],
+        description: json['description'],
+        features: json['features'],
+      );
+
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'label': label,
+      'description': description,
+      'features': features,
+    };
+  }
+}
+
 /// An argument value and a possible value set.
 class ArgValue<T> {
   ArgValue({
     this.value,
     this.valuePresent,
-    this.labeledValueSet,
+    this.annotatedValueSet,
   });
 
   /// The value.
@@ -40,43 +77,20 @@ class ArgValue<T> {
   /// If the value is present this flag is `true`.
   bool valuePresent;
 
-  /// The possible value set with optional labels. For example it may be a list of string values to choose from.
+  /// The possible value set with optional annotations. For example it may be a list of string values to choose from.
   /// If there is no value set for this argument, this property should is `null`.
-  List<LabeledValue<T>> labeledValueSet;
+  List<AnnotatedValue<T>> annotatedValueSet;
 
-  /// The utility getter for the possible value set without labels. 
-  List<T> get valueSet => labeledValueSet?.map((labeledValue) => labeledValue.value)?.toList();
+  /// The utility getter for the possible value set without labels.
+  List<T> get valueSet => annotatedValueSet
+      ?.map((annotatedValue) => annotatedValue.value)
+      ?.toList();
 
   factory ArgValue.fromJson(Map<String, dynamic> json) => ArgValue(
         value: json['value'],
         valuePresent: json['valuePresent'],
-        labeledValueSet: (json['labeledValueSet'] as List)
-            ?.map((arg) => LabeledValue.fromJson(arg))
+        annotatedValueSet: (json['annotatedValueSet'] as List)
+            ?.map((arg) => AnnotatedValue.fromJson(arg))
             ?.toList(),
       );
-}
-
-class AnnotatedValue {
-  AnnotatedValue(
-    this.value,
-    Map<String, Object> features,
-  ) : this.features = features ?? {};
-
-  /// The value.
-  dynamic value;
-
-  /// The annotated type features as a map of names to values.
-  final Map<String, Object> features;
-
-  factory AnnotatedValue.fromJson(Map<String, dynamic> json) => AnnotatedValue(
-        json['value'],
-        json['features'],
-      );
-
-  Map<String, dynamic> toJson() {
-    return {
-      'value': value,
-      'features': features,
-    };
-  }
 }

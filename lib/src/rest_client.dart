@@ -347,8 +347,8 @@ class SpongeRestClient {
       argValue.value =
           await _typeConverter.unmarshal(argMeta.type, argValue.value);
 
-      if (argValue.labeledValueSet != null) {
-        for (var labeledValue in argValue.labeledValueSet) {
+      if (argValue.annotatedValueSet != null) {
+        for (var labeledValue in argValue.annotatedValueSet) {
           labeledValue.value =
               await _typeConverter.unmarshal(argMeta.type, labeledValue.value);
         }

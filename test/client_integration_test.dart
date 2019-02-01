@@ -222,7 +222,7 @@ void main() {
       // Reset the test state.
       await client.call(actionName, ['A', false, null, 1]);
 
-      Map<String, ArgValue> providedArgs =
+      Map<String, ArgProvidedValue> providedArgs =
           await client.provideActionArgs(actionName);
       expect(providedArgs.length, equals(3));
       expect(providedArgs['actuator1'], isNotNull);
@@ -284,7 +284,7 @@ void main() {
       expect(argsMeta[4].provided.depends?.length, equals(1));
       expect(argsMeta[4].provided.depends, equals(['actuator1']));
 
-      Map<String, ArgValue> providedArgs =
+      Map<String, ArgProvidedValue> providedArgs =
           await client.provideActionArgs(actionName, argNames: ['actuator1']);
       expect(providedArgs.length, equals(1));
       expect(providedArgs['actuator1'], isNotNull);

@@ -335,13 +335,13 @@ class SpongeRestClient {
   }
 
   Future<Null> unmarshalProvidedActionArgValues(
-      ActionMeta actionMeta, Map<String, ArgValue> argValues) async {
+      ActionMeta actionMeta, Map<String, ArgProvidedValue> argValues) async {
     if (argValues == null || actionMeta.argsMeta == null) {
       return;
     }
 
     for (var entry in argValues.entries) {
-      ArgValue argValue = entry.value;
+      ArgProvidedValue argValue = entry.value;
       var argMeta = actionMeta.getArgMeta(entry.key);
 
       argValue.value =
@@ -555,7 +555,7 @@ class SpongeRestClient {
   }
 
   /// Fetches the provided action arguments from the server.
-  Future<Map<String, ArgValue>> provideActionArgs(
+  Future<Map<String, ArgProvidedValue>> provideActionArgs(
     String actionName, {
     List<String> argNames,
     Map<String, Object> current,

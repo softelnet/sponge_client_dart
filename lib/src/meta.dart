@@ -15,9 +15,9 @@
 import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 
-/// A provided argument specification.
-class ArgProvided {
-  ArgProvided({
+/// A provided argument metadata.
+class ArgProvidedMeta {
+  ArgProvidedMeta({
     this.value,
     this.valueSet,
     this.depends,
@@ -40,9 +40,9 @@ class ArgProvided {
   /// The flag specifying if the provided value of this argument should overwrite the value set in a client code.
   final bool overwrite;
 
-  factory ArgProvided.fromJson(Map<String, dynamic> json) {
+  factory ArgProvidedMeta.fromJson(Map<String, dynamic> json) {
     return json != null
-        ? ArgProvided(
+        ? ArgProvidedMeta(
             value: json['value'],
             valueSet: json['valueSet'],
             depends: (json['depends'] as List)?.cast<String>()?.toList(),
@@ -80,7 +80,7 @@ class ArgMeta {
   final bool optional;
 
   /// The provided argument specification. Defaults to `null`.
-  final ArgProvided provided;
+  final ArgProvidedMeta provided;
 
   factory ArgMeta.fromJson(Map<String, dynamic> json) {
     return json != null
@@ -90,15 +90,15 @@ class ArgMeta {
             label: json['label'],
             description: json['description'],
             optional: json['optional'] ?? false,
-            provided: ArgProvided.fromJson(json['provided']),
+            provided: ArgProvidedMeta.fromJson(json['provided']),
           )
         : null;
   }
 }
 
 /// An action result metadata.
-class ActionResultMeta {
-  ActionResultMeta({
+class ResultMeta {
+  ResultMeta({
     @required this.type,
     this.label,
     this.description,
@@ -113,9 +113,9 @@ class ActionResultMeta {
   /// The result description.
   final String description;
 
-  factory ActionResultMeta.fromJson(Map<String, dynamic> json) {
+  factory ResultMeta.fromJson(Map<String, dynamic> json) {
     return json != null
-        ? ActionResultMeta(
+        ? ResultMeta(
             type: DataType.fromJson(json['type']),
             label: json['label'],
             description: json['description'],
@@ -184,7 +184,7 @@ class ActionMeta {
   final List<ArgMeta> argsMeta;
 
   /// The action result metadata (optional).
-  final ActionResultMeta resultMeta;
+  final ResultMeta resultMeta;
 
   /// The action qualified version.
   ProcessorQualifiedVersion qualifiedVersion;
@@ -200,7 +200,7 @@ class ActionMeta {
             argsMeta: (json['argsMeta'] as List)
                 ?.map((arg) => ArgMeta.fromJson(arg))
                 ?.toList(),
-            resultMeta: ActionResultMeta.fromJson(json['resultMeta']),
+            resultMeta: ResultMeta.fromJson(json['resultMeta']),
             qualifiedVersion:
                 ProcessorQualifiedVersion.fromJson(json['qualifiedVersion']),
           )

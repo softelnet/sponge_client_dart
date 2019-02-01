@@ -145,9 +145,9 @@ class ProvideActionArgsResponse extends SpongeResponse {
   ProvideActionArgsResponse(this.provided);
 
   /// The provided action arguments.
-  Map<String, ArgValue> provided;
+  Map<String, ArgProvidedValue> provided;
 
   factory ProvideActionArgsResponse.fromJson(Map<String, dynamic> json) =>
       SpongeResponse.setupFromJson(ProvideActionArgsResponse((json['provided'] as Map)?.map(
-        (argName, argValueJson) => MapEntry(argName, ArgValue.fromJson(argValueJson)))), json);
+        (argName, argValueJson) => MapEntry(argName, ArgProvidedValue.fromJson(argValueJson)))), json);
 }

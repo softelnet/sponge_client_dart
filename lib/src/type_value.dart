@@ -12,20 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// A labeled value.
-class LabeledValue<T> {
-  LabeledValue(this.value, this.label);
-
-  /// The value.
-  T value;
-
-  /// The optional value label.
-  String label;
-
-  factory LabeledValue.fromJson(Map<String, dynamic> json) =>
-      LabeledValue(json['value'], json['label']);
-}
-
 class AnnotatedValue<T> {
   AnnotatedValue(
     this.value, {
@@ -63,9 +49,9 @@ class AnnotatedValue<T> {
   }
 }
 
-/// An argument value and a possible value set.
-class ArgValue<T> {
-  ArgValue({
+/// A provided argument value and a possible value set.
+class ArgProvidedValue<T> {
+  ArgProvidedValue({
     this.value,
     this.valuePresent,
     this.annotatedValueSet,
@@ -86,7 +72,7 @@ class ArgValue<T> {
       ?.map((annotatedValue) => annotatedValue.value)
       ?.toList();
 
-  factory ArgValue.fromJson(Map<String, dynamic> json) => ArgValue(
+  factory ArgProvidedValue.fromJson(Map<String, dynamic> json) => ArgProvidedValue(
         value: json['value'],
         valuePresent: json['valuePresent'],
         annotatedValueSet: (json['annotatedValueSet'] as List)

@@ -1,4 +1,4 @@
-## 1.7.0 (not released yet)
+## 1.7.0 (2019-02-01)
 
 * API change: Renamed `displayName` to `label`.
 * API change: Renamed `ActionArgMeta` to `ArgMeta`, `ActionResultMeta` to `ResultMeta`, `ArgProvided` to `ArgProvidedMeta`, `ArgValue` to `ArgProvidedValue`.

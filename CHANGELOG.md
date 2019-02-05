@@ -1,3 +1,7 @@
+## 1.7.1 (not released yet)
+
+* Added support for categories.
+
 ## 1.7.0 (2019-02-01)
 
 * API change: Renamed `displayName` to `label`.

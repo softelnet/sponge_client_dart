@@ -103,6 +103,9 @@ void main() {
       var client = await getClient();
       ActionMeta actionMeta = await client.getActionMeta('UpperCase');
       expect(actionMeta.name, equals('UpperCase'));
+      expect(actionMeta.category.name, equals('category1'));
+      expect(actionMeta.category.label, equals('Category 1'));
+      expect(actionMeta.category.description, equals('Category 1 description'));
       expect(actionMeta.argsMeta.length, equals(1));
       expect(actionMeta.argsMeta[0].type is StringType, isTrue);
       expect(actionMeta.resultMeta.type is StringType, isTrue);

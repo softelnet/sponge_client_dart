@@ -152,6 +152,34 @@ class ProcessorQualifiedVersion {
       '$processorVersion';
 }
 
+/// A category metadata.
+class CategoryMeta {
+  CategoryMeta(
+    this.name, {
+    this.label,
+    this.description,
+  });
+
+  /// The category name.
+  String name;
+
+  /// The category label.
+  String label;
+
+  /// The category description.
+  String description;
+
+  factory CategoryMeta.fromJson(Map<String, dynamic> json) {
+    return json != null
+        ? CategoryMeta(
+            json['name'],
+            label: json['label'],
+            description: json['description'],
+          )
+        : null;
+  }
+}
+
 /// An action metadata.
 class ActionMeta {
   ActionMeta({
@@ -159,10 +187,12 @@ class ActionMeta {
     this.label,
     this.description,
     @required this.knowledgeBase,
+    this.category,
     Map<String, Object> features,
     this.argsMeta,
     this.resultMeta,
     this.qualifiedVersion,
+    
   }) : this.features = features ?? Map();
 
   /// The action name.
@@ -176,6 +206,9 @@ class ActionMeta {
 
   /// The action knowledge base metadata.
   final KnowledgeBaseMeta knowledgeBase;
+
+  /// The action category metadata.
+  final CategoryMeta category;
 
   /// The action features.
   final Map<String, Object> features;
@@ -196,6 +229,7 @@ class ActionMeta {
             label: json['label'],
             description: json['description'],
             knowledgeBase: KnowledgeBaseMeta.fromJson(json['knowledgeBase']),
+            category: CategoryMeta.fromJson(json['category']),
             features: json['features'] ?? Map(),
             argsMeta: (json['argsMeta'] as List)
                 ?.map((arg) => ArgMeta.fromJson(arg))

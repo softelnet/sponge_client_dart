@@ -67,12 +67,14 @@ class DefaultTypeConverter extends TypeConverter {
       AnyTypeUnitConverter(),
       BinaryTypeUnitConverter(),
       BooleanTypeUnitConverter(),
+      DynamicTypeUnitConverter(),
       IntegerTypeUnitConverter(),
       ListTypeUnitConverter(),
       MapTypeUnitConverter(),
       NumberTypeUnitConverter(),
       ObjectTypeUnitConverter(),
       StringTypeUnitConverter(),
+      TypeTypeUnitConverter(),
       VoidTypeUnitConverter(),
     ]);
   }
@@ -141,6 +143,24 @@ class BinaryTypeUnitConverter extends UnitTypeConverter<Uint8List, BinaryType> {
 
 class BooleanTypeUnitConverter extends UnitTypeConverter<bool, BooleanType> {
   BooleanTypeUnitConverter() : super(DataTypeKind.BOOLEAN);
+}
+
+class DynamicTypeUnitConverter
+    extends UnitTypeConverter<DynamicValue, DynamicType> {
+  DynamicTypeUnitConverter() : super(DataTypeKind.DYNAMIC);
+
+  @override
+  Future<dynamic> marshal(TypeConverter converter, DynamicType type,
+          DynamicValue value) async =>
+      DynamicValue(await converter.marshal(value.type, value.value), value.type).toJson();
+
+  @override
+  Future<DynamicValue> unmarshal(
+      TypeConverter converter, DynamicType type, dynamic value) async {
+    DynamicValue result = DynamicValue.fromJson(value);
+    result.value = await converter.unmarshal(result.type, result.value);
+    return result;
+  }
 }
 
 class IntegerTypeUnitConverter extends UnitTypeConverter<int, IntegerType> {
@@ -248,6 +268,24 @@ class ObjectTypeUnitConverter extends UnitTypeConverter<dynamic, ObjectType> {
 
 class StringTypeUnitConverter extends UnitTypeConverter<String, StringType> {
   StringTypeUnitConverter() : super(DataTypeKind.STRING);
+}
+
+class TypeTypeUnitConverter
+    extends UnitTypeConverter<DataType, TypeType> {
+  TypeTypeUnitConverter() : super(DataTypeKind.TYPE);
+
+  /// Note that the `value` is modified in this method.
+  @override
+  Future<dynamic> marshal(TypeConverter converter, TypeType type,
+          DataType value) async => value..defaultValue = await converter.marshal(value, value.defaultValue);
+
+  @override
+  Future<DataType> unmarshal(
+      TypeConverter converter, TypeType type, dynamic value) async {
+    DataType result = DataType.fromJson(value);
+    result.defaultValue = await converter.unmarshal(result, result.defaultValue);
+    return result;
+  }
 }
 
 class VoidTypeUnitConverter extends UnitTypeConverter<Null, VoidType> {

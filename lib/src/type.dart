@@ -24,12 +24,14 @@ enum DataTypeKind {
   ANY,
   BINARY,
   BOOLEAN,
+  DYNAMIC,
   INTEGER,
   LIST,
   MAP,
   NUMBER,
   OBJECT,
   STRING,
+  TYPE,
   VOID,
 }
 
@@ -44,6 +46,8 @@ DataType _typeFromJson(Map<String, dynamic> json) {
       return BinaryType.fromJson(json);
     case DataTypeKind.BOOLEAN:
       return BooleanType.fromJson(json);
+    case DataTypeKind.DYNAMIC:
+      return DynamicType.fromJson(json);
     case DataTypeKind.INTEGER:
       return IntegerType.fromJson(json);
     case DataTypeKind.LIST:
@@ -56,6 +60,8 @@ DataType _typeFromJson(Map<String, dynamic> json) {
       return ObjectType.fromJson(json);
     case DataTypeKind.STRING:
       return StringType.fromJson(json);
+    case DataTypeKind.TYPE:
+      return TypeType.fromJson(json);
     case DataTypeKind.VOID:
       return VoidType.fromJson(json);
   }
@@ -115,6 +121,14 @@ class DataType<T> {
 
   static String _getDataTypeKindValue(DataTypeKind kind) =>
       kind.toString().split('.')[1];
+
+  Map<String, dynamic> toJson() => {
+        'kind': _getDataTypeKindValue(kind),
+        'nullable': nullable,
+        'format': format,
+        'defaultValue': defaultValue,
+        'features': features,
+      };
 }
 
 /// An annotated type. This type requires a `valueType` parameter, which is is a type of an annotated value.
@@ -124,8 +138,14 @@ class AnnotatedType extends DataType<AnnotatedValue> {
   /// The annotated value type.
   final DataType valueType;
 
-  factory AnnotatedType.fromJson(Map<String, dynamic> json) => DataType.fromJsonBase(
-      AnnotatedType(DataType.fromJson(json['valueType'])), json);
+  factory AnnotatedType.fromJson(Map<String, dynamic> json) =>
+      DataType.fromJsonBase(
+          AnnotatedType(DataType.fromJson(json['valueType'])), json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'valueType': valueType.toJson(),
+    });
 }
 
 /// An any type. It may be used in situations when type is not important.
@@ -145,6 +165,11 @@ class BinaryType extends DataType<Uint8List> {
 
   factory BinaryType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(BinaryType(json['mimeType']), json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'mimeType': mimeType,
+    });
 }
 
 /// A boolean type.
@@ -153,6 +178,14 @@ class BooleanType extends DataType<bool> {
 
   factory BooleanType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(BooleanType(), json);
+}
+
+/// An dynamic type representing dynamically typed values. A value of this type has to be an instance of `DynamicValue`.
+class DynamicType extends DataType<DynamicValue> {
+  DynamicType() : super(DataTypeKind.DYNAMIC);
+
+  factory DynamicType.fromJson(Map<String, dynamic> json) =>
+      DataType.fromJsonBase(DynamicType(), json);
 }
 
 /// An integer type (commonly used integer type or long).
@@ -185,6 +218,14 @@ class IntegerType extends DataType<int> {
             exclusiveMax: json['exclusiveMax'],
           ),
           json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'minValue': minValue,
+      'maxValue': maxValue,
+      'exclusiveMin': exclusiveMin,
+      'exclusiveMax': exclusiveMax,
+    });
 }
 
 /// A list type. This type requires an `elementType` parameter, which is is a type of list elements.
@@ -196,6 +237,11 @@ class ListType extends DataType<List> {
 
   factory ListType.fromJson(Map<String, dynamic> json) => DataType.fromJsonBase(
       ListType(DataType.fromJson(json['elementType'])), json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'elementType': elementType.toJson(),
+    });
 }
 
 /// A map type. This type requires two parameters: a type of keys and a type of values in the map.
@@ -212,6 +258,12 @@ class MapType extends DataType<Map> {
       MapType(DataType.fromJson(json['keyType']),
           DataType.fromJson(json['valueType'])),
       json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'keyType': keyType.toJson(),
+      'valueType': valueType.toJson(),
+    });
 }
 
 /// A number type, that include both integer and floating-point numbers.
@@ -244,6 +296,14 @@ class NumberType extends DataType<num> {
             exclusiveMax: json['exclusiveMax'],
           ),
           json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'minValue': minValue,
+      'maxValue': maxValue,
+      'exclusiveMin': exclusiveMin,
+      'exclusiveMax': exclusiveMax,
+    });
 }
 
 /// An object. This type requires a class name (typically a Java class name) as a constructor parameter.
@@ -255,6 +315,11 @@ class ObjectType extends DataType<dynamic> {
 
   factory ObjectType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(ObjectType(json['className']), json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'className': className,
+    });
 }
 
 /// A string type.
@@ -277,6 +342,20 @@ class StringType extends DataType<String> {
             maxLength: json['maxLength'],
           ),
           json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'minLength': minLength,
+      'maxLength': maxLength,
+    });
+}
+
+/// A type representing a data type. A value of this type has to be an instance of `DataType`.
+class TypeType extends DataType<DataType> {
+  TypeType() : super(DataTypeKind.TYPE);
+
+  factory TypeType.fromJson(Map<String, dynamic> json) =>
+      DataType.fromJsonBase(TypeType(), json);
 }
 
 /// A void type that may be used to specify that an action returns no meaningful result.

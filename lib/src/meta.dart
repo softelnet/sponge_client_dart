@@ -68,7 +68,7 @@ class ArgMeta {
   final String name;
 
   /// The argument data type.
-  final DataType type;
+  DataType type;
 
   /// The argument label.
   final String label;
@@ -105,7 +105,7 @@ class ResultMeta {
   });
 
   /// The result data type.
-  final DataType type;
+  DataType type;
 
   /// The result label.
   final String label;

@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:sponge_client_dart/src/type.dart';
+
 class AnnotatedValue<T> {
   AnnotatedValue(
     this.value, {
@@ -49,6 +51,27 @@ class AnnotatedValue<T> {
   }
 }
 
+/// A dynamic value that specifies its type.
+class DynamicValue<T> {
+  DynamicValue(this.value, this.type);
+
+  /// The value.
+  T value;
+
+  /// The value type.
+  DataType type;
+
+  factory DynamicValue.fromJson(Map<String, dynamic> json) =>
+      DynamicValue(json['value'], DataType.fromJson(json['type']));
+
+  Map<String, dynamic> toJson() {
+    return {
+      'value': value,
+      'type': type.toJson(),
+    };
+  }
+}
+
 /// A provided argument value and a possible value set.
 class ArgProvidedValue<T> {
   ArgProvidedValue({
@@ -72,7 +95,8 @@ class ArgProvidedValue<T> {
       ?.map((annotatedValue) => annotatedValue.value)
       ?.toList();
 
-  factory ArgProvidedValue.fromJson(Map<String, dynamic> json) => ArgProvidedValue(
+  factory ArgProvidedValue.fromJson(Map<String, dynamic> json) =>
+      ArgProvidedValue(
         value: json['value'],
         valuePresent: json['valuePresent'],
         annotatedValueSet: (json['annotatedValueSet'] as List)

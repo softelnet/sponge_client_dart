@@ -201,6 +201,33 @@ void main() {
       expect(result.features['feature1'], equals('value1'));
       expect(result.features['argFeature1'], equals('argFeature1Value1'));
     });
+    test('testCallDynamicType', () async {
+      var client = await getClient();
+      ActionMeta actionMeta = await client.getActionMeta('DynamicResultAction');
+      var resultType = actionMeta.resultMeta.type;
+      expect(resultType.kind, equals(DataTypeKind.DYNAMIC));
+
+      DynamicValue resultForString =
+          await client.call(actionMeta.name, ['string']);
+      expect(resultForString.value, equals('text'));
+      expect(resultForString.type.kind, equals(DataTypeKind.STRING));
+
+      DynamicValue resultForBoolean =
+          await client.call(actionMeta.name, ['boolean']);
+      expect(resultForBoolean.value, equals(true));
+      expect(resultForBoolean.type.kind, equals(DataTypeKind.BOOLEAN));
+    });
+    test('testCallTypeType', () async {
+      var client = await getClient();
+      ActionMeta actionMeta = await client.getActionMeta('TypeResultAction');
+      var resultType = actionMeta.resultMeta.type;
+      expect(resultType.kind, equals(DataTypeKind.TYPE));
+
+      expect(
+          await client.call(actionMeta.name, ['string']) is StringType, isTrue);
+      expect(await client.call(actionMeta.name, ['boolean']) is BooleanType,
+          isTrue);
+    });
     test('testProvideActionArgs', () async {
       var client = await getClient();
       var actionName = 'SetActuator';
@@ -294,7 +321,8 @@ void main() {
       var actuator1value = providedArgs['actuator1'].value;
       expect(actuator1value, equals('A'));
       expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
-      var actuator1AnnotatedValueSet = providedArgs['actuator1'].annotatedValueSet;
+      var actuator1AnnotatedValueSet =
+          providedArgs['actuator1'].annotatedValueSet;
       expect(actuator1AnnotatedValueSet.length, equals(3));
       expect(actuator1AnnotatedValueSet[0].value, equals('A'));
       expect(actuator1AnnotatedValueSet[0].label, equals('Value A'));

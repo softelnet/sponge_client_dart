@@ -168,6 +168,9 @@ class DateTimeTypeUnitConverter
       case DateTimeKind.TIME:
         throw Exception(
             'The Dart implementation of ${type.dateTimeKind} requires format');
+      case DateTimeKind.INSTANT:
+        // Formatter not used.
+        return (value as DateTime).toUtc().toIso8601String();
     }
 
     throw Exception('Unsupported DateTime kind ${type.dateTimeKind}');
@@ -189,10 +192,13 @@ class DateTimeTypeUnitConverter
         return SpongeUtils.parseIsoDateTimeZone(stringValue);
       case DateTimeKind.DATE:
       case DateTimeKind.TIME:
-              checkArgument(type.format != null,
+        checkArgument(type.format != null,
             message:
                 'The Dart implementation of ${type.dateTimeKind} requires format');
         return DateFormat(type.format).parse(stringValue);
+      case DateTimeKind.INSTANT:
+        // Formatter not used.
+        return DateTime.parse(stringValue);
     }
 
     DynamicValue result = DynamicValue.fromJson(value);

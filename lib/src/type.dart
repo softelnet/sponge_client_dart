@@ -195,7 +195,10 @@ enum DateTimeKind {
   DATE,
 
   /// Represented by DateTime. Requires a format in the corresponding data type.
-  TIME
+  TIME,
+
+  /// Represented by DateTime. A format in the corresponding data type is ignored.
+  INSTANT
 }
 
 /// A date/time type.

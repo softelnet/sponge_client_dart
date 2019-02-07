@@ -243,15 +243,19 @@ void main() {
           equals(DateTimeKind.DATE));
       expect((actionMeta.argsMeta[3].type as DateTimeType).dateTimeKind,
           equals(DateTimeKind.TIME));
+      expect((actionMeta.argsMeta[4].type as DateTimeType).dateTimeKind,
+          equals(DateTimeKind.INSTANT));
 
       DateTime dateTime = DateTime.now();
       await initializeTimeZone();
       TZDateTime dateTimeZone = TZDateTime.now(getLocation('America/Detroit'));
       DateTime date = DateTime.parse('2019-02-06');
-      DateTime time = DateFormat(actionMeta.argsMeta[3].type .format).parse('15:15:00');
+      DateTime time =
+          DateFormat(actionMeta.argsMeta[3].type.format).parse('15:15:00');
+      DateTime instant = DateTime.now().toUtc();
 
       List<dynamic> dates = await client
-          .call(actionMeta.name, [dateTime, dateTimeZone, date, time]);
+          .call(actionMeta.name, [dateTime, dateTimeZone, date, time, instant]);
       expect(dates[0].value is DateTime, isTrue);
       expect(dates[0].value, equals(dateTime));
 
@@ -263,6 +267,9 @@ void main() {
 
       expect(dates[3].value is DateTime, isTrue);
       expect(dates[3].value, equals(time));
+
+      expect(dates[4].value is DateTime, isTrue);
+      expect(dates[4].value, equals(instant));
     });
     test('testProvideActionArgs', () async {
       var client = await getClient();

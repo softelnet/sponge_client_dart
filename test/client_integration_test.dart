@@ -15,6 +15,8 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:intl/intl.dart';
+import 'package:timezone/standalone.dart';
 
 import 'package:http/http.dart';
 import 'package:sponge_client_dart/src/constants.dart';
@@ -29,6 +31,7 @@ import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:test/test.dart';
+import 'package:timezone/timezone.dart';
 
 import 'complex_object.dart';
 import 'logger_configuration.dart';
@@ -227,6 +230,39 @@ void main() {
           await client.call(actionMeta.name, ['string']) is StringType, isTrue);
       expect(await client.call(actionMeta.name, ['boolean']) is BooleanType,
           isTrue);
+    });
+    test('testCallDateTimeType', () async {
+      var client = await getClient();
+      ActionMeta actionMeta = await client.getActionMeta('DateTimeAction');
+
+      expect((actionMeta.argsMeta[0].type as DateTimeType).dateTimeKind,
+          equals(DateTimeKind.DATE_TIME));
+      expect((actionMeta.argsMeta[1].type as DateTimeType).dateTimeKind,
+          equals(DateTimeKind.DATE_TIME_ZONE));
+      expect((actionMeta.argsMeta[2].type as DateTimeType).dateTimeKind,
+          equals(DateTimeKind.DATE));
+      expect((actionMeta.argsMeta[3].type as DateTimeType).dateTimeKind,
+          equals(DateTimeKind.TIME));
+
+      DateTime dateTime = DateTime.now();
+      await initializeTimeZone();
+      TZDateTime dateTimeZone = TZDateTime.now(getLocation('America/Detroit'));
+      DateTime date = DateTime.parse('2019-02-06');
+      DateTime time = DateFormat(actionMeta.argsMeta[3].type .format).parse('15:15:00');
+
+      List<dynamic> dates = await client
+          .call(actionMeta.name, [dateTime, dateTimeZone, date, time]);
+      expect(dates[0].value is DateTime, isTrue);
+      expect(dates[0].value, equals(dateTime));
+
+      expect(dates[1].value is DateTime, isTrue);
+      expect(dates[1].value, equals(dateTimeZone));
+
+      expect(dates[2].value is DateTime, isTrue);
+      expect(dates[2].value, equals(date));
+
+      expect(dates[3].value is DateTime, isTrue);
+      expect(dates[3].value, equals(time));
     });
     test('testProvideActionArgs', () async {
       var client = await getClient();

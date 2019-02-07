@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:sponge_client_dart/src/constants.dart';
+import 'package:timezone/timezone.dart';
 
 /// A set of utility methods.
 class SpongeUtils {
@@ -27,4 +28,24 @@ class SpongeUtils {
   static bool isServerVersionCompatible(String serverVersion) =>
       serverVersion.startsWith(
           '${SpongeClientConstants.SUPPORTED_SPONGE_VERSION_MAJOR_MINOR}.');
+
+  /// Formats a timezoned date/time to a Java compatible format.
+  static String formatIsoDateTimeZone(TZDateTime tzDateTime) {
+    var result = tzDateTime.toIso8601String();
+    return '${result.substring(0, result.length - 2)}:${result.substring(result.length - 2)}[${tzDateTime.location.name}]';
+  }
+
+  /// Parses a Java compatible timezoned date/time format as `TZDateTime` or `DateTime` if the location is not present
+  /// in the `tzDateTimeString`.
+  static DateTime parseIsoDateTimeZone(String tzDateTimeString) {
+    int locationIndex = tzDateTimeString.indexOf('[');
+    String location = locationIndex > -1
+        ? tzDateTimeString.substring(
+            locationIndex + 1, tzDateTimeString.indexOf(']'))
+        : null;
+    return location != null
+        ? TZDateTime.parse(
+            getLocation(location), tzDateTimeString.substring(0, locationIndex))
+        : DateTime.parse(tzDateTimeString);
+  }
 }

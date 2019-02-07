@@ -1,7 +1,7 @@
 ## 1.7.1 (not released yet)
 
 * Added support for categories.
-* Added new types: `DynamicType`, `TypeType`.
+* Added new types: `DynamicType`, `TypeType`, `DateTimeType`.
 
 ## 1.7.0 (2019-02-01)
 

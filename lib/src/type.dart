@@ -24,6 +24,7 @@ enum DataTypeKind {
   ANY,
   BINARY,
   BOOLEAN,
+  DATE_TIME,
   DYNAMIC,
   INTEGER,
   LIST,
@@ -46,6 +47,8 @@ DataType _typeFromJson(Map<String, dynamic> json) {
       return BinaryType.fromJson(json);
     case DataTypeKind.BOOLEAN:
       return BooleanType.fromJson(json);
+    case DataTypeKind.DATE_TIME:
+      return DateTimeType.fromJson(json);
     case DataTypeKind.DYNAMIC:
       return DynamicType.fromJson(json);
     case DataTypeKind.INTEGER:
@@ -178,6 +181,49 @@ class BooleanType extends DataType<bool> {
 
   factory BooleanType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(BooleanType(), json);
+}
+
+/// A date/time kind.
+enum DateTimeKind {
+  /// Represented by DateTime.
+  DATE_TIME,
+
+  /// Represented by TZDateTime or DateTime.
+  DATE_TIME_ZONE,
+
+  /// Represented by DateTime. Requires a format in the corresponding data type.
+  DATE,
+
+  /// Represented by DateTime. Requires a format in the corresponding data type.
+  TIME
+}
+
+/// A date/time type.
+class DateTimeType extends DataType<Uint8List> {
+  DateTimeType(this.dateTimeKind) : super(DataTypeKind.DATE_TIME);
+
+  /// The date/time kind.
+  final DateTimeKind dateTimeKind;
+
+  factory DateTimeType.fromJson(Map<String, dynamic> json) =>
+      DataType.fromJsonBase(
+          DateTimeType(_fromJsonDateTimeKind(json['dateTimeKind'])), json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'dateTimeKind': _getDateTimeKindValue(dateTimeKind),
+    });
+
+  static DateTimeKind _fromJsonDateTimeKind(String jsonDateTimeKind) {
+    DateTimeKind dateTimeKind = DateTimeKind.values.firstWhere(
+        (k) => _getDateTimeKindValue(k) == jsonDateTimeKind,
+        orElse: () => null);
+    return checkNotNull(dateTimeKind,
+        message: 'Unsupported date/time kind $jsonDateTimeKind');
+  }
+
+  static String _getDateTimeKindValue(DateTimeKind dateTimeKind) =>
+      dateTimeKind.toString().split('.')[1];
 }
 
 /// An dynamic type representing dynamically typed values. A value of this type has to be an instance of `DynamicValue`.

@@ -15,6 +15,7 @@
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:test/test.dart';
+import 'package:timezone/standalone.dart';
 
 void main() {
   group('Utils', () {
@@ -46,6 +47,22 @@ void main() {
               '${SpongeClientConstants.SUPPORTED_SPONGE_VERSION_MAJOR_MINOR}.5'),
           isTrue);
       expect(SpongeUtils.isServerVersionCompatible('0.4.3'), isFalse);
+    });
+    test('formatIsoDateTimeZone', () async {
+      await initializeTimeZone();
+      TZDateTime dateTimeZone = TZDateTime.from(
+          DateTime.parse('2019-02-07T15:16:17'), getLocation('Europe/Paris'));
+      expect(SpongeUtils.formatIsoDateTimeZone(dateTimeZone),
+          equals('2019-02-07T15:16:17.000+01:00[Europe/Paris]'));
+    });
+    test('parseIsoDateTimeZone', () async {
+      await initializeTimeZone();
+      TZDateTime dateTimeZone = TZDateTime.from(
+          DateTime.parse('2019-02-07T15:16:17'), getLocation('Europe/Paris'));
+      expect(
+          SpongeUtils.parseIsoDateTimeZone(
+              '2019-02-07T15:16:17.000+01:00[Europe/Paris]'),
+          equals(dateTimeZone));
     });
   });
 }

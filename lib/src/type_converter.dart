@@ -15,6 +15,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:sponge_client_dart/src/utils.dart';
+import 'package:timezone/timezone.dart';
+import 'package:intl/intl.dart';
 
 import 'package:logging/logging.dart';
 import 'package:quiver/check.dart';
@@ -67,6 +70,7 @@ class DefaultTypeConverter extends TypeConverter {
       AnyTypeUnitConverter(),
       BinaryTypeUnitConverter(),
       BooleanTypeUnitConverter(),
+      DateTimeTypeUnitConverter(),
       DynamicTypeUnitConverter(),
       IntegerTypeUnitConverter(),
       ListTypeUnitConverter(),
@@ -145,6 +149,58 @@ class BooleanTypeUnitConverter extends UnitTypeConverter<bool, BooleanType> {
   BooleanTypeUnitConverter() : super(DataTypeKind.BOOLEAN);
 }
 
+class DateTimeTypeUnitConverter
+    extends UnitTypeConverter<dynamic, DateTimeType> {
+  DateTimeTypeUnitConverter() : super(DataTypeKind.DATE_TIME);
+
+  @override
+  Future<dynamic> marshal(
+      TypeConverter converter, DateTimeType type, dynamic value) async {
+    if (type.format != null) {
+      return DateFormat(type.format).format(value as DateTime);
+    }
+    switch (type.dateTimeKind) {
+      case DateTimeKind.DATE_TIME:
+        return (value as DateTime).toIso8601String();
+      case DateTimeKind.DATE_TIME_ZONE:
+        return SpongeUtils.formatIsoDateTimeZone(value as TZDateTime);
+      case DateTimeKind.DATE:
+      case DateTimeKind.TIME:
+        throw Exception(
+            'The Dart implementation of ${type.dateTimeKind} requires format');
+    }
+
+    throw Exception('Unsupported DateTime kind ${type.dateTimeKind}');
+  }
+
+  @override
+  Future<dynamic> unmarshal(
+      TypeConverter converter, DateTimeType type, dynamic value) async {
+    String stringValue = value as String;
+    switch (type.dateTimeKind) {
+      case DateTimeKind.DATE_TIME:
+        return type.format != null
+            ? DateFormat(type.format).parse(stringValue)
+            : DateTime.parse(stringValue);
+      case DateTimeKind.DATE_TIME_ZONE:
+        checkArgument(type.format == null,
+            message:
+                'Format is not supported for the Dart implementation of ${type.dateTimeKind}');
+        return SpongeUtils.parseIsoDateTimeZone(stringValue);
+      case DateTimeKind.DATE:
+      case DateTimeKind.TIME:
+              checkArgument(type.format != null,
+            message:
+                'The Dart implementation of ${type.dateTimeKind} requires format');
+        return DateFormat(type.format).parse(stringValue);
+    }
+
+    DynamicValue result = DynamicValue.fromJson(value);
+    result.value = await converter.unmarshal(result.type, result.value);
+    return result;
+  }
+}
+
 class DynamicTypeUnitConverter
     extends UnitTypeConverter<DynamicValue, DynamicType> {
   DynamicTypeUnitConverter() : super(DataTypeKind.DYNAMIC);
@@ -152,7 +208,8 @@ class DynamicTypeUnitConverter
   @override
   Future<dynamic> marshal(TypeConverter converter, DynamicType type,
           DynamicValue value) async =>
-      DynamicValue(await converter.marshal(value.type, value.value), value.type).toJson();
+      DynamicValue(await converter.marshal(value.type, value.value), value.type)
+          .toJson();
 
   @override
   Future<DynamicValue> unmarshal(
@@ -270,20 +327,21 @@ class StringTypeUnitConverter extends UnitTypeConverter<String, StringType> {
   StringTypeUnitConverter() : super(DataTypeKind.STRING);
 }
 
-class TypeTypeUnitConverter
-    extends UnitTypeConverter<DataType, TypeType> {
+class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
   TypeTypeUnitConverter() : super(DataTypeKind.TYPE);
 
   /// Note that the `value` is modified in this method.
   @override
-  Future<dynamic> marshal(TypeConverter converter, TypeType type,
-          DataType value) async => value..defaultValue = await converter.marshal(value, value.defaultValue);
+  Future<dynamic> marshal(
+          TypeConverter converter, TypeType type, DataType value) async =>
+      value..defaultValue = await converter.marshal(value, value.defaultValue);
 
   @override
   Future<DataType> unmarshal(
       TypeConverter converter, TypeType type, dynamic value) async {
     DataType result = DataType.fromJson(value);
-    result.defaultValue = await converter.unmarshal(result, result.defaultValue);
+    result.defaultValue =
+        await converter.unmarshal(result, result.defaultValue);
     return result;
   }
 }

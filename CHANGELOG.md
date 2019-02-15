@@ -1,7 +1,9 @@
 ## 1.7.1 (not released yet)
 
+* API change: Renamed `ArgProvidedMeta.depends` to `ArgProvidedMeta.dependencies`.
 * Added support for categories.
 * Added new types: `DynamicType`, `TypeType`, `DateTimeType`.
+* Added `ArgMeta.features`.
 
 ## 1.7.0 (2019-02-01)
 

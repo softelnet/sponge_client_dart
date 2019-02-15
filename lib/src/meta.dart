@@ -20,7 +20,7 @@ class ArgProvidedMeta {
   ArgProvidedMeta({
     this.value,
     this.valueSet,
-    this.depends,
+    this.dependencies,
     this.readOnly = false,
     this.overwrite = false,
   });
@@ -32,7 +32,7 @@ class ArgProvidedMeta {
   bool valueSet;
 
   /// The list of attribute names that this provided attribute depends on.
-  final List<String> depends;
+  final List<String> dependencies;
 
   /// The flag specifying if this provided argument is read only.
   final bool readOnly;
@@ -45,7 +45,7 @@ class ArgProvidedMeta {
         ? ArgProvidedMeta(
             value: json['value'],
             valueSet: json['valueSet'],
-            depends: (json['depends'] as List)?.cast<String>()?.toList(),
+            dependencies: (json['dependencies'] as List)?.cast<String>()?.toList(),
             readOnly: json['readOnly'] ?? false,
             overwrite: json['overwrite'] ?? false,
           )
@@ -62,7 +62,8 @@ class ArgMeta {
     this.description,
     this.optional = false,
     this.provided,
-  });
+    Map<String, Object> features,
+  }) : this.features = features ?? Map();
 
   /// The argument name.
   final String name;
@@ -82,6 +83,9 @@ class ArgMeta {
   /// The provided argument specification. Defaults to `null`.
   final ArgProvidedMeta provided;
 
+    /// The argument features.
+  final Map<String, Object> features;
+
   factory ArgMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ArgMeta(
@@ -91,6 +95,7 @@ class ArgMeta {
             description: json['description'],
             optional: json['optional'] ?? false,
             provided: ArgProvidedMeta.fromJson(json['provided']),
+            features: json['features'] ?? Map(),
           )
         : null;
   }

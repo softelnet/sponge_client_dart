@@ -280,15 +280,15 @@ void main() {
 
       expect(argsMeta[0].provided.value, isTrue);
       expect(argsMeta[0].provided.valueSet, isTrue);
-      expect(argsMeta[0].provided.depends?.length, equals(0));
+      expect(argsMeta[0].provided.dependencies?.length, equals(0));
       expect(argsMeta[0].provided.readOnly, isFalse);
       expect(argsMeta[1].provided.value, isTrue);
       expect(argsMeta[1].provided.valueSet, isFalse);
-      expect(argsMeta[1].provided.depends?.length, equals(0));
+      expect(argsMeta[1].provided.dependencies?.length, equals(0));
       expect(argsMeta[1].provided.readOnly, isFalse);
       expect(argsMeta[2].provided.value, isTrue);
       expect(argsMeta[2].provided.valueSet, isFalse);
-      expect(argsMeta[2].provided.depends?.length, equals(0));
+      expect(argsMeta[2].provided.dependencies?.length, equals(0));
       expect(argsMeta[2].provided.readOnly, isTrue);
       expect(argsMeta[3].provided, isNull);
 
@@ -344,18 +344,18 @@ void main() {
 
       expect(argsMeta[0].provided.value, isTrue);
       expect(argsMeta[0].provided.valueSet, isTrue);
-      expect(argsMeta[0].provided.depends?.length, equals(0));
+      expect(argsMeta[0].provided.dependencies?.length, equals(0));
       expect(argsMeta[1].provided.value, isTrue);
       expect(argsMeta[1].provided.valueSet, isFalse);
-      expect(argsMeta[1].provided.depends?.length, equals(0));
+      expect(argsMeta[1].provided.dependencies?.length, equals(0));
       expect(argsMeta[2].provided.value, isTrue);
       expect(argsMeta[2].provided.valueSet, isFalse);
-      expect(argsMeta[2].provided.depends?.length, equals(0));
+      expect(argsMeta[2].provided.dependencies?.length, equals(0));
       expect(argsMeta[3].provided, isNull);
       expect(argsMeta[4].provided.value, isTrue);
       expect(argsMeta[4].provided.valueSet, isTrue);
-      expect(argsMeta[4].provided.depends?.length, equals(1));
-      expect(argsMeta[4].provided.depends, equals(['actuator1']));
+      expect(argsMeta[4].provided.dependencies?.length, equals(1));
+      expect(argsMeta[4].provided.dependencies, equals(['actuator1']));
 
       Map<String, ArgProvidedValue> providedArgs =
           await client.provideActionArgs(actionName, argNames: ['actuator1']);

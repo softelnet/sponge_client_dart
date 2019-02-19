@@ -15,6 +15,17 @@
 import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 
+/// A value set metadata.
+class ValueSetMeta {
+  ValueSetMeta({this.limited = true});
+
+  /// The flag specifying if the value set is limited only to the provided values. Defaults to `true`.
+  bool limited = true;
+
+  factory ValueSetMeta.fromJson(Map<String, dynamic> json) =>
+      json != null ? ValueSetMeta(limited: json['limited']) : null;
+}
+
 /// A provided argument metadata.
 class ArgProvidedMeta {
   ArgProvidedMeta({
@@ -28,8 +39,8 @@ class ArgProvidedMeta {
   /// The flag specifying if this argument value is provided.
   bool value;
 
-  /// The flag specifying if this argument value set is provided.
-  bool valueSet;
+  /// The metadata specifying if this argument value set is provided. Defaults to `null`.
+  ValueSetMeta valueSet;
 
   /// The list of attribute names that this provided attribute depends on.
   final List<String> dependencies;
@@ -40,12 +51,15 @@ class ArgProvidedMeta {
   /// The flag specifying if the provided value of this argument should overwrite the value set in a client code.
   final bool overwrite;
 
+  bool get hasValueSet => valueSet != null;
+
   factory ArgProvidedMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ArgProvidedMeta(
             value: json['value'],
-            valueSet: json['valueSet'],
-            dependencies: (json['dependencies'] as List)?.cast<String>()?.toList(),
+            valueSet: ValueSetMeta.fromJson(json['valueSet']),
+            dependencies:
+                (json['dependencies'] as List)?.cast<String>()?.toList(),
             readOnly: json['readOnly'] ?? false,
             overwrite: json['overwrite'] ?? false,
           )
@@ -63,7 +77,9 @@ class ArgMeta {
     this.optional = false,
     this.provided,
     Map<String, Object> features,
-  }) : this.features = features ?? Map();
+    List<ArgMeta> subArgs,
+  })  : this.features = features ?? {},
+        this.subArgs = subArgs ?? [];
 
   /// The argument name.
   final String name;
@@ -83,8 +99,11 @@ class ArgMeta {
   /// The provided argument specification. Defaults to `null`.
   final ArgProvidedMeta provided;
 
-    /// The argument features.
+  /// The argument features.
   final Map<String, Object> features;
+
+  /// The sub-arguments metadata. Defaults to an empty list.
+  final List<ArgMeta> subArgs;
 
   factory ArgMeta.fromJson(Map<String, dynamic> json) {
     return json != null
@@ -96,6 +115,10 @@ class ArgMeta {
             optional: json['optional'] ?? false,
             provided: ArgProvidedMeta.fromJson(json['provided']),
             features: json['features'] ?? Map(),
+            subArgs: (json['subArgs'] as List)
+                    ?.map((arg) => ArgMeta.fromJson(arg))
+                    ?.toList() ??
+                [],
           )
         : null;
   }
@@ -197,7 +220,6 @@ class ActionMeta {
     this.argsMeta,
     this.resultMeta,
     this.qualifiedVersion,
-    
   }) : this.features = features ?? Map();
 
   /// The action name.

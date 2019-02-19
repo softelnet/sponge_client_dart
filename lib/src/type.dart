@@ -31,6 +31,7 @@ enum DataTypeKind {
   MAP,
   NUMBER,
   OBJECT,
+  RECORD,
   STRING,
   TYPE,
   VOID,
@@ -61,6 +62,8 @@ DataType _typeFromJson(Map<String, dynamic> json) {
       return NumberType.fromJson(json);
     case DataTypeKind.OBJECT:
       return ObjectType.fromJson(json);
+    case DataTypeKind.RECORD:
+      return RecordType.fromJson(json);
     case DataTypeKind.STRING:
       return StringType.fromJson(json);
     case DataTypeKind.TYPE:
@@ -368,6 +371,67 @@ class ObjectType extends DataType<dynamic> {
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'className': className,
+    });
+}
+
+/// A record type field.
+class RecordTypeField {
+  RecordTypeField(this.name, this.type, {this.label, this.description});
+
+  /// The field name.
+  final String name;
+
+  /// The field label.
+  final String label;
+
+  /// The field description.
+  final String description;
+
+  /// The field type.
+  final DataType type;
+
+  factory RecordTypeField.fromJson(Map<String, dynamic> json) =>
+      RecordTypeField(
+        json['name'],
+        DataType.fromJson(json['type']),
+        label: json['label'],
+        description: json['description'],
+      );
+
+  Map<String, dynamic> toJson() {
+    return {
+      'name': name,
+      'type': type.toJson(),
+      'label': label,
+      'description': description,
+    };
+  }
+}
+
+/// A record type. This type requires a list of record field types. A value of this type has to be an instance of Map<String, dynamic> with
+/// elements corresponding to the field names and values.
+class RecordType extends DataType<Map<String, dynamic>> {
+  RecordType(this.name, this.fields) : super(DataTypeKind.RECORD);
+
+  /// The record type name.
+  final String name;
+
+  /// The field types.
+  final List<RecordTypeField> fields;
+
+  factory RecordType.fromJson(Map<String, dynamic> json) =>
+      DataType.fromJsonBase(
+          RecordType(
+              json['name'],
+              (json['fields'] as List)
+                  ?.map((arg) => RecordTypeField.fromJson(arg))
+                  ?.toList()),
+          json);
+
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'name': name,
+      'fields': fields?.map((field) => field.toJson())?.toList(),
     });
 }
 

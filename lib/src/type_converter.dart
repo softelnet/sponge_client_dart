@@ -77,6 +77,7 @@ class DefaultTypeConverter extends TypeConverter {
       MapTypeUnitConverter(),
       NumberTypeUnitConverter(),
       ObjectTypeUnitConverter(),
+      RecordTypeUnitConverter(),
       StringTypeUnitConverter(),
       TypeTypeUnitConverter(),
       VoidTypeUnitConverter(),
@@ -327,6 +328,50 @@ class ObjectTypeUnitConverter extends UnitTypeConverter<dynamic, ObjectType> {
   void addUnmarshaller(
           String className, ObjectUnitTypeUnmarshallerCallback callback) =>
       unmarshallers[className] = callback;
+}
+
+class RecordTypeUnitConverter
+    extends UnitTypeConverter<Map<String, dynamic>, RecordType> {
+  RecordTypeUnitConverter() : super(DataTypeKind.RECORD);
+
+  @override
+  Future<dynamic> marshal(TypeConverter converter, RecordType type,
+      Map<String, dynamic> value) async {
+    var fieldMap = _createFieldMap(type);
+
+    Map result = {};
+    for (var entry in value.entries) {
+      result[entry.key] = await converter.marshal(
+          _getFieldType(fieldMap, type, entry.key), entry.value);
+    }
+    return result;
+  }
+
+  @override
+  Future<Map<String, dynamic>> unmarshal(
+      TypeConverter converter, RecordType type, dynamic value) async {
+    var fieldMap = _createFieldMap(type);
+    Map<String, dynamic> result = {};
+    for (var entry in (value as Map).entries) {
+      result[entry.key] = await converter.unmarshal(
+          _getFieldType(fieldMap, type, entry.key), entry.value);
+    }
+    return result;
+  }
+
+  DataType _getFieldType(Map<String, RecordTypeField> fieldMap, RecordType type,
+      String fieldName) {
+    checkArgument(fieldMap.containsKey(fieldName),
+        message:
+            'Field $fieldName is not defined in the record type ${type.name ?? ""}');
+    return fieldMap[fieldName].type;
+  }
+
+  Map<String, RecordTypeField> _createFieldMap(RecordType type) {
+    Map<String, RecordTypeField> fieldMap = {};
+    type.fields.forEach((field) => fieldMap[field.name] = field);
+    return fieldMap;
+  }
 }
 
 class StringTypeUnitConverter extends UnitTypeConverter<String, StringType> {

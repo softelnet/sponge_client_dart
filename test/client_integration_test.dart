@@ -271,6 +271,48 @@ void main() {
       expect(dates[4].value is DateTime, isTrue);
       expect(dates[4].value, equals(instant));
     });
+
+    test('testCallRecordType', () async {
+      var client = await getClient();
+      ActionMeta actionMeta =
+          await client.getActionMeta('RecordAsResultAction');
+      RecordType recordType = actionMeta.resultMeta.type as RecordType;
+      expect(recordType.kind, equals(DataTypeKind.RECORD));
+      expect(recordType.name, equals('Book'));
+      expect(recordType.fields.length, equals(3));
+      expect(recordType.fields[0].name, equals('id'));
+      expect(recordType.fields[0].type.kind, equals(DataTypeKind.INTEGER));
+      expect(recordType.fields[1].name, equals('author'));
+      expect(recordType.fields[1].type.kind, equals(DataTypeKind.STRING));
+      expect(recordType.fields[2].name, equals('title'));
+      expect(recordType.fields[2].type.kind, equals(DataTypeKind.STRING));
+
+      Map<String, Object> book1 = await client.call(actionMeta.name, [1]);
+      expect(book1.length, equals(3));
+      expect(book1['id'], equals(1));
+      expect(book1['author'], equals('James Joyce'));
+      expect(book1['title'], equals('Ulysses'));
+
+      actionMeta = await client.getActionMeta('RecordAsArgAction');
+      recordType = actionMeta.argsMeta[0].type as RecordType;
+      expect(recordType.kind, equals(DataTypeKind.RECORD));
+      expect(recordType.fields.length, equals(3));
+      expect(recordType.fields[0].name, equals('id'));
+      expect(recordType.fields[0].type.kind, equals(DataTypeKind.INTEGER));
+      expect(recordType.fields[1].name, equals('author'));
+      expect(recordType.fields[1].type.kind, equals(DataTypeKind.STRING));
+      expect(recordType.fields[2].name, equals('title'));
+      expect(recordType.fields[2].type.kind, equals(DataTypeKind.STRING));
+
+      var book2 = {
+        'id': 5,
+        'author': 'Arthur Conan Doyle',
+        'title': 'Adventures of Sherlock Holmes'
+      };
+
+      var bookId = await client.call('RecordAsArgAction', [book2]);
+      expect(bookId, equals(5));
+    });
     test('testProvideActionArgs', () async {
       var client = await getClient();
       var actionName = 'SetActuator';
@@ -279,15 +321,16 @@ void main() {
           (await client.getActionMeta(actionName)).argsMeta;
 
       expect(argsMeta[0].provided.value, isTrue);
-      expect(argsMeta[0].provided.valueSet, isTrue);
+      expect(argsMeta[0].provided.hasValueSet, isTrue);
+      expect(argsMeta[0].provided.valueSet.limited, isTrue);
       expect(argsMeta[0].provided.dependencies?.length, equals(0));
       expect(argsMeta[0].provided.readOnly, isFalse);
       expect(argsMeta[1].provided.value, isTrue);
-      expect(argsMeta[1].provided.valueSet, isFalse);
+      expect(argsMeta[1].provided.hasValueSet, isFalse);
       expect(argsMeta[1].provided.dependencies?.length, equals(0));
       expect(argsMeta[1].provided.readOnly, isFalse);
       expect(argsMeta[2].provided.value, isTrue);
-      expect(argsMeta[2].provided.valueSet, isFalse);
+      expect(argsMeta[2].provided.hasValueSet, isFalse);
       expect(argsMeta[2].provided.dependencies?.length, equals(0));
       expect(argsMeta[2].provided.readOnly, isTrue);
       expect(argsMeta[3].provided, isNull);
@@ -332,6 +375,18 @@ void main() {
       expect(providedArgs['actuator3'].valuePresent, isTrue);
       expect(providedArgs['actuator4'], isNull);
     });
+    test('testProvideActionArgsNotLimitedValueSet', () async {
+      var client = await getClient();
+      var actionName = 'SetActuatorNotLimitedValueSet';
+
+      List<ArgMeta> argsMeta =
+          (await client.getActionMeta(actionName)).argsMeta;
+
+      expect(argsMeta[0].provided, isNotNull);
+      expect(argsMeta[0].provided.value, isNotNull);
+      expect(argsMeta[0].provided.hasValueSet, isTrue);
+      expect(argsMeta[0].provided.valueSet.limited, isFalse);
+    });
     test('testProvideActionArgsDepends', () async {
       var client = await getClient();
       String actionName = 'SetActuatorDepends';
@@ -343,17 +398,17 @@ void main() {
           (await client.getActionMeta(actionName)).argsMeta;
 
       expect(argsMeta[0].provided.value, isTrue);
-      expect(argsMeta[0].provided.valueSet, isTrue);
+      expect(argsMeta[0].provided.valueSet.limited, isTrue);
       expect(argsMeta[0].provided.dependencies?.length, equals(0));
       expect(argsMeta[1].provided.value, isTrue);
-      expect(argsMeta[1].provided.valueSet, isFalse);
+      expect(argsMeta[1].provided.hasValueSet, isFalse);
       expect(argsMeta[1].provided.dependencies?.length, equals(0));
       expect(argsMeta[2].provided.value, isTrue);
-      expect(argsMeta[2].provided.valueSet, isFalse);
+      expect(argsMeta[2].provided.hasValueSet, isFalse);
       expect(argsMeta[2].provided.dependencies?.length, equals(0));
       expect(argsMeta[3].provided, isNull);
       expect(argsMeta[4].provided.value, isTrue);
-      expect(argsMeta[4].provided.valueSet, isTrue);
+      expect(argsMeta[4].provided.valueSet.limited, isTrue);
       expect(argsMeta[4].provided.dependencies?.length, equals(1));
       expect(argsMeta[4].provided.dependencies, equals(['actuator1']));
 

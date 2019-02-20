@@ -13,6 +13,8 @@
 // limitations under the License.
 
 import 'package:meta/meta.dart';
+import 'package:quiver/check.dart';
+import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/type.dart';
 
 /// A value set metadata.
@@ -114,7 +116,7 @@ class ArgMeta {
             description: json['description'],
             optional: json['optional'] ?? false,
             provided: ArgProvidedMeta.fromJson(json['provided']),
-            features: json['features'] ?? Map(),
+            features: json['features'] ?? {},
             subArgs: (json['subArgs'] as List)
                     ?.map((arg) => ArgMeta.fromJson(arg))
                     ?.toList() ??
@@ -257,7 +259,7 @@ class ActionMeta {
             description: json['description'],
             knowledgeBase: KnowledgeBaseMeta.fromJson(json['knowledgeBase']),
             category: CategoryMeta.fromJson(json['category']),
-            features: json['features'] ?? Map(),
+            features: json['features'] ?? {},
             argsMeta: (json['argsMeta'] as List)
                 ?.map((arg) => ArgMeta.fromJson(arg))
                 ?.toList(),
@@ -268,15 +270,35 @@ class ActionMeta {
         : null;
   }
 
+  String getArgName(int index) => getArgMetaByIndex(index).name;
+
+  int getArgIndex(String argName) =>
+      argsMeta.indexWhere((argMeta) => argMeta.name == argName);
+
+  bool isSubArgName(String argName) => argName.contains(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
+
+  /// Supports sub-arguments.
   ArgMeta getArgMeta(String argName) {
-    ArgMeta argMeta = argsMeta.firstWhere((argMeta) => argMeta.name == argName,
-        orElse: () => null);
-    if (argMeta == null) {
-      throw Exception('Metadata for argument $argName not found');
-    }
+    var elements = argName.split(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
+    var argMeta = argsMeta[getArgIndex(elements[0])];
+    elements.skip(1).forEach((element) {
+      // Verify Record/Map type.
+      checkArgument(
+          argMeta.type is RecordType ||
+              argMeta.type is AnnotatedType &&
+                  (argMeta.type as AnnotatedType).valueType is RecordType,
+          message: 'The argument $argName doesn\'t containt a record');
+      argMeta = argMeta.subArgs.firstWhere(
+          (subArgMeta) => subArgMeta.name == element,
+          orElse: () => null);
+      checkNotNull(argMeta, message: 'Metadata for argument $argName not found');
+          throw Exception('Metadata for argument $argName not found');
+    });
 
     return argMeta;
   }
+
+  ArgMeta getArgMetaByIndex(int index) => argsMeta[index];
 }
 
 /// A knowledge base metadata.

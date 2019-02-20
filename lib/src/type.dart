@@ -376,7 +376,7 @@ class ObjectType extends DataType<dynamic> {
 
 /// A record type field.
 class RecordTypeField {
-  RecordTypeField(this.name, this.type, {this.label, this.description});
+  RecordTypeField(this.name, this.type, {this.label, this.description, Map<String, Object> features}) : this.features = features ?? Map();
 
   /// The field name.
   final String name;
@@ -390,12 +390,16 @@ class RecordTypeField {
   /// The field type.
   final DataType type;
 
+  /// The features as a map of names to values.
+  final Map<String, Object> features;
+
   factory RecordTypeField.fromJson(Map<String, dynamic> json) =>
       RecordTypeField(
         json['name'],
         DataType.fromJson(json['type']),
         label: json['label'],
         description: json['description'],
+        features: json['features'] ?? {},
       );
 
   Map<String, dynamic> toJson() {
@@ -404,6 +408,7 @@ class RecordTypeField {
       'type': type.toJson(),
       'label': label,
       'description': description,
+      'features': features,
     };
   }
 }

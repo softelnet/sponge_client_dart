@@ -38,7 +38,7 @@ class AnnotatedValue<T> {
         json['value'],
         label: json['label'],
         description: json['description'],
-        features: json['features'],
+        features: json['features'] ?? {},
       );
 
   Map<String, dynamic> toJson() {

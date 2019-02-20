@@ -35,4 +35,6 @@ abstract class SpongeClientConstants {
   static const String DEFAULT_ERROR_CODE = 'SPONGE001';
   static const String ERROR_CODE_INVALID_AUTH_TOKEN = 'SPONGE002';
   static const String ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION = 'SPONGE003';
+
+  static const String ACTION_SUB_ARG_SEPARATOR = '.';
 }

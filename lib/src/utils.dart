@@ -13,7 +13,18 @@
 // limitations under the License.
 
 import 'package:sponge_client_dart/src/constants.dart';
+import 'package:sponge_client_dart/src/meta.dart';
 import 'package:timezone/timezone.dart';
+
+/// A qualified argument/sub-argument metadata.
+class QualifiedArgMeta {
+  QualifiedArgMeta(this.qame, this.meta);
+
+  final String qame;
+  final ArgMeta meta;
+}
+
+typedef void ArgMetaTraverseCallback(QualifiedArgMeta qualifiedArgMeta);
 
 /// A set of utility methods.
 class SpongeUtils {
@@ -47,5 +58,22 @@ class SpongeUtils {
         ? TZDateTime.parse(
             getLocation(location), tzDateTimeString.substring(0, locationIndex))
         : DateTime.parse(tzDateTimeString);
+  }
+
+  static void traverseActionArgMeta(
+      ActionMeta actionMeta, ArgMetaTraverseCallback onArgMeta) {
+    actionMeta.argsMeta
+        .forEach((argMeta) => traverseArgMeta(null, argMeta, onArgMeta));
+  }
+
+  static void traverseArgMeta(String parentArgName, ArgMeta argMeta,
+      ArgMetaTraverseCallback onArgMeta) {
+    String qname =
+        (parentArgName != null ? parentArgName + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR : '') + argMeta.name;
+
+    onArgMeta(QualifiedArgMeta(qname, argMeta));
+
+    argMeta.subArgs?.forEach((subArgMeta) =>
+        traverseArgMeta(qname, subArgMeta, onArgMeta));
   }
 }

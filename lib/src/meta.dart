@@ -292,7 +292,6 @@ class ActionMeta {
           (subArgMeta) => subArgMeta.name == element,
           orElse: () => null);
       checkNotNull(argMeta, message: 'Metadata for argument $argName not found');
-          throw Exception('Metadata for argument $argName not found');
     });
 
     return argMeta;

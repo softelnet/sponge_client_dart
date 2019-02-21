@@ -367,11 +367,9 @@ class RecordTypeUnitConverter
     return fieldMap[fieldName].type;
   }
 
-  Map<String, RecordTypeField> _createFieldMap(RecordType type) {
-    Map<String, RecordTypeField> fieldMap = {};
-    type.fields.forEach((field) => fieldMap[field.name] = field);
-    return fieldMap;
-  }
+  Map<String, RecordTypeField> _createFieldMap(RecordType type) =>
+      Map.fromIterable(type.fields,
+          key: (field) => field.name, value: (field) => field);
 }
 
 class StringTypeUnitConverter extends UnitTypeConverter<String, StringType> {

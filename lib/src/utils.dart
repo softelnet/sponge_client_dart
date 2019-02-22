@@ -18,9 +18,12 @@ import 'package:timezone/timezone.dart';
 
 /// A qualified argument/sub-argument metadata.
 class QualifiedArgMeta {
-  QualifiedArgMeta(this.qame, this.meta);
+  QualifiedArgMeta(this.name, this.meta);
 
-  final String qame;
+  /// The qualified name.
+  final String name;
+
+  /// The metadata.
   final ArgMeta meta;
 }
 
@@ -68,12 +71,14 @@ class SpongeUtils {
 
   static void traverseArgMeta(String parentArgName, ArgMeta argMeta,
       ArgMetaTraverseCallback onArgMeta) {
-    String qname =
-        (parentArgName != null ? parentArgName + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR : '') + argMeta.name;
+    String qname = (parentArgName != null
+            ? parentArgName + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
+            : '') +
+        argMeta.name;
 
     onArgMeta(QualifiedArgMeta(qname, argMeta));
 
-    argMeta.subArgs?.forEach((subArgMeta) =>
-        traverseArgMeta(qname, subArgMeta, onArgMeta));
+    argMeta.subArgs?.forEach(
+        (subArgMeta) => traverseArgMeta(qname, subArgMeta, onArgMeta));
   }
 }

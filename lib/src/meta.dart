@@ -13,9 +13,9 @@
 // limitations under the License.
 
 import 'package:meta/meta.dart';
-import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/utils.dart';
 
 /// A value set metadata.
 class ValueSetMeta {
@@ -26,11 +26,15 @@ class ValueSetMeta {
 
   factory ValueSetMeta.fromJson(Map<String, dynamic> json) =>
       json != null ? ValueSetMeta(limited: json['limited']) : null;
+
+  Map<String, dynamic> toJson() => {
+        'limited': limited,
+      };
 }
 
-/// A provided argument metadata.
-class ArgProvidedMeta {
-  ArgProvidedMeta({
+/// A provided object metadata.
+class ProvidedMeta {
+  ProvidedMeta({
     this.value,
     this.valueSet,
     this.dependencies,
@@ -38,26 +42,26 @@ class ArgProvidedMeta {
     this.overwrite = false,
   });
 
-  /// The flag specifying if this argument value is provided.
+  /// The flag specifying if the value is provided.
   bool value;
 
-  /// The metadata specifying if this argument value set is provided. Defaults to `null`.
+  /// The metadata specifying if the value set is provided. Defaults to `null`.
   ValueSetMeta valueSet;
 
-  /// The list of attribute names that this provided attribute depends on.
+  /// The list of names that this provided object depends on.
   final List<String> dependencies;
 
-  /// The flag specifying if this provided argument is read only.
+  /// The flag specifying if this provided object is read only. Defaults to `false`.
   final bool readOnly;
 
-  /// The flag specifying if the provided value of this argument should overwrite the value set in a client code.
+  /// The flag specifying if the provided value of this object should overwrite the value set in a client code. Defaults to `false`.
   final bool overwrite;
 
   bool get hasValueSet => valueSet != null;
 
-  factory ArgProvidedMeta.fromJson(Map<String, dynamic> json) {
+  factory ProvidedMeta.fromJson(Map<String, dynamic> json) {
     return json != null
-        ? ArgProvidedMeta(
+        ? ProvidedMeta(
             value: json['value'],
             valueSet: ValueSetMeta.fromJson(json['valueSet']),
             dependencies:
@@ -67,91 +71,14 @@ class ArgProvidedMeta {
           )
         : null;
   }
-}
 
-/// An action argument metadata.
-class ArgMeta {
-  ArgMeta({
-    @required this.name,
-    @required this.type,
-    this.label,
-    this.description,
-    this.optional = false,
-    this.provided,
-    Map<String, Object> features,
-    List<ArgMeta> subArgs,
-  })  : this.features = features ?? {},
-        this.subArgs = subArgs ?? [];
-
-  /// The argument name.
-  final String name;
-
-  /// The argument data type.
-  DataType type;
-
-  /// The argument label.
-  final String label;
-
-  /// The argument description.
-  final String description;
-
-  /// The flag specifying if this argument is optional.
-  final bool optional;
-
-  /// The provided argument specification. Defaults to `null`.
-  final ArgProvidedMeta provided;
-
-  /// The argument features.
-  final Map<String, Object> features;
-
-  /// The sub-arguments metadata. Defaults to an empty list.
-  final List<ArgMeta> subArgs;
-
-  factory ArgMeta.fromJson(Map<String, dynamic> json) {
-    return json != null
-        ? ArgMeta(
-            name: json['name'],
-            type: DataType.fromJson(json['type']),
-            label: json['label'],
-            description: json['description'],
-            optional: json['optional'] ?? false,
-            provided: ArgProvidedMeta.fromJson(json['provided']),
-            features: json['features'] ?? {},
-            subArgs: (json['subArgs'] as List)
-                    ?.map((arg) => ArgMeta.fromJson(arg))
-                    ?.toList() ??
-                [],
-          )
-        : null;
-  }
-}
-
-/// An action result metadata.
-class ResultMeta {
-  ResultMeta({
-    @required this.type,
-    this.label,
-    this.description,
-  });
-
-  /// The result data type.
-  DataType type;
-
-  /// The result label.
-  final String label;
-
-  /// The result description.
-  final String description;
-
-  factory ResultMeta.fromJson(Map<String, dynamic> json) {
-    return json != null
-        ? ResultMeta(
-            type: DataType.fromJson(json['type']),
-            label: json['label'],
-            description: json['description'],
-          )
-        : null;
-  }
+  Map<String, dynamic> toJson() => {
+        'value': value,
+        'valueSet': valueSet?.toJson(),
+        'dependencies': dependencies,
+        'readOnly': readOnly,
+        'overwrite': overwrite,
+      };
 }
 
 /// A processor qualified version.
@@ -219,8 +146,8 @@ class ActionMeta {
     @required this.knowledgeBase,
     this.category,
     Map<String, Object> features,
-    this.argsMeta,
-    this.resultMeta,
+    this.args,
+    this.result,
     this.qualifiedVersion,
   }) : this.features = features ?? Map();
 
@@ -242,11 +169,11 @@ class ActionMeta {
   /// The action features.
   final Map<String, Object> features;
 
-  /// The action arguments metadata (optional).
-  final List<ArgMeta> argsMeta;
+  /// The action argument types (optional).
+  final List<DataType> args;
 
-  /// The action result metadata (optional).
-  final ResultMeta resultMeta;
+  /// The action result type (optional).
+  final DataType result;
 
   /// The action qualified version.
   ProcessorQualifiedVersion qualifiedVersion;
@@ -260,44 +187,29 @@ class ActionMeta {
             knowledgeBase: KnowledgeBaseMeta.fromJson(json['knowledgeBase']),
             category: CategoryMeta.fromJson(json['category']),
             features: json['features'] ?? {},
-            argsMeta: (json['argsMeta'] as List)
-                ?.map((arg) => ArgMeta.fromJson(arg))
+            args: (json['args'] as List)
+                ?.map((arg) => DataType.fromJson(arg))
                 ?.toList(),
-            resultMeta: ResultMeta.fromJson(json['resultMeta']),
+            result: DataType.fromJson(json['result']),
             qualifiedVersion:
                 ProcessorQualifiedVersion.fromJson(json['qualifiedVersion']),
           )
         : null;
   }
 
-  String getArgName(int index) => getArgMetaByIndex(index).name;
+  // TODO String getArgName(int index) => getArgMetaByIndex(index).name;
 
   int getArgIndex(String argName) =>
-      argsMeta.indexWhere((argMeta) => argMeta.name == argName);
+      SpongeUtils.getActionArgIndex(args, argName);
 
-  bool isSubArgName(String argName) => argName.contains(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
+  bool isSubArgName(String argName) =>
+      argName.contains(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
 
   /// Supports sub-arguments.
-  ArgMeta getArgMeta(String argName) {
-    var elements = argName.split(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
-    var argMeta = argsMeta[getArgIndex(elements[0])];
-    elements.skip(1).forEach((element) {
-      // Verify Record/Map type.
-      checkArgument(
-          argMeta.type is RecordType ||
-              argMeta.type is AnnotatedType &&
-                  (argMeta.type as AnnotatedType).valueType is RecordType,
-          message: 'The argument $argName doesn\'t containt a record');
-      argMeta = argMeta.subArgs.firstWhere(
-          (subArgMeta) => subArgMeta.name == element,
-          orElse: () => null);
-      checkNotNull(argMeta, message: 'Metadata for argument $argName not found');
-    });
+  DataType getArg(String argName) =>
+      SpongeUtils.getActionArgType(args, argName);
 
-    return argMeta;
-  }
-
-  ArgMeta getArgMetaByIndex(int index) => argsMeta[index];
+  // TODO ArgMeta getArgMetaByIndex(int index) => args[index];
 }
 
 /// A knowledge base metadata.

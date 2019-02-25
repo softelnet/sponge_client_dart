@@ -30,16 +30,43 @@ abstract class TypeConverter {
   final Map<DataTypeKind, UnitTypeConverter> _registry = Map();
 
   /// Marshals the [value] as [type].
-  Future<dynamic> marshal<T, D extends DataType>(D type, T value) async =>
-      value != null
-          ? await _getUnitConverter(type).marshal(this, type, value)
-          : null;
+  Future<dynamic> marshal<T, D extends DataType>(D type, T value) async {
+    if (value == null) {
+      return null;
+    }
+
+    if (type.annotated) {
+      AnnotatedValue<T> annotatedValue = value as AnnotatedValue;
+      return AnnotatedValue(
+          await _getUnitConverter(type)
+              .marshal(this, type, annotatedValue.value),
+          label: annotatedValue.label,
+          description: annotatedValue.description,
+          features: annotatedValue.features);
+    }
+
+    return await _getUnitConverter(type).marshal(this, type, value);
+  }
 
   /// Unmarshals the [value] as [type].
-  Future<T> unmarshal<T, D extends DataType>(D type, dynamic value) async =>
-      value != null
-          ? await _getUnitConverter(type).unmarshal(this, type, value)
-          : null;
+  Future<T> unmarshal<T, D extends DataType>(D type, dynamic value) async {
+    if (value == null) {
+      return null;
+    }
+
+    if (type.annotated) {
+      checkArgument(value is Map,
+          message:
+              'Expected an annotated value as a map but got ${value.runtimeType}');
+      var annotatedValue = AnnotatedValue.fromJson(value);
+      annotatedValue.value = await _getUnitConverter(type)
+          .unmarshal(this, type, annotatedValue.value);
+
+      return annotatedValue as T;
+    }
+
+    return await _getUnitConverter(type).unmarshal(this, type, value);
+  }
 
   /// Registers the unit type converter.
   void register(UnitTypeConverter unitConverter) {
@@ -66,7 +93,6 @@ class DefaultTypeConverter extends TypeConverter {
   DefaultTypeConverter() {
     // Register default unit converters.
     registerAll([
-      AnnotatedTypeUnitConverter(),
       AnyTypeUnitConverter(),
       BinaryTypeUnitConverter(),
       BooleanTypeUnitConverter(),
@@ -104,28 +130,6 @@ abstract class UnitTypeConverter<T, D extends DataType> {
   /// The [value] will never be null here.
   Future<T> unmarshal(TypeConverter converter, D type, dynamic value) async =>
       value;
-}
-
-class AnnotatedTypeUnitConverter
-    extends UnitTypeConverter<AnnotatedValue, AnnotatedType> {
-  AnnotatedTypeUnitConverter() : super(DataTypeKind.ANNOTATED);
-
-  @override
-  Future<dynamic> marshal(TypeConverter converter, AnnotatedType type,
-          AnnotatedValue value) async =>
-      AnnotatedValue(await converter.marshal(type.valueType, value.value),
-              label: value.label,
-              description: value.description,
-              features: value.features)
-          .toJson();
-
-  @override
-  Future<AnnotatedValue> unmarshal(
-      TypeConverter converter, AnnotatedType type, dynamic value) async {
-    var result = AnnotatedValue.fromJson(value);
-    result.value = await converter.unmarshal(type.valueType, result.value);
-    return result;
-  }
 }
 
 class AnyTypeUnitConverter extends UnitTypeConverter<dynamic, AnyType> {
@@ -359,15 +363,15 @@ class RecordTypeUnitConverter
     return result;
   }
 
-  DataType _getFieldType(Map<String, RecordTypeField> fieldMap, RecordType type,
-      String fieldName) {
+  DataType _getFieldType(
+      Map<String, DataType> fieldMap, RecordType type, String fieldName) {
     checkArgument(fieldMap.containsKey(fieldName),
         message:
             'Field $fieldName is not defined in the record type ${type.name ?? ""}');
-    return fieldMap[fieldName].type;
+    return fieldMap[fieldName];
   }
 
-  Map<String, RecordTypeField> _createFieldMap(RecordType type) =>
+  Map<String, DataType> _createFieldMap(RecordType type) =>
       Map.fromIterable(type.fields,
           key: (field) => field.name, value: (field) => field);
 }

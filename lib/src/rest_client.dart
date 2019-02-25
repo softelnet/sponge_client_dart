@@ -317,40 +317,38 @@ class SpongeRestClient {
   }
 
   Future<Null> _unmarshalActionMeta(ActionMeta actionMeta) async {
-    if (actionMeta?.argsMeta == null) {
+    if (actionMeta?.args == null) {
       return;
     }
 
-    for (var argMeta in actionMeta.argsMeta) {
-      var type = argMeta.type;
-      type.defaultValue =
-          await _typeConverter.unmarshal(type, type.defaultValue);
+    for (var argType in actionMeta.args) {
+      argType.defaultValue =
+          await _typeConverter.unmarshal(argType, argType.defaultValue);
     }
 
-    if (actionMeta.resultMeta != null) {
-      var type = actionMeta.resultMeta.type;
-      type.defaultValue =
-          await _typeConverter.unmarshal(type, type.defaultValue);
+    if (actionMeta.result != null) {
+      var resultType = actionMeta.result;
+      resultType.defaultValue =
+          await _typeConverter.unmarshal(resultType, resultType.defaultValue);
     }
   }
 
   Future<Null> unmarshalProvidedActionArgValues(
-      ActionMeta actionMeta, Map<String, ArgProvidedValue> argValues) async {
-    if (argValues == null || actionMeta.argsMeta == null) {
+      ActionMeta actionMeta, Map<String, ProvidedValue> argValues) async {
+    if (argValues == null || actionMeta.args == null) {
       return;
     }
 
     for (var entry in argValues.entries) {
-      ArgProvidedValue argValue = entry.value;
-      var argMeta = actionMeta.getArgMeta(entry.key);
+      ProvidedValue argValue = entry.value;
+      var argType = actionMeta.getArg(entry.key);
 
-      argValue.value =
-          await _typeConverter.unmarshal(argMeta.type, argValue.value);
+      argValue.value = await _typeConverter.unmarshal(argType, argValue.value);
 
       if (argValue.annotatedValueSet != null) {
-        for (var labeledValue in argValue.annotatedValueSet) {
-          labeledValue.value =
-              await _typeConverter.unmarshal(argMeta.type, labeledValue.value);
+        for (var annotatedValue in argValue.annotatedValueSet) {
+          annotatedValue.value =
+              await _typeConverter.unmarshal(argType, annotatedValue.value);
         }
       }
     }
@@ -459,13 +457,13 @@ class SpongeRestClient {
   /// Validates the action call arguments. This method is invoked internally by the `call` methods.
   /// Throws exception on validation failure.
   void validateCallArgs(ActionMeta actionMeta, List args) {
-    if (actionMeta?.argsMeta == null) {
+    if (actionMeta?.args == null) {
       return;
     }
 
-    int expectedAllArgCount = actionMeta.argsMeta.length;
+    int expectedAllArgCount = actionMeta.args.length;
     int expectedNonOptionalArgCount =
-        actionMeta.argsMeta.where((argMeta) => !argMeta.optional).length;
+        actionMeta.args.where((argMeta) => !argMeta.optional).length;
     int actualArgCount = args?.length ?? 0;
 
     if (expectedNonOptionalArgCount == expectedAllArgCount) {
@@ -482,23 +480,23 @@ class SpongeRestClient {
     }
 
     // Validate non-nullable arguments.
-    for (int i = 0; i < actionMeta.argsMeta.length; i++) {
-      var meta = actionMeta.argsMeta[i];
-      checkArgument(meta.optional || meta.type.nullable || args[i] != null,
-          message: 'Action argument ${meta.label ?? meta.name} is not set');
+    for (int i = 0; i < actionMeta.args.length; i++) {
+      var argType = actionMeta.args[i];
+      checkArgument(argType.optional || argType.nullable || args[i] != null,
+          message:
+              'Action argument ${argType.label ?? argType.name} is not set');
     }
   }
 
   // Marshals the action call arguments.
   Future<List> _marshalActionCallArgs(ActionMeta actionMeta, List args) async {
-    if (args == null || actionMeta?.argsMeta == null) {
+    if (args == null || actionMeta?.args == null) {
       return args;
     }
 
     List result = [];
     for (int i = 0; i < args.length; i++) {
-      result.add(
-          await _typeConverter.marshal(actionMeta.argsMeta[i].type, args[i]));
+      result.add(await _typeConverter.marshal(actionMeta.args[i], args[i]));
     }
 
     return result;
@@ -506,15 +504,15 @@ class SpongeRestClient {
 
   Future<Map<String, Object>> _marshalProvideActionArgsCurrent(
       ActionMeta actionMeta, Map<String, Object> current) async {
-    if (current == null || actionMeta?.argsMeta == null) {
+    if (current == null || actionMeta?.args == null) {
       return current;
     }
 
     Map<String, Object> marshalled = {};
     for (var entry in current.entries) {
       var name = entry.key;
-      marshalled[name] = await _typeConverter.marshal(
-          actionMeta.getArgMeta(name).type, entry.value);
+      marshalled[name] =
+          await _typeConverter.marshal(actionMeta.getArg(name), entry.value);
     }
 
     return marshalled;
@@ -523,12 +521,12 @@ class SpongeRestClient {
   /// Unmarshals the action call result.
   Future<Null> _unmarshalActionCallResult(
       ActionMeta actionMeta, ActionCallResponse response) async {
-    if (actionMeta?.resultMeta == null || response.result == null) {
+    if (actionMeta?.result == null || response.result == null) {
       return;
     }
 
-    response.result = await _typeConverter.unmarshal(
-        actionMeta.resultMeta.type, response.result);
+    response.result =
+        await _typeConverter.unmarshal(actionMeta.result, response.result);
   }
 
   /// Sends the `actionArgs` request to the server. Fetches the provided action arguments from the server.
@@ -555,7 +553,7 @@ class SpongeRestClient {
   }
 
   /// Fetches the provided action arguments from the server.
-  Future<Map<String, ArgProvidedValue>> provideActionArgs(
+  Future<Map<String, ProvidedValue>> provideActionArgs(
     String actionName, {
     List<String> argNames,
     Map<String, Object> current,

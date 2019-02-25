@@ -72,9 +72,9 @@ class DynamicValue<T> {
   }
 }
 
-/// A provided argument value and a possible value set.
-class ArgProvidedValue<T> {
-  ArgProvidedValue({
+/// A provided object value and a possible value set.
+class ProvidedValue<T> {
+  ProvidedValue({
     this.value,
     this.valuePresent,
     this.annotatedValueSet,
@@ -95,8 +95,7 @@ class ArgProvidedValue<T> {
       ?.map((annotatedValue) => annotatedValue.value)
       ?.toList();
 
-  factory ArgProvidedValue.fromJson(Map<String, dynamic> json) =>
-      ArgProvidedValue(
+  factory ProvidedValue.fromJson(Map<String, dynamic> json) => ProvidedValue(
         value: json['value'],
         valuePresent: json['valuePresent'],
         annotatedValueSet: (json['annotatedValueSet'] as List)

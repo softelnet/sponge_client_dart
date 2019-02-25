@@ -12,22 +12,24 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
+import 'package:sponge_client_dart/src/type.dart';
 import 'package:timezone/timezone.dart';
 
-/// A qualified argument/sub-argument metadata.
-class QualifiedArgMeta {
-  QualifiedArgMeta(this.name, this.meta);
+// /// A qualified argument/sub-argument metadata.
+// TODO class QualifiedArgMeta {
+//   QualifiedArgMeta(this.name, this.meta);
 
-  /// The qualified name.
-  final String name;
+//   /// The qualified name.
+//   final String name;
 
-  /// The metadata.
-  final ArgMeta meta;
-}
+//   /// The metadata.
+//   final ArgMeta meta;
+// }
 
-typedef void ArgMetaTraverseCallback(QualifiedArgMeta qualifiedArgMeta);
+// TODO typedef void ArgMetaTraverseCallback(QualifiedArgMeta qualifiedArgMeta);
 
 /// A set of utility methods.
 class SpongeUtils {
@@ -63,22 +65,50 @@ class SpongeUtils {
         : DateTime.parse(tzDateTimeString);
   }
 
-  static void traverseActionArgMeta(
-      ActionMeta actionMeta, ArgMetaTraverseCallback onArgMeta) {
-    actionMeta.argsMeta
-        .forEach((argMeta) => traverseArgMeta(null, argMeta, onArgMeta));
+  static List<String> getActionArgNameElements(String name) =>
+      name.split(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
+
+  static int getActionArgIndex(List<DataType> argTypes, String argName) =>
+      argTypes.indexWhere((argMeta) => argMeta.name == argName);
+
+  static DataType getActionArgType(List<DataType> argTypes, String argName) {
+    checkNotNull(argTypes, message: 'Arguments not defined');
+
+    List<String> elements = getActionArgNameElements(argName);
+
+    DataType argType = argTypes[getActionArgIndex(argTypes, elements[0])];
+    elements.skip(1).take(elements.length - 1).forEach((element) {
+      checkNotNull(argType, message: 'Argument $argName not found');
+      checkNotNull(argType.name, message: 'The sub-type nas no name');
+
+      // Verify Record/Map type.
+      checkArgument(argType is RecordType,
+          message: 'The element ${argType.name} is not a record');
+
+      argType = (argType as RecordType)
+          .fields
+          .firstWhere((field) => field.name == element, orElse: () => null);
+    });
+
+    return argType;
   }
 
-  static void traverseArgMeta(String parentArgName, ArgMeta argMeta,
-      ArgMetaTraverseCallback onArgMeta) {
-    String qname = (parentArgName != null
-            ? parentArgName + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
-            : '') +
-        argMeta.name;
+  // TODO static void traverseActionArgMeta(
+  //     ActionMeta actionMeta, ArgMetaTraverseCallback onArgMeta) {
+  //   actionMeta.args
+  //       .forEach((argMeta) => traverseArgMeta(null, argMeta, onArgMeta));
+  // }
 
-    onArgMeta(QualifiedArgMeta(qname, argMeta));
+  // static void traverseArgMeta(String parentArgName, ArgMeta argMeta,
+  //     ArgMetaTraverseCallback onArgMeta) {
+  //   String qname = (parentArgName != null
+  //           ? parentArgName + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
+  //           : '') +
+  //       argMeta.name;
 
-    argMeta.subArgs?.forEach(
-        (subArgMeta) => traverseArgMeta(qname, subArgMeta, onArgMeta));
-  }
+  //   onArgMeta(QualifiedArgMeta(qname, argMeta));
+
+  //   argMeta.subArgs?.forEach(
+  //       (subArgMeta) => traverseArgMeta(qname, subArgMeta, onArgMeta));
+  // }
 }

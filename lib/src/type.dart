@@ -16,11 +16,11 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:quiver/check.dart';
+import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 
 /// A data type kind.
 enum DataTypeKind {
-  ANNOTATED,
   ANY,
   BINARY,
   BOOLEAN,
@@ -40,8 +40,6 @@ enum DataTypeKind {
 DataType _typeFromJson(Map<String, dynamic> json) {
   DataTypeKind kind = DataType.fromJsonDataTypeKind(json['kind']);
   switch (kind) {
-    case DataTypeKind.ANNOTATED:
-      return AnnotatedType.fromJson(json);
     case DataTypeKind.ANY:
       return AnyType.fromJson(json);
     case DataTypeKind.BINARY:
@@ -79,18 +77,32 @@ DataType _typeFromJson(Map<String, dynamic> json) {
 class DataType<T> {
   DataType(
     this.kind, {
-    this.nullable = false,
+    this.name,
+    this.label,
+    this.description,
+    this.annotated = false,
     this.format,
     this.defaultValue,
+    this.nullable = false,
     Map<String, Object> features,
+    this.optional = false,
+    this.provided,
   }) : this.features = features ?? Map();
 
   /// The data type kind.
   final DataTypeKind kind;
 
-  /// Tells if a value of this type may be `null`. The default is that a value must not be `null`,
-  /// i.e. it is not nullable.
-  bool nullable;
+  /// The data type location name.
+  String name;
+
+  /// The data type location label.
+  String label;
+
+  /// The data type location description.
+  String description;
+
+  /// Tells if a value of this type is annotated, i.e. wrapped by an instance of `AnnotatedValue`. Defaults to `false`.
+  bool annotated;
 
   /// The format (optional).
   String format;
@@ -98,22 +110,38 @@ class DataType<T> {
   /// The default value (optional).
   T defaultValue;
 
+  /// Tells if a value of this type may be `null`. The default is that a value must not be `null`,
+  /// i.e. it is not nullable.
+  bool nullable;
+
   /// The data type features as a map of names to values.
   final Map<String, Object> features;
+
+  /// The flag specifying if this type is optional. Defaults to `false`.
+  bool optional;
+
+  /// The provided value specification. Defaults to `null`.
+  ProvidedMeta provided;
 
   /// The string value of the data type kind, e.g. `'LIST'`.
   String get kindValue => _getDataTypeKindValue(kind);
 
-  factory DataType.fromJson(Map<String, dynamic> json) => _typeFromJson(json);
+  factory DataType.fromJson(Map<String, dynamic> json) =>
+      json != null ? _typeFromJson(json) : null;
 
   @protected
   static DataType fromJsonBase(DataType type, Map<String, dynamic> json) {
-    type.nullable = json['nullable'] ?? type.nullable;
+    type.name = json['name'];
+    type.label = json['label'];
+    type.description = json['description'];
+    type.annotated = json['annotated'] ?? type.annotated;
     type.format = json['format'];
     type.defaultValue = json['defaultValue'];
+    type.nullable = json['nullable'] ?? type.nullable;
     (json['features'] as Map)
         ?.forEach((name, value) => type.features[name] = value);
-
+    type.optional = json['optional'] ?? type.optional;
+    type.provided = ProvidedMeta.fromJson(json['provided']);
     return type;
   }
 
@@ -130,28 +158,21 @@ class DataType<T> {
 
   Map<String, dynamic> toJson() => {
         'kind': _getDataTypeKindValue(kind),
-        'nullable': nullable,
+        'name': name,
+        'label': label,
+        'description': description,
+        'annotated': annotated,
         'format': format,
         'defaultValue': defaultValue,
+        'nullable': nullable,
         'features': features,
+        'optional': optional,
+        'provided': provided?.toJson(),
       };
 }
 
-/// An annotated type. This type requires a `valueType` parameter, which is is a type of an annotated value.
-class AnnotatedType extends DataType<AnnotatedValue> {
-  AnnotatedType(this.valueType) : super(DataTypeKind.ANNOTATED);
-
-  /// The annotated value type.
-  final DataType valueType;
-
-  factory AnnotatedType.fromJson(Map<String, dynamic> json) =>
-      DataType.fromJsonBase(
-          AnnotatedType(DataType.fromJson(json['valueType'])), json);
-
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll({
-      'valueType': valueType.toJson(),
-    });
+abstract class CollectionType<T> extends DataType<T> {
+  CollectionType(DataTypeKind kind) : super(kind);
 }
 
 /// An any type. It may be used in situations when type is not important.
@@ -281,7 +302,7 @@ class IntegerType extends DataType<int> {
 }
 
 /// A list type. This type requires an `elementType` parameter, which is is a type of list elements.
-class ListType extends DataType<List> {
+class ListType extends CollectionType<List> {
   ListType(this.elementType) : super(DataTypeKind.LIST);
 
   /// The list element type.
@@ -297,7 +318,7 @@ class ListType extends DataType<List> {
 }
 
 /// A map type. This type requires two parameters: a type of keys and a type of values in the map.
-class MapType extends DataType<Map> {
+class MapType extends CollectionType<Map> {
   MapType(this.keyType, this.valueType) : super(DataTypeKind.MAP);
 
   /// The map key type.
@@ -374,68 +395,23 @@ class ObjectType extends DataType<dynamic> {
     });
 }
 
-/// A record type field.
-class RecordTypeField {
-  RecordTypeField(this.name, this.type, {this.label, this.description, Map<String, Object> features}) : this.features = features ?? Map();
-
-  /// The field name.
-  final String name;
-
-  /// The field label.
-  final String label;
-
-  /// The field description.
-  final String description;
-
-  /// The field type.
-  final DataType type;
-
-  /// The features as a map of names to values.
-  final Map<String, Object> features;
-
-  factory RecordTypeField.fromJson(Map<String, dynamic> json) =>
-      RecordTypeField(
-        json['name'],
-        DataType.fromJson(json['type']),
-        label: json['label'],
-        description: json['description'],
-        features: json['features'] ?? {},
-      );
-
-  Map<String, dynamic> toJson() {
-    return {
-      'name': name,
-      'type': type.toJson(),
-      'label': label,
-      'description': description,
-      'features': features,
-    };
-  }
-}
-
 /// A record type. This type requires a list of record field types. A value of this type has to be an instance of Map<String, dynamic> with
 /// elements corresponding to the field names and values.
 class RecordType extends DataType<Map<String, dynamic>> {
-  RecordType(this.name, this.fields) : super(DataTypeKind.RECORD);
-
-  /// The record type name.
-  final String name;
+  RecordType(this.fields) : super(DataTypeKind.RECORD);
 
   /// The field types.
-  final List<RecordTypeField> fields;
+  final List<DataType> fields;
 
   factory RecordType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(
-          RecordType(
-              json['name'],
-              (json['fields'] as List)
-                  ?.map((arg) => RecordTypeField.fromJson(arg))
-                  ?.toList()),
+          RecordType((json['fields'] as List)
+              ?.map((arg) => DataType.fromJson(arg))
+              ?.toList()),
           json);
 
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
-      'name': name,
       'fields': fields?.map((field) => field.toJson())?.toList(),
     });
 }

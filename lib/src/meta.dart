@@ -197,8 +197,6 @@ class ActionMeta {
         : null;
   }
 
-  // TODO String getArgName(int index) => getArgMetaByIndex(index).name;
-
   int getArgIndex(String argName) =>
       SpongeUtils.getActionArgIndex(args, argName);
 
@@ -208,8 +206,6 @@ class ActionMeta {
   /// Supports sub-arguments.
   DataType getArg(String argName) =>
       SpongeUtils.getActionArgType(args, argName);
-
-  // TODO ArgMeta getArgMetaByIndex(int index) => args[index];
 }
 
 /// A knowledge base metadata.

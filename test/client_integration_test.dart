@@ -74,14 +74,14 @@ void main() {
       List<ActionMeta> actions = await client.getActions();
       expect(actions.length, equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
-    test('testActionsParamArgMetadataRequiredTrue', () async {
+    test('testActionsArgRequiredTrue', () async {
       var client = await getClient();
       List<ActionMeta> actions =
           await client.getActions(metadataRequired: true);
       expect(actions.length,
           equals(TestConstants.ANONYMOUS_ACTIONS_WITH_METADATA_COUNT));
     });
-    test('testActionsParamArgMetadataRequiredFalse', () async {
+    test('testActionsArgRequiredFalse', () async {
       var client = await getClient();
       List<ActionMeta> actions =
           await client.getActions(metadataRequired: false);

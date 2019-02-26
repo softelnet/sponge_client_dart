@@ -463,7 +463,7 @@ class SpongeRestClient {
 
     int expectedAllArgCount = actionMeta.args.length;
     int expectedNonOptionalArgCount =
-        actionMeta.args.where((argMeta) => !argMeta.optional).length;
+        actionMeta.args.where((argType) => !argType.optional).length;
     int actualArgCount = args?.length ?? 0;
 
     if (expectedNonOptionalArgCount == expectedAllArgCount) {

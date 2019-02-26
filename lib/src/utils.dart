@@ -79,7 +79,7 @@ class SpongeUtils {
       name.split(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
 
   static int getActionArgIndex(List<DataType> argTypes, String argName) =>
-      argTypes.indexWhere((argMeta) => argMeta.name == argName);
+      argTypes.indexWhere((argType) => argType.name == argName);
 
   static DataType getActionArgType(List<DataType> argTypes, String argName) {
     checkNotNull(argTypes, message: 'Arguments not defined');

@@ -18,18 +18,28 @@ import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:timezone/timezone.dart';
 
-// /// A qualified argument/sub-argument metadata.
-// TODO class QualifiedArgMeta {
-//   QualifiedArgMeta(this.name, this.meta);
+/// A qualified data type.
+class QualifiedDataType {
+  QualifiedDataType(this.path, this.type);
 
-//   /// The qualified name.
-//   final String name;
+  /// The qualified name path.
+  final String path;
 
-//   /// The metadata.
-//   final ArgMeta meta;
-// }
+  /// The type.
+  final DataType type;
 
-// TODO typedef void ArgMetaTraverseCallback(QualifiedArgMeta qualifiedArgMeta);
+  // TODO Handle children with no names.
+  QualifiedDataType createChild(DataType childType) => QualifiedDataType(
+      childType.name != null
+          ? (path != null
+                  ? path + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
+                  : '') +
+              childType.name
+          : '',
+      childType);
+}
+
+typedef void DataTypeTraverseCallback(QualifiedDataType qualifiedType);
 
 /// A set of utility methods.
 class SpongeUtils {
@@ -93,22 +103,30 @@ class SpongeUtils {
     return argType;
   }
 
-  // TODO static void traverseActionArgMeta(
-  //     ActionMeta actionMeta, ArgMetaTraverseCallback onArgMeta) {
-  //   actionMeta.args
-  //       .forEach((argMeta) => traverseArgMeta(null, argMeta, onArgMeta));
-  // }
+  static void traverseActionArguments(
+      ActionMeta actionMeta, DataTypeTraverseCallback onType) {
+    actionMeta.args.forEach((argType) => _traverseDataType(argType, onType));
+  }
 
-  // static void traverseArgMeta(String parentArgName, ArgMeta argMeta,
-  //     ArgMetaTraverseCallback onArgMeta) {
-  //   String qname = (parentArgName != null
-  //           ? parentArgName + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
-  //           : '') +
-  //       argMeta.name;
+  static void _traverseDataType(
+      DataType dataType, DataTypeTraverseCallback onType,
+      {String path}) {
+    // TODO Only named types.
+    if (dataType.name == null) {
+      return;
+    }
 
-  //   onArgMeta(QualifiedArgMeta(qname, argMeta));
+    String subPath = (path != null
+            ? path + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
+            : '') +
+        dataType.name;
 
-  //   argMeta.subArgs?.forEach(
-  //       (subArgMeta) => traverseArgMeta(qname, subArgMeta, onArgMeta));
-  // }
+    onType(QualifiedDataType(subPath, dataType));
+
+    // TODO Traverses only through record types.
+    if (dataType is RecordType) {
+      dataType.fields
+          .forEach((field) => _traverseDataType(field, onType, path: subPath));
+    }
+  }
 }

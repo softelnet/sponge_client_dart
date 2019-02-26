@@ -36,7 +36,9 @@ abstract class TypeConverter {
     }
 
     if (type.annotated) {
-      AnnotatedValue<T> annotatedValue = value as AnnotatedValue;
+      // Transparently handle annotated values.
+      AnnotatedValue annotatedValue =
+          value is AnnotatedValue ? value : AnnotatedValue(value);
       return AnnotatedValue(
           await _getUnitConverter(type)
               .marshal(this, type, annotatedValue.value),

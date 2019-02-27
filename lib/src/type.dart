@@ -16,6 +16,7 @@ import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
 import 'package:quiver/check.dart';
+import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 
@@ -169,6 +170,33 @@ class DataType<T> {
         'optional': optional,
         'provided': provided?.toJson(),
       };
+}
+
+/// A qualified data type.
+class QualifiedDataType<T> {
+  QualifiedDataType(this.path, this.type, {this.isRoot = true});
+
+  /// The qualified name path. Can be `null` for the root type or a path that has at least one element unnamed.
+  final String path;
+
+  /// The type.
+  final DataType<T> type;
+
+  /// The flag that informs if this qualified type is a root.
+  bool isRoot;
+
+  QualifiedDataType<C> createChild<C>(DataType<C> childType) {
+    String parentPath = path != null
+        ? path + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
+        : (isRoot ? '' : null);
+
+    return QualifiedDataType(
+        parentPath != null && childType.name != null
+            ? parentPath + childType.name
+            : null,
+        childType,
+        isRoot: false);
+  }
 }
 
 abstract class CollectionType<T> extends DataType<T> {

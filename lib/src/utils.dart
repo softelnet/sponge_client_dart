@@ -18,29 +18,6 @@ import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:timezone/timezone.dart';
 
-/// A qualified data type.
-class QualifiedDataType {
-  QualifiedDataType(this.path, this.type);
-
-  /// The qualified name path.
-  final String path;
-
-  /// The type.
-  final DataType type;
-
-  // TODO Handle children with no names.
-  QualifiedDataType createChild(DataType childType) => QualifiedDataType(
-      childType.name != null
-          ? (path != null
-                  ? path + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
-                  : '') +
-              childType.name
-          : '',
-      childType);
-}
-
-typedef void DataTypeTraverseCallback(QualifiedDataType qualifiedType);
-
 /// A set of utility methods.
 class SpongeUtils {
   /// Obfuscates a password in the JSON text of a request or response.
@@ -103,30 +80,32 @@ class SpongeUtils {
     return argType;
   }
 
+  /// Traverses the action argument types but only through record types.
   static void traverseActionArguments(
-      ActionMeta actionMeta, DataTypeTraverseCallback onType) {
-    actionMeta.args.forEach((argType) => _traverseDataType(argType, onType));
+      ActionMeta actionMeta, void onType(QualifiedDataType _),
+      [bool namedOnly = true]) {
+    actionMeta.args?.forEach((argType) => traverseDataType(
+        QualifiedDataType(argType.name, argType), onType, namedOnly));
   }
 
-  static void _traverseDataType(
-      DataType dataType, DataTypeTraverseCallback onType,
-      {String path}) {
-    // TODO Only named types.
-    if (dataType.name == null) {
+  /// Traverses the data type but only through record types.
+  static void traverseDataType(
+      QualifiedDataType qType, void onType(QualifiedDataType _),
+      [bool namedOnly = true]) {
+    if (namedOnly && qType.type.name == null) {
       return;
     }
 
-    String subPath = (path != null
-            ? path + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
-            : '') +
-        dataType.name;
+    onType(qType);
 
-    onType(QualifiedDataType(subPath, dataType));
-
-    // TODO Traverses only through record types.
-    if (dataType is RecordType) {
-      dataType.fields
-          .forEach((field) => _traverseDataType(field, onType, path: subPath));
+    // Traverses only through record types.
+    switch (qType.type.kind) {
+      case DataTypeKind.RECORD:
+        (qType.type as RecordType).fields?.forEach((field) =>
+            traverseDataType(qType.createChild(field), onType, namedOnly));
+        break;
+      default:
+        break;
     }
   }
 }

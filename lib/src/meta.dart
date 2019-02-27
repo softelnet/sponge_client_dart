@@ -148,6 +148,7 @@ class ActionMeta {
     Map<String, Object> features,
     this.args,
     this.result,
+    this.callable = true,
     this.qualifiedVersion,
   }) : this.features = features ?? Map();
 
@@ -175,6 +176,9 @@ class ActionMeta {
   /// The action result type (optional).
   final DataType result;
 
+  /// The callable flag.
+  final bool callable;
+
   /// The action qualified version.
   ProcessorQualifiedVersion qualifiedVersion;
 
@@ -191,6 +195,7 @@ class ActionMeta {
                 ?.map((arg) => DataType.fromJson(arg))
                 ?.toList(),
             result: DataType.fromJson(json['result']),
+            callable: json['callable'],
             qualifiedVersion:
                 ProcessorQualifiedVersion.fromJson(json['qualifiedVersion']),
           )

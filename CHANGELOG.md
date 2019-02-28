@@ -1,9 +1,11 @@
 ## 1.7.1 (not released yet)
 
-* API change: Renamed `ArgProvidedMeta.depends` to `ArgProvidedMeta.dependencies`.
-* Added support for categories.
+* API change: Action arguments and result metadata are now specified as data types. `ArgMeta` and `ResultMeta` classes have been removed.
+* API change: Renamed `ArgProvidedMeta` to `ProvidedMeta`, `ArgProvidedValue` to `ProvidedValue` and `ProvidedMeta.depends` to `ProvidedMeta.dependencies`.
+* API change: Removed `AnnotatedType`. Use `DataType.withAnnotated()` instead.
+* Added support for categories. Processors may be assigned to registered categories.
 * Added new types: `DynamicType`, `TypeType`, `DateTimeType`.
-* Added `ArgMeta.features`.
+* Fixed the bug that caused an error when sending an empty body in the REST API request.
 
 ## 1.7.0 (2019-02-01)
 

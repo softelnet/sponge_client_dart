@@ -312,6 +312,51 @@ void main() {
       var bookId = await client.call('RecordAsArgAction', [book2]);
       expect(bookId, equals(5));
     });
+    test('testNestedRecordAsArgAction', () async {
+      var client = await getClient();
+      ActionMeta actionMeta =
+          await client.getActionMeta('NestedRecordAsArgAction');
+      expect(actionMeta.args.length, equals(1));
+      var argType = actionMeta.args[0] as RecordType;
+      expect(argType.kind, equals(DataTypeKind.RECORD));
+      expect(argType.name, equals('book'));
+      expect(argType.label, equals('Book'));
+      expect(argType.fields.length, equals(3));
+
+      expect(argType.fields[0].kind, equals(DataTypeKind.INTEGER));
+      expect(argType.fields[0].name, equals('id'));
+      expect(argType.fields[0].label, equals('Identifier'));
+
+      var authorType = argType.fields[1] as RecordType;
+      expect(authorType.name, equals('author'));
+      expect(authorType.label, equals('Author'));
+      expect(authorType.fields.length, equals(3));
+
+      expect(authorType.fields[0].kind, equals(DataTypeKind.INTEGER));
+      expect(authorType.fields[0].name, equals('id'));
+      expect(authorType.fields[0].label, equals('Identifier'));
+
+      expect(authorType.fields[1].kind, equals(DataTypeKind.STRING));
+      expect(authorType.fields[1].name, equals('firstName'));
+      expect(authorType.fields[1].label, equals('First name'));
+
+      expect(authorType.fields[2].kind, equals(DataTypeKind.STRING));
+      expect(authorType.fields[2].name, equals('surname'));
+      expect(authorType.fields[2].label, equals('Surname'));
+
+      expect(argType.fields[2].kind, equals(DataTypeKind.STRING));
+      expect(argType.fields[2].name, equals('title'));
+      expect(argType.fields[2].label, equals('Title'));
+
+      String bookSummary = await client.call(actionMeta.name, [
+        {
+          'author': {'firstName': 'James', 'surname': 'Joyce'},
+          'title': 'Ulysses'
+        }
+      ]);
+
+      expect(bookSummary, equals('James Joyce - Ulysses'));
+    });
     test('testProvideActionArgs', () async {
       var client = await getClient();
       var actionName = 'SetActuator';

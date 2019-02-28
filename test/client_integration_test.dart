@@ -528,6 +528,49 @@ void main() {
       expect(
           await client.call(actionMeta.name, [values.last]), equals('value3'));
     });
+    test('testTraverseActionArguments', () async {
+      var client = await getClient();
+      ActionMeta meta = await client.getActionMeta('NestedRecordAsArgAction');
+
+      var bookType = meta.args[0] as RecordType;
+      var authorType = bookType.fields[1] as RecordType;
+      expect(identical(meta.getArg('book'), bookType), isTrue);
+      expect(identical(meta.getArg('book.id'), bookType.fields[0]), isTrue);
+      expect(identical(meta.getArg('book.author'), authorType), isTrue);
+      expect(identical(meta.getArg('book.author.id'), authorType.fields[0]),
+          isTrue);
+      expect(
+          identical(meta.getArg('book.author.firstName'), authorType.fields[1]),
+          isTrue);
+      expect(
+          identical(meta.getArg('book.author.surname'), authorType.fields[2]),
+          isTrue);
+      expect(identical(meta.getArg('book.title'), bookType.fields[2]), isTrue);
+
+      List<QualifiedDataType> namedQTypes = [];
+      SpongeUtils.traverseActionArguments(
+          meta, (qType) => namedQTypes.add(qType), true);
+
+      expect(namedQTypes[0].path, equals('book'));
+      expect(identical(namedQTypes[0].type, meta.getArg('book')), isTrue);
+      expect(namedQTypes[1].path, equals('book.id'));
+      expect(identical(namedQTypes[1].type, meta.getArg('book.id')), isTrue);
+      expect(namedQTypes[2].path, equals('book.author'));
+      expect(
+          identical(namedQTypes[2].type, meta.getArg('book.author')), isTrue);
+      expect(namedQTypes[3].path, equals('book.author.id'));
+      expect(identical(namedQTypes[3].type, meta.getArg('book.author.id')),
+          isTrue);
+      expect(namedQTypes[4].path, equals('book.author.firstName'));
+      expect(
+          identical(namedQTypes[4].type, meta.getArg('book.author.firstName')),
+          isTrue);
+      expect(namedQTypes[5].path, equals('book.author.surname'));
+      expect(identical(namedQTypes[5].type, meta.getArg('book.author.surname')),
+          isTrue);
+      expect(namedQTypes[6].path, equals('book.title'));
+      expect(identical(namedQTypes[6].type, meta.getArg('book.title')), isTrue);
+    });
   });
   group('REST API Client send', () {
     test('testSend', () async {

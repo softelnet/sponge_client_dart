@@ -1,4 +1,4 @@
-## 1.7.1 (not released yet)
+## 1.8.0 (2019-03-04)
 
 * API change: Action arguments and result metadata are now specified as data types. `ArgMeta` and `ResultMeta` classes have been removed.
 * API change: Renamed `ArgProvidedMeta` to `ProvidedMeta`, `ArgProvidedValue` to `ProvidedValue` and `ProvidedMeta.depends` to `ProvidedMeta.dependencies`.

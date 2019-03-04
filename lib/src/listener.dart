@@ -17,7 +17,9 @@ import 'package:sponge_client_dart/src/response.dart';
 
 /// A callback that will be invoked when the request is serialized. Remember to obfuscate
 /// the password if the [requestString] is to be shown.
-typedef void OnRequestSerializedListener(SpongeRequest request, String requestString);
+typedef void OnRequestSerializedListener(
+    SpongeRequest request, String requestString);
 
 /// A callback that will be invoked when the response is deserialized.
-typedef void OnResponseDeserializedListener(SpongeRequest request, SpongeResponse response, String responseString);
+typedef void OnResponseDeserializedListener(
+    SpongeRequest request, SpongeResponse response, String responseString);

@@ -15,7 +15,8 @@
 import 'package:sponge_client_dart/src/listener.dart';
 
 class SpongeRequestContext {
-  SpongeRequestContext({this.onRequestSerializedListener, this.onResponseDeserializedListener});
+  SpongeRequestContext(
+      {this.onRequestSerializedListener, this.onResponseDeserializedListener});
 
   OnRequestSerializedListener onRequestSerializedListener;
   OnResponseDeserializedListener onResponseDeserializedListener;

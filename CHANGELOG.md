@@ -5,6 +5,7 @@
 * API change: Removed `AnnotatedType`. Use `DataType.withAnnotated()` instead.
 * Added support for categories. Processors may be assigned to registered categories.
 * Added new types: `DynamicType`, `TypeType`, `DateTimeType`.
+* Added `CategoryMeta.features`.
 * Fixed the bug that caused an error when sending an empty body in the REST API request.
 
 ## 1.7.0 (2019-02-01)

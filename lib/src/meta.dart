@@ -115,7 +115,8 @@ class CategoryMeta {
     this.name, {
     this.label,
     this.description,
-  });
+    Map<String, Object> features,
+  }) : this.features = features ?? Map();
 
   /// The category name.
   String name;
@@ -126,12 +127,16 @@ class CategoryMeta {
   /// The category description.
   String description;
 
+  /// The category features.
+  final Map<String, Object> features;
+
   factory CategoryMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? CategoryMeta(
             json['name'],
             label: json['label'],
             description: json['description'],
+            features: json['features'] ?? {},
           )
         : null;
   }

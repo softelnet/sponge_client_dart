@@ -278,39 +278,49 @@ void main() {
       RecordType recordType = actionMeta.result as RecordType;
       expect(recordType.kind, equals(DataTypeKind.RECORD));
       expect(recordType.name, equals('book'));
-      expect(recordType.fields.length, equals(3));
+      expect(recordType.fields.length, equals(4));
       expect(recordType.fields[0].name, equals('id'));
       expect(recordType.fields[0].kind, equals(DataTypeKind.INTEGER));
       expect(recordType.fields[1].name, equals('author'));
       expect(recordType.fields[1].kind, equals(DataTypeKind.STRING));
       expect(recordType.fields[2].name, equals('title'));
       expect(recordType.fields[2].kind, equals(DataTypeKind.STRING));
+      expect(recordType.fields[3].name, equals('comment'));
+      expect(recordType.fields[3].kind, equals(DataTypeKind.STRING));
 
       Map<String, Object> book1 = await client.call(actionMeta.name, [1]);
-      expect(book1.length, equals(3));
+      expect(book1.length, equals(4));
       expect(book1['id'], equals(1));
       expect(book1['author'], equals('James Joyce'));
       expect(book1['title'], equals('Ulysses'));
+      expect(book1.containsKey('comment'), isTrue);
+      expect(book1['comment'], isNull);
 
       actionMeta = await client.getActionMeta('RecordAsArgAction');
       recordType = actionMeta.args[0] as RecordType;
       expect(recordType.kind, equals(DataTypeKind.RECORD));
-      expect(recordType.fields.length, equals(3));
+      expect(recordType.fields.length, equals(4));
       expect(recordType.fields[0].name, equals('id'));
       expect(recordType.fields[0].kind, equals(DataTypeKind.INTEGER));
       expect(recordType.fields[1].name, equals('author'));
       expect(recordType.fields[1].kind, equals(DataTypeKind.STRING));
       expect(recordType.fields[2].name, equals('title'));
       expect(recordType.fields[2].kind, equals(DataTypeKind.STRING));
+      expect(recordType.fields[3].name, equals('comment'));
+      expect(recordType.fields[3].kind, equals(DataTypeKind.STRING));
 
       var book2 = {
         'id': 5,
         'author': 'Arthur Conan Doyle',
-        'title': 'Adventures of Sherlock Holmes'
+        'title': 'Adventures of Sherlock Holmes',
+        'comment': null,
       };
 
-      var bookId = await client.call('RecordAsArgAction', [book2]);
-      expect(bookId, equals(5));
+      Map<String, Object> book3 =
+          await client.call('RecordAsArgAction', [book2]);
+      expect(book3.length, equals(4));
+      book2.forEach((key, value) => expect(book3[key], equals(value)));
+      expect(book3['comment'], isNull);
     });
     test('testNestedRecordAsArgAction', () async {
       var client = await getClient();

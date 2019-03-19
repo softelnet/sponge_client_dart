@@ -32,7 +32,7 @@ class AnnotatedValue<T> {
   String description;
 
   /// The annotated type features as a map of names to values.
-  final Map<String, Object> features;
+  Map<String, Object> features;
 
   factory AnnotatedValue.fromJson(Map<String, dynamic> json) => AnnotatedValue(
         json['value'],
@@ -49,6 +49,13 @@ class AnnotatedValue<T> {
       'features': features,
     };
   }
+
+  AnnotatedValue<T> copy() => AnnotatedValue(
+        value,
+        label: label,
+        description: description,
+        features: Map.from(features),
+      );
 }
 
 /// A dynamic value that specifies its type.

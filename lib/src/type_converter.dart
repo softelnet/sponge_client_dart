@@ -20,7 +20,6 @@ import 'package:timezone/timezone.dart';
 import 'package:intl/intl.dart';
 
 import 'package:logging/logging.dart';
-import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 
@@ -57,9 +56,8 @@ abstract class TypeConverter {
     }
 
     if (type.annotated) {
-      checkArgument(value is Map,
-          message:
-              'Expected an annotated value as a map but got ${value.runtimeType}');
+      Validate.isTrue(value is Map,
+          'Expected an annotated value as a map but got ${value.runtimeType}');
       var annotatedValue = AnnotatedValue.fromJson(value);
       annotatedValue.value = await _getUnitConverter(type)
           .unmarshal(this, type, annotatedValue.value);
@@ -86,8 +84,7 @@ abstract class TypeConverter {
       _registry.remove(typeKind);
 
   UnitTypeConverter<T, D> _getUnitConverter<T, D extends DataType>(D type) =>
-      checkNotNull(_registry[type.kind],
-          message: 'Unsupported type ${type.kind}');
+      Validate.notNull(_registry[type.kind], 'Unsupported type ${type.kind}');
 }
 
 /// A default type converter.
@@ -193,15 +190,13 @@ class DateTimeTypeUnitConverter
             ? DateFormat(type.format).parse(stringValue)
             : DateTime.parse(stringValue);
       case DateTimeKind.DATE_TIME_ZONE:
-        checkArgument(type.format == null,
-            message:
-                'Format is not supported for the Dart implementation of ${type.dateTimeKind}');
+        Validate.isTrue(type.format == null,
+            'Format is not supported for the Dart implementation of ${type.dateTimeKind}');
         return SpongeUtils.parseIsoDateTimeZone(stringValue);
       case DateTimeKind.DATE:
       case DateTimeKind.TIME:
-        checkArgument(type.format != null,
-            message:
-                'The Dart implementation of ${type.dateTimeKind} requires format');
+        Validate.isTrue(type.format != null,
+            'The Dart implementation of ${type.dateTimeKind} requires format');
         return DateFormat(type.format).parse(stringValue);
       case DateTimeKind.INSTANT:
         // Formatter not used.
@@ -367,9 +362,8 @@ class RecordTypeUnitConverter
 
   DataType _getFieldType(
       Map<String, DataType> fieldMap, RecordType type, String fieldName) {
-    checkArgument(fieldMap.containsKey(fieldName),
-        message:
-            'Field $fieldName is not defined in the record type ${type.name ?? ""}');
+    Validate.isTrue(fieldMap.containsKey(fieldName),
+        'Field $fieldName is not defined in the record type ${type.name ?? ""}');
     return fieldMap[fieldName];
   }
 

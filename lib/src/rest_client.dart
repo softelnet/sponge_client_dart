@@ -18,7 +18,6 @@ import 'dart:convert';
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:quiver/cache.dart';
-import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/context.dart';
 import 'package:sponge_client_dart/src/rest_client_configuration.dart';
 import 'package:sponge_client_dart/src/constants.dart';
@@ -429,10 +428,10 @@ class SpongeRestClient {
       request.qualifiedVersion = actionMeta.qualifiedVersion;
     }
 
-    checkArgument(actionMeta == null || actionMeta.name == request.name,
-        message:
-            'Action name ${actionMeta?.name} in the metadata doesn\'t match '
-            'the action name ${request?.name} in the request');
+    Validate.isTrue(
+        actionMeta == null || actionMeta.name == request.name,
+        'Action name ${actionMeta?.name} in the metadata doesn\'t match '
+        'the action name ${request?.name} in the request');
   }
 
   Future<ActionCallResponse> _doCallByRequest(ActionMeta actionMeta,
@@ -467,14 +466,12 @@ class SpongeRestClient {
     int actualArgCount = args?.length ?? 0;
 
     if (expectedNonOptionalArgCount == expectedAllArgCount) {
-      checkArgument(expectedAllArgCount == actualArgCount,
-          message:
+      Validate.isTrue(expectedAllArgCount == actualArgCount,
               'Incorrect number of arguments. Expected $expectedAllArgCount but got $actualArgCount');
     } else {
-      checkArgument(
+      Validate.isTrue(
           expectedNonOptionalArgCount <= actualArgCount &&
               actualArgCount <= expectedAllArgCount,
-          message:
               'Incorrect number of arguments. Expected between $expectedNonOptionalArgCount and $expectedAllArgCount'
               ' but got $actualArgCount');
     }
@@ -482,8 +479,7 @@ class SpongeRestClient {
     // Validate non-nullable arguments.
     for (int i = 0; i < actionMeta.args.length; i++) {
       var argType = actionMeta.args[i];
-      checkArgument(argType.optional || argType.nullable || args[i] != null,
-          message:
+      Validate.isTrue(argType.optional || argType.nullable || args[i] != null,
               'Action argument ${argType.label ?? argType.name} is not set');
     }
   }

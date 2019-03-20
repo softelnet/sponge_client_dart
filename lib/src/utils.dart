@@ -12,8 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/constants.dart';
+import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:timezone/timezone.dart';
@@ -60,18 +60,18 @@ class SpongeUtils {
       argTypes.indexWhere((argType) => argType.name == argName);
 
   static DataType getActionArgType(List<DataType> argTypes, String argName) {
-    checkNotNull(argTypes, message: 'Arguments not defined');
+    Validate.notNull(argTypes, 'Arguments not defined');
 
     List<String> elements = getActionArgNameElements(argName);
 
     DataType argType = argTypes[getActionArgIndex(argTypes, elements[0])];
     elements.skip(1).take(elements.length - 1).forEach((element) {
-      checkNotNull(argType, message: 'Argument $argName not found');
-      checkNotNull(argType.name, message: 'The sub-type nas no name');
+      Validate.notNull(argType, 'Argument $argName not found');
+      Validate.notNull(argType.name, 'The sub-type nas no name');
 
       // Verify Record/Map type.
-      checkArgument(argType is RecordType,
-          message: 'The element ${argType.name} is not a record');
+      Validate.isTrue(
+          argType is RecordType, 'The element ${argType.name} is not a record');
 
       argType = (argType as RecordType)
           .fields
@@ -108,5 +108,21 @@ class SpongeUtils {
       default:
         break;
     }
+  }
+}
+
+class Validate {
+  static void isTrue(bool expression, String message) {
+    if (!expression) {
+      throw SpongeException(message);
+    }
+  }
+
+  static T notNull<T>(T value, [String message = 'The value is null']) {
+    if (value == null) {
+      throw SpongeException(message);
+    }
+
+    return value;
   }
 }

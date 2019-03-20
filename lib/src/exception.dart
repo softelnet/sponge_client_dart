@@ -12,16 +12,26 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// A base Sponge exception.
+class SpongeException implements Exception {
+  const SpongeException(this.message);
+
+  final String message;
+
+  @override
+  String toString() => message;
+}
+
 /// A Sponge client exception.
-class SpongeClientException implements Exception {
+class SpongeClientException extends SpongeException {
   const SpongeClientException([
     this.errorCode,
-    this.errorMessage,
+    String errorMessage,
     this.detailedErrorMessage,
-  ]);
+  ]) : super(errorMessage);
 
   final String errorCode;
-  final String errorMessage;
+  String get errorMessage => super.message;
   final String detailedErrorMessage;
 
   @override

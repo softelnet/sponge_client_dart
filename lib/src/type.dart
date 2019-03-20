@@ -15,10 +15,10 @@
 import 'dart:typed_data';
 
 import 'package:meta/meta.dart';
-import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
+import 'package:sponge_client_dart/src/utils.dart';
 
 /// A data type kind.
 enum DataTypeKind {
@@ -150,8 +150,8 @@ class DataType<T> {
     DataTypeKind kind = DataTypeKind.values.firstWhere(
         (k) => _getDataTypeKindValue(k) == jsonDataTypeKind,
         orElse: () => null);
-    return checkNotNull(kind,
-        message: 'Unsupported type kind $jsonDataTypeKind');
+    return Validate.notNull(kind,
+        'Unsupported type kind $jsonDataTypeKind');
   }
 
   static String _getDataTypeKindValue(DataTypeKind kind) =>
@@ -273,8 +273,8 @@ class DateTimeType extends DataType<Uint8List> {
     DateTimeKind dateTimeKind = DateTimeKind.values.firstWhere(
         (k) => _getDateTimeKindValue(k) == jsonDateTimeKind,
         orElse: () => null);
-    return checkNotNull(dateTimeKind,
-        message: 'Unsupported date/time kind $jsonDateTimeKind');
+    return Validate.notNull(dateTimeKind,
+        'Unsupported date/time kind $jsonDateTimeKind');
   }
 
   static String _getDateTimeKindValue(DateTimeKind dateTimeKind) =>

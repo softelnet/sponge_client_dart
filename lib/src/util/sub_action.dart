@@ -14,8 +14,8 @@
 
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
-import 'package:sponge_client_dart/src/type_utils.dart';
-import 'package:sponge_client_dart/src/utils.dart';
+import 'package:sponge_client_dart/src/util/type_utils.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 
 enum SubActionType { create, read, update, delete, context }
 

@@ -13,10 +13,10 @@
 // limitations under the License.
 
 import 'package:sponge_client_dart/src/constants.dart';
-import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
-import 'package:sponge_client_dart/src/type_utils.dart';
+import 'package:sponge_client_dart/src/util/type_utils.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:timezone/timezone.dart';
 
 /// A set of utility methods.
@@ -82,21 +82,5 @@ class SpongeUtils {
       [bool namedOnly = true]) {
     actionMeta.args?.forEach((argType) => DataTypeUtils.traverseDataType(
         QualifiedDataType(argType.name, argType), onType, namedOnly));
-  }
-}
-
-class Validate {
-  static void isTrue(bool expression, String message) {
-    if (!expression) {
-      throw SpongeException(message);
-    }
-  }
-
-  static T notNull<T>(T value, [String message = 'The value is null']) {
-    if (value == null) {
-      throw SpongeException(message);
-    }
-
-    return value;
   }
 }

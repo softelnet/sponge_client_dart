@@ -1,4 +1,4 @@
-import 'package:sponge_client_dart/src/sub_action.dart';
+import 'package:sponge_client_dart/src/util/sub_action.dart';
 import 'package:test/test.dart';
 
 void main() {

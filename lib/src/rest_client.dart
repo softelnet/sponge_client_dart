@@ -28,6 +28,7 @@ import 'package:sponge_client_dart/src/request.dart';
 import 'package:sponge_client_dart/src/response.dart';
 import 'package:sponge_client_dart/src/type_converter.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:synchronized/synchronized.dart';
 

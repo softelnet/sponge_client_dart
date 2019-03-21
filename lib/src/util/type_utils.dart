@@ -15,7 +15,7 @@
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
-import 'package:sponge_client_dart/src/utils.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 
 class DataTypeUtils {
   static const THIS = 'this';
@@ -93,6 +93,8 @@ class DataTypeUtils {
 
   static bool hasAllNotNullValuesSet(DataType type, dynamic value) {
     bool result = true;
+
+    // TODO Traversing all data type tree is not necessary.
     traverseValue(QualifiedDataType(null, type), value, (_qType, _value) {
       if (!_qType.type.nullable && _value == null) {
         result = false;

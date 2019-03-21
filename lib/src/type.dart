@@ -18,7 +18,7 @@ import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
-import 'package:sponge_client_dart/src/utils.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 
 /// A data type kind.
 enum DataTypeKind {

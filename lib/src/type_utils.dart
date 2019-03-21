@@ -30,17 +30,21 @@ class DataTypeUtils {
 
   // Bypasses annotated values. Doesn't support collections inside the path with the exception of the last path element.
   static dynamic getSubValue(dynamic value, String path,
+          {bool returnAnnotated = false}) =>
+      _getSubValueByPathElements(value, getPathElements(path),
+          returnAnnotated: returnAnnotated);
+
+  static dynamic _getSubValueByPathElements(
+      dynamic value, List<String> pathElements,
       {bool returnAnnotated = false}) {
-    var elements = getPathElements(path);
-    elements.forEach((element) {
+    pathElements.forEach((element) {
       value = value is AnnotatedValue ? (value as AnnotatedValue).value : value;
       if (value == null) {
         return null;
       }
 
       // Verify Record/Map type.
-      Validate.isTrue(
-          value is Map, 'The value $path doesn\'t containt a record');
+      Validate.isTrue(value is Map, 'The value path doesn\'t contain a record');
       value = (value as Map)[element];
     });
 
@@ -49,6 +53,26 @@ class DataTypeUtils {
     }
 
     return value;
+  }
+
+  /// Supports sub-arguments and bypasses annotated values. The `value` has to a complex type.
+  static void setSubValue(dynamic value, String path, dynamic subValue) {
+    var elements = getPathElements(path);
+
+    Validate.isTrue(
+        elements.isNotEmpty, 'The $path is empty or points to the same value');
+    if (elements.length > 1) {
+      value = _getSubValueByPathElements(
+          value, elements.sublist(0, elements.length - 1),
+          returnAnnotated: false);
+    }
+
+    Validate.notNull(value, 'The parent value of $path is null');
+
+    // Verify Record/Map type.
+    Validate.isTrue(value is Map, 'The value of $path is not a record');
+
+    (value as Map)[elements.last] = subValue;
   }
 
   static DataType getSubType(DataType type, String path) {

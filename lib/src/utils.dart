@@ -70,9 +70,7 @@ class SpongeUtils {
       Validate.isTrue(
           argType is RecordType, 'The element ${argType.name} is not a record');
 
-      argType = (argType as RecordType)
-          .fields
-          .firstWhere((field) => field.name == element, orElse: () => null);
+      argType = (argType as RecordType).getFieldType(element);
     });
 
     return argType;

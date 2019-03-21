@@ -16,7 +16,6 @@ import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
-import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:timezone/timezone.dart';
 
 /// A set of utility methods.
@@ -51,29 +50,6 @@ class SpongeUtils {
         ? TZDateTime.parse(
             getLocation(location), tzDateTimeString.substring(0, locationIndex))
         : DateTime.parse(tzDateTimeString);
-  }
-
-  static int getActionArgIndex(List<DataType> argTypes, String argName) =>
-      argTypes.indexWhere((argType) => argType.name == argName);
-
-  static DataType getActionArgType(List<DataType> argTypes, String argName) {
-    Validate.notNull(argTypes, 'Arguments not defined');
-
-    List<String> elements = DataTypeUtils.getPathElements(argName);
-
-    DataType argType = argTypes[getActionArgIndex(argTypes, elements[0])];
-    elements.skip(1).take(elements.length - 1).forEach((element) {
-      Validate.notNull(argType, 'Argument $argName not found');
-      Validate.notNull(argType.name, 'The sub-type nas no name');
-
-      // Verify Record/Map type.
-      Validate.isTrue(
-          argType is RecordType, 'The element ${argType.name} is not a record');
-
-      argType = (argType as RecordType).getFieldType(element);
-    });
-
-    return argType;
   }
 
   /// Traverses the action argument types but only through record types.

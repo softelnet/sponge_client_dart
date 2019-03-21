@@ -425,10 +425,15 @@ class ObjectType extends DataType<dynamic> {
 /// A record type. This type requires a list of record field types. A value of this type has to be an instance of Map<String, dynamic> with
 /// elements corresponding to the field names and values.
 class RecordType extends DataType<Map<String, dynamic>> {
-  RecordType(this.fields) : super(DataTypeKind.RECORD);
+  RecordType(this.fields) : super(DataTypeKind.RECORD) {
+    _fieldsMap = Map.fromIterable(this.fields,
+        key: (field) => field.name, value: (field) => field);
+  }
 
   /// The field types.
   final List<DataType> fields;
+
+  Map<String, DataType> _fieldsMap;
 
   factory RecordType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(
@@ -442,9 +447,8 @@ class RecordType extends DataType<Map<String, dynamic>> {
       'fields': fields?.map((field) => field.toJson())?.toList(),
     });
 
-  DataType getFieldType(String fieldName) => Validate.notNull(
-      fields.firstWhere((field) => field.name == fieldName, orElse: () => null),
-      'Field $fieldName not found');
+  DataType getFieldType(String fieldName) =>
+      Validate.notNull(_fieldsMap[fieldName], 'Field $fieldName not found');
 }
 
 /// A string type.

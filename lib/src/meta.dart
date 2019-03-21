@@ -14,7 +14,7 @@
 
 import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
-import 'package:sponge_client_dart/src/utils.dart';
+import 'package:sponge_client_dart/src/util/type_utils.dart';
 
 /// A value set metadata.
 class ValueSetMeta {
@@ -154,7 +154,13 @@ class ActionMeta {
     this.result,
     this.callable = true,
     this.qualifiedVersion,
-  }) : this.features = features ?? Map();
+  }) : this.features = features ?? Map() {
+    if (this.args != null) {
+      _argsAsRecordType = RecordType(this.args)
+        ..name = this.name
+        ..features.addAll(this.features ?? {});
+    }
+  }
 
   /// The action name.
   final String name;
@@ -186,6 +192,11 @@ class ActionMeta {
   /// The action qualified version.
   ProcessorQualifiedVersion qualifiedVersion;
 
+  RecordType _argsAsRecordType;
+
+  /// Could be `null` if the action has no argument metadata.
+  RecordType get argsAsRecordType => _argsAsRecordType;
+
   factory ActionMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ActionMeta(
@@ -206,12 +217,9 @@ class ActionMeta {
         : null;
   }
 
-  int getArgIndex(String argName) =>
-      SpongeUtils.getActionArgIndex(args, argName);
-
   /// Supports sub-arguments.
-  DataType getArg(String argName) =>
-      SpongeUtils.getActionArgType(args, argName);
+  DataType getArg(String path) =>
+      DataTypeUtils.getSubType(argsAsRecordType, path);
 }
 
 /// A knowledge base metadata.

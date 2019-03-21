@@ -186,7 +186,7 @@ class QualifiedDataType<T> {
 
   QualifiedDataType<C> createChild<C>(DataType<C> childType) {
     String parentPath = path != null
-        ? path + SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR
+        ? path + SpongeClientConstants.ATTRIBUTE_PATH_SEPARATOR
         : (isRoot ? '' : null);
 
     return QualifiedDataType(

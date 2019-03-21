@@ -23,5 +23,6 @@ export 'src/rest_client.dart';
 export 'src/rest_client_configuration.dart';
 export 'src/type.dart';
 export 'src/type_converter.dart';
+export 'src/type_utils.dart';
 export 'src/type_value.dart';
 export 'src/utils.dart';

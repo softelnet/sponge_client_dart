@@ -16,7 +16,7 @@ import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
-import 'package:sponge_client_dart/src/type_value.dart';
+import 'package:sponge_client_dart/src/type_utils.dart';
 import 'package:timezone/timezone.dart';
 
 /// A set of utility methods.
@@ -53,17 +53,13 @@ class SpongeUtils {
         : DateTime.parse(tzDateTimeString);
   }
 
-  // TODO Copy.
-  static List<String> getActionArgNameElements(String name) =>
-      name.split(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
-
   static int getActionArgIndex(List<DataType> argTypes, String argName) =>
       argTypes.indexWhere((argType) => argType.name == argName);
 
   static DataType getActionArgType(List<DataType> argTypes, String argName) {
     Validate.notNull(argTypes, 'Arguments not defined');
 
-    List<String> elements = getActionArgNameElements(argName);
+    List<String> elements = DataTypeUtils.getPathElements(argName);
 
     DataType argType = argTypes[getActionArgIndex(argTypes, elements[0])];
     elements.skip(1).take(elements.length - 1).forEach((element) {
@@ -86,57 +82,8 @@ class SpongeUtils {
   static void traverseActionArguments(
       ActionMeta actionMeta, void onType(QualifiedDataType _),
       [bool namedOnly = true]) {
-    actionMeta.args?.forEach((argType) => traverseDataType(
+    actionMeta.args?.forEach((argType) => DataTypeUtils.traverseDataType(
         QualifiedDataType(argType.name, argType), onType, namedOnly));
-  }
-
-  /// Traverses the data type but only through record types.
-  static void traverseDataType(
-      QualifiedDataType qType, void onType(QualifiedDataType _),
-      [bool namedOnly = true]) {
-    if (namedOnly && qType.type.name == null) {
-      return;
-    }
-
-    onType(qType);
-
-    // Traverses only through record types.
-    switch (qType.type.kind) {
-      case DataTypeKind.RECORD:
-        (qType.type as RecordType).fields?.forEach((field) =>
-            traverseDataType(qType.createChild(field), onType, namedOnly));
-        break;
-      default:
-        break;
-    }
-  }
-
-  static void traverseValue(QualifiedDataType qType, dynamic value,
-      void onValue(QualifiedDataType _qType, dynamic _value)) {
-    onValue(qType, value);
-
-    if (value == null) {
-      return;
-    }
-
-    // Bypass an annotated value.
-    if (value is AnnotatedValue) {
-      value = value.value;
-    }
-
-    // Traverses only through record types.
-    switch (qType.type.kind) {
-      case DataTypeKind.RECORD:
-        (value as Map<String, dynamic>).forEach(
-            (String fieldName, dynamic fieldValue) => traverseValue(
-                qType.createChild(
-                    (qType.type as RecordType).getFieldType(fieldName)),
-                fieldValue,
-                onValue));
-        break;
-      default:
-        break;
-    }
   }
 }
 

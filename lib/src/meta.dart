@@ -211,7 +211,7 @@ class ActionMeta {
       SpongeUtils.getActionArgIndex(args, argName);
 
   bool isSubArgName(String argName) =>
-      argName.contains(SpongeClientConstants.ACTION_SUB_ARG_SEPARATOR);
+      argName.contains(SpongeClientConstants.ATTRIBUTE_PATH_SEPARATOR);
 
   /// Supports sub-arguments.
   DataType getArg(String argName) =>

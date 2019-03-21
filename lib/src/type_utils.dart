@@ -80,15 +80,12 @@ class DataTypeUtils {
     var subType = type;
     elements.forEach((element) {
       Validate.notNull(subType, 'Argument $path not found');
-      //Validate.notNull(subType.name, 'The sub-type nas no name');
 
       // Verify Record/Map type.
       Validate.isTrue(subType is RecordType,
           'The element ${subType.name ?? subType.kind} is not a record');
 
-      subType = (subType as RecordType)
-          .fields
-          .firstWhere((field) => field.name == element, orElse: () => null);
+      subType = (subType as RecordType).getFieldType(element);
     });
 
     return subType;

@@ -13,7 +13,6 @@
 // limitations under the License.
 
 import 'package:meta/meta.dart';
-import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 
@@ -209,9 +208,6 @@ class ActionMeta {
 
   int getArgIndex(String argName) =>
       SpongeUtils.getActionArgIndex(args, argName);
-
-  bool isSubArgName(String argName) =>
-      argName.contains(SpongeClientConstants.ATTRIBUTE_PATH_SEPARATOR);
 
   /// Supports sub-arguments.
   DataType getArg(String argName) =>

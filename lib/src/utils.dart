@@ -16,6 +16,7 @@ import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:timezone/timezone.dart';
 
 /// A set of utility methods.
@@ -104,6 +105,34 @@ class SpongeUtils {
       case DataTypeKind.RECORD:
         (qType.type as RecordType).fields?.forEach((field) =>
             traverseDataType(qType.createChild(field), onType, namedOnly));
+        break;
+      default:
+        break;
+    }
+  }
+
+  static void traverseValue(QualifiedDataType qType, dynamic value,
+      void onValue(QualifiedDataType _qType, dynamic _value)) {
+    onValue(qType, value);
+
+    if (value == null) {
+      return;
+    }
+
+    // Bypass an annotated value.
+    if (value is AnnotatedValue) {
+      value = value.value;
+    }
+
+    // Traverses only through record types.
+    switch (qType.type.kind) {
+      case DataTypeKind.RECORD:
+        (value as Map<String, dynamic>).forEach(
+            (String fieldName, dynamic fieldValue) => traverseValue(
+                qType.createChild(
+                    (qType.type as RecordType).getFieldType(fieldName)),
+                fieldValue,
+                onValue));
         break;
       default:
         break;

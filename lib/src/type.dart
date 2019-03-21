@@ -150,8 +150,7 @@ class DataType<T> {
     DataTypeKind kind = DataTypeKind.values.firstWhere(
         (k) => _getDataTypeKindValue(k) == jsonDataTypeKind,
         orElse: () => null);
-    return Validate.notNull(kind,
-        'Unsupported type kind $jsonDataTypeKind');
+    return Validate.notNull(kind, 'Unsupported type kind $jsonDataTypeKind');
   }
 
   static String _getDataTypeKindValue(DataTypeKind kind) =>
@@ -273,8 +272,8 @@ class DateTimeType extends DataType<Uint8List> {
     DateTimeKind dateTimeKind = DateTimeKind.values.firstWhere(
         (k) => _getDateTimeKindValue(k) == jsonDateTimeKind,
         orElse: () => null);
-    return Validate.notNull(dateTimeKind,
-        'Unsupported date/time kind $jsonDateTimeKind');
+    return Validate.notNull(
+        dateTimeKind, 'Unsupported date/time kind $jsonDateTimeKind');
   }
 
   static String _getDateTimeKindValue(DateTimeKind dateTimeKind) =>
@@ -442,6 +441,10 @@ class RecordType extends DataType<Map<String, dynamic>> {
     ..addAll({
       'fields': fields?.map((field) => field.toJson())?.toList(),
     });
+
+  DataType getFieldType(String fieldName) => Validate.notNull(
+      fields.firstWhere((field) => field.name == fieldName, orElse: () => null),
+      'Field $fieldName not found');
 }
 
 /// A string type.

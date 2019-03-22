@@ -33,6 +33,7 @@ enum DataTypeKind {
   NUMBER,
   OBJECT,
   RECORD,
+  STREAM,
   STRING,
   TYPE,
   VOID,
@@ -63,6 +64,8 @@ DataType _typeFromJson(Map<String, dynamic> json) {
       return ObjectType.fromJson(json);
     case DataTypeKind.RECORD:
       return RecordType.fromJson(json);
+    case DataTypeKind.STREAM:
+      return StreamType.fromJson(json);
     case DataTypeKind.STRING:
       return StringType.fromJson(json);
     case DataTypeKind.TYPE:
@@ -449,6 +452,16 @@ class RecordType extends DataType<Map<String, dynamic>> {
 
   DataType getFieldType(String fieldName) =>
       Validate.notNull(_fieldsMap[fieldName], 'Field $fieldName not found');
+}
+
+/// A stream type.
+class StreamType extends DataType<dynamic> {
+  StreamType() : super(DataTypeKind.STREAM);
+
+  factory StreamType.fromJson(Map<String, dynamic> json) =>
+      DataType.fromJsonBase(StreamType(), json);
+
+  Map<String, dynamic> toJson() => super.toJson();
 }
 
 /// A string type.

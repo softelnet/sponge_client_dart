@@ -104,6 +104,7 @@ class DefaultTypeConverter extends TypeConverter {
       NumberTypeUnitConverter(),
       ObjectTypeUnitConverter(),
       RecordTypeUnitConverter(),
+      StreamTypeUnitConverter(),
       StringTypeUnitConverter(),
       TypeTypeUnitConverter(),
       VoidTypeUnitConverter(),
@@ -371,6 +372,10 @@ class RecordTypeUnitConverter
   Map<String, DataType> _createFieldMap(RecordType type) =>
       Map.fromIterable(type.fields,
           key: (field) => field.name, value: (field) => field);
+}
+
+class StreamTypeUnitConverter extends UnitTypeConverter<String, StreamType> {
+  StreamTypeUnitConverter() : super(DataTypeKind.STREAM);
 }
 
 class StringTypeUnitConverter extends UnitTypeConverter<String, StringType> {

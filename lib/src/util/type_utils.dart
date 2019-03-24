@@ -152,4 +152,14 @@ class DataTypeUtils {
         break;
     }
   }
+
+  static P getFeatureOrProperty<P>(
+      DataType type, dynamic value, String propertyName, P orElse()) {
+    P property;
+    if (value is AnnotatedValue) {
+      property = value.features[propertyName];
+    }
+
+    return property ?? type.features[propertyName] ?? orElse();
+  }
 }

@@ -93,6 +93,9 @@ class DataType<T> {
     this.provided,
   }) : this.features = features ?? Map();
 
+  /// The feature name for the format.
+  static const String FEATURE_FORMAT = 'format';
+
   /// The data type kind.
   final DataTypeKind kind;
 
@@ -217,6 +220,9 @@ class AnyType extends DataType<dynamic> {
 class BinaryType extends DataType<Uint8List> {
   BinaryType(this.mimeType) : super(DataTypeKind.BINARY);
 
+  /// The feature name for the mimeType.
+  static const String FEATURE_MIME_TYPE = 'mimeType';
+
   /// The binary data mime type.
   final String mimeType;
 
@@ -259,6 +265,9 @@ enum DateTimeKind {
 class DateTimeType extends DataType<Uint8List> {
   DateTimeType(this.dateTimeKind) : super(DataTypeKind.DATE_TIME);
 
+  /// The feature name for the dateTimeKind.
+  static const String FEATURE_DATE_TIME_KIND = 'dateTimeKind';
+
   /// The date/time kind.
   final DateTimeKind dateTimeKind;
 
@@ -299,6 +308,18 @@ class IntegerType extends DataType<int> {
     this.exclusiveMin = false,
     this.exclusiveMax = false,
   }) : super(DataTypeKind.INTEGER);
+
+  /// The feature name for the exclusiveMax.
+  static const String FEATURE_MIN_VALUE = 'minValue';
+
+  /// The feature name for the maxValue.
+  static const String FEATURE_MAX_VALUE = 'maxValue';
+
+  /// The feature name for the exclusiveMin.
+  static const String FEATURE_EXCLUSIVE_MIN = 'exclusiveMin';
+
+  /// The feature name for the exclusiveMax.
+  static const String FEATURE_EXCLUSIVE_MAX = 'exclusiveMax';
 
   /// The minimum value (optional).
   final int minValue;
@@ -378,6 +399,18 @@ class NumberType extends DataType<num> {
     this.exclusiveMax = false,
   }) : super(DataTypeKind.NUMBER);
 
+  /// The feature name for the exclusiveMax.
+  static const String FEATURE_MIN_VALUE = 'minValue';
+
+  /// The feature name for the maxValue.
+  static const String FEATURE_MAX_VALUE = 'maxValue';
+
+  /// The feature name for the exclusiveMin.
+  static const String FEATURE_EXCLUSIVE_MIN = 'exclusiveMin';
+
+  /// The feature name for the exclusiveMax.
+  static const String FEATURE_EXCLUSIVE_MAX = 'exclusiveMax';
+
   /// The minimum value (optional).
   final double minValue;
 
@@ -412,6 +445,9 @@ class NumberType extends DataType<num> {
 /// An object. This type requires a class name (typically a Java class name) as a constructor parameter.
 class ObjectType extends DataType<dynamic> {
   ObjectType(this.className) : super(DataTypeKind.OBJECT);
+
+  /// The feature name for the className.
+  static const String FEATURE_CLASS_NAME = 'className';
 
   /// The class name.
   final String className;
@@ -470,6 +506,12 @@ class StringType extends DataType<String> {
     this.minLength,
     this.maxLength,
   }) : super(DataTypeKind.STRING);
+
+  /// The feature name for the minLength.
+  static const String FEATURE_MIN_LENGTH = 'minLength';
+
+  /// The feature name for the maxLength.
+  static const String FEATURE_MAX_LENGTH = 'maxLength';
 
   /// The minimum length (optional).
   final int minLength;

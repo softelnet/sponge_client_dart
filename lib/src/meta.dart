@@ -15,6 +15,7 @@
 import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 
 /// A value set metadata.
 class ValueSetMeta {
@@ -220,6 +221,12 @@ class ActionMeta {
   /// Supports sub-arguments.
   DataType getArg(String path) =>
       DataTypeUtils.getSubType(argsAsRecordType, path);
+
+  int getArgIndex(String argName) {
+    var index = args.indexWhere((arg) => arg.name == argName);
+    Validate.isTrue(index > -1, 'Argument $argName not found');
+    return index;
+  }
 }
 
 /// A knowledge base metadata.

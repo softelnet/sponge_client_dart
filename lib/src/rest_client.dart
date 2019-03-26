@@ -468,20 +468,20 @@ class SpongeRestClient {
 
     if (expectedNonOptionalArgCount == expectedAllArgCount) {
       Validate.isTrue(expectedAllArgCount == actualArgCount,
-              'Incorrect number of arguments. Expected $expectedAllArgCount but got $actualArgCount');
+          'Incorrect number of arguments. Expected $expectedAllArgCount but got $actualArgCount');
     } else {
       Validate.isTrue(
           expectedNonOptionalArgCount <= actualArgCount &&
               actualArgCount <= expectedAllArgCount,
-              'Incorrect number of arguments. Expected between $expectedNonOptionalArgCount and $expectedAllArgCount'
-              ' but got $actualArgCount');
+          'Incorrect number of arguments. Expected between $expectedNonOptionalArgCount and $expectedAllArgCount'
+          ' but got $actualArgCount');
     }
 
     // Validate non-nullable arguments.
     for (int i = 0; i < actionMeta.args.length; i++) {
       var argType = actionMeta.args[i];
       Validate.isTrue(argType.optional || argType.nullable || args[i] != null,
-              'Action argument ${argType.label ?? argType.name} is not set');
+          'Action argument ${argType.label ?? argType.name} is not set');
     }
   }
 
@@ -598,6 +598,13 @@ class SpongeRestClient {
         // Must recreate the cache because of the internal cache implementation.
         _actionMetaCache = _createActionMetaCache();
       });
+
+  /// Clears the session, i.e. the auth token.
+  Future<void> clearSession() async {
+    await _lock.synchronized(() async {
+      _currentAuthToken = null;
+    });
+  }
 }
 
 typedef R _ResponseFromJsonCallback<R extends SpongeResponse>(

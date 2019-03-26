@@ -55,3 +55,12 @@ class InvalidAuthTokenException extends SpongeClientException {
     String detailedErrorMessage,
   ]) : super(errorCode, errorMessage, detailedErrorMessage);
 }
+
+/// A Sponge client exception for incorrect username or password version.
+class IncorrectUsernamePasswordException extends SpongeClientException {
+  const IncorrectUsernamePasswordException([
+    String errorCode,
+    String errorMessage,
+    String detailedErrorMessage,
+  ]) : super(errorCode, errorMessage, detailedErrorMessage);
+}

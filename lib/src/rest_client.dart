@@ -121,6 +121,9 @@ class SpongeRestClient {
               .ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION:
             throw IncorrectKnowledgeBaseVersionException(response.errorCode,
                 response.errorMessage, response.detailedErrorMessage);
+          case SpongeClientConstants.ERROR_CODE_INCORRECT_USERNAME_PASSWORD:
+            throw IncorrectUsernamePasswordException(response.errorCode,
+                response.errorMessage, response.detailedErrorMessage);
           default:
             throw SpongeClientException(response.errorCode,
                 response.errorMessage, response.detailedErrorMessage);

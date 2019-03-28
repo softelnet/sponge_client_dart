@@ -401,6 +401,6 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
   }
 }
 
-class VoidTypeUnitConverter extends UnitTypeConverter<Null, VoidType> {
+class VoidTypeUnitConverter extends UnitTypeConverter<void, VoidType> {
   VoidTypeUnitConverter() : super(DataTypeKind.VOID);
 }

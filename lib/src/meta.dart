@@ -155,13 +155,7 @@ class ActionMeta {
     this.result,
     this.callable = true,
     this.qualifiedVersion,
-  }) : this.features = features ?? Map() {
-    if (this.args != null) {
-      _argsAsRecordType = RecordType(this.args)
-        ..name = this.name
-        ..features.addAll(this.features ?? {});
-    }
-  }
+  }) : this.features = features ?? Map();
 
   /// The action name.
   final String name;
@@ -193,10 +187,9 @@ class ActionMeta {
   /// The action qualified version.
   ProcessorQualifiedVersion qualifiedVersion;
 
-  RecordType _argsAsRecordType;
-
   /// Could be `null` if the action has no argument metadata.
-  RecordType get argsAsRecordType => _argsAsRecordType;
+  RecordType get argsAsRecordType =>
+      args != null ? (RecordType(args)..name = this.name) : null;
 
   factory ActionMeta.fromJson(Map<String, dynamic> json) {
     return json != null

@@ -262,7 +262,7 @@ class SpongeRestClient {
   }
 
   /// Sends the `logout` request to the server. See [logoutByRequest].
-  Future<Null> logout() async {
+  Future<void> logout() async {
     await logoutByRequest(LogoutRequest());
   }
 
@@ -319,7 +319,7 @@ class SpongeRestClient {
     return response;
   }
 
-  Future<Null> _unmarshalActionMeta(ActionMeta actionMeta) async {
+  Future<void> _unmarshalActionMeta(ActionMeta actionMeta) async {
     if (actionMeta?.args == null) {
       return;
     }
@@ -336,7 +336,7 @@ class SpongeRestClient {
     }
   }
 
-  Future<Null> unmarshalProvidedActionArgValues(
+  Future<void> unmarshalProvidedActionArgValues(
       ActionMeta actionMeta, Map<String, ProvidedValue> argValues) async {
     if (argValues == null || actionMeta.args == null) {
       return;
@@ -519,7 +519,7 @@ class SpongeRestClient {
   }
 
   /// Unmarshals the action call result.
-  Future<Null> _unmarshalActionCallResult(
+  Future<void> _unmarshalActionCallResult(
       ActionMeta actionMeta, ActionCallResponse response) async {
     if (actionMeta?.result == null || response.result == null) {
       return;
@@ -581,7 +581,7 @@ class SpongeRestClient {
           (json) => ReloadResponse.fromJson(json), context);
 
   /// Sends the `reload` request to the server.
-  Future<Null> reload() async {
+  Future<void> reload() async {
     await reloadByRequest(ReloadRequest());
   }
 
@@ -597,7 +597,7 @@ class SpongeRestClient {
   }
 
   /// Clears the action metadata cache.
-  Future<Null> clearCache() async => await _lock.synchronized(() async {
+  Future<void> clearCache() async => await _lock.synchronized(() async {
         // Must recreate the cache because of the internal cache implementation.
         _actionMetaCache = _createActionMetaCache();
       });

@@ -32,3 +32,5 @@ linter:
     - unnecessary_brace_in_string_interps
     - unrelated_type_equality_checks
     - valid_regexps
+    - prefer_void_to_null
+    - void_checks

@@ -543,7 +543,7 @@ class TypeType extends DataType<DataType> {
 }
 
 /// A void type that may be used to specify that an action returns no meaningful result.
-class VoidType extends DataType<Null> {
+class VoidType extends DataType<void> {
   VoidType() : super(DataTypeKind.VOID);
 
   factory VoidType.fromJson(Map<String, dynamic> json) =>

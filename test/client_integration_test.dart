@@ -559,7 +559,7 @@ void main() {
 
       List<QualifiedDataType> namedQTypes = [];
       SpongeUtils.traverseActionArguments(
-          meta, (qType) => namedQTypes.add(qType), true);
+          meta, (qType) => namedQTypes.add(qType), namedOnly: true);
 
       expect(namedQTypes[0].path, equals('book'));
       expect(identical(namedQTypes[0].type, meta.getArg('book')), isTrue);

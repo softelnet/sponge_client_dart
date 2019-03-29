@@ -55,8 +55,8 @@ class SpongeUtils {
   /// Traverses the action argument types but only through record types.
   static void traverseActionArguments(
       ActionMeta actionMeta, void onType(QualifiedDataType _),
-      [bool namedOnly = true]) {
+      {bool namedOnly = true}) {
     actionMeta.args?.forEach((argType) => DataTypeUtils.traverseDataType(
-        QualifiedDataType(argType.name, argType), onType, namedOnly));
+        QualifiedDataType(argType.name, argType), onType, namedOnly: namedOnly));
   }
 }

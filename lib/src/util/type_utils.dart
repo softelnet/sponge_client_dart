@@ -104,25 +104,59 @@ class DataTypeUtils {
     return result;
   }
 
+  static bool hasSubType(DataType type, DataTypeKind subTypeKind) {
+    bool result = false;
+
+    // Traverses record and collection sub-types.
+    traverseDataType(QualifiedDataType(null, type), (QualifiedDataType qType) {
+      if (qType.type.kind == subTypeKind) {
+        result = true;
+      }
+    }, namedOnly: false, traverseCollections: true);
+
+    return result;
+  }
+
   /// Traverses the data type but only through record types.
   static void traverseDataType(
-      QualifiedDataType qType, void onType(QualifiedDataType _),
-      [bool namedOnly = true]) {
+    QualifiedDataType qType,
+    void onType(QualifiedDataType _), {
+    bool namedOnly = true,
+    bool traverseCollections = false,
+  }) {
     if (namedOnly && qType.type.name == null) {
       return;
     }
 
     onType(qType);
 
-    // Traverses only through record types.
+    List<QualifiedDataType> subTypes = [];
+
     switch (qType.type.kind) {
       case DataTypeKind.RECORD:
-        (qType.type as RecordType).fields?.forEach((field) =>
-            traverseDataType(qType.createChild(field), onType, namedOnly));
+        (qType.type as RecordType)
+            .fields
+            ?.forEach((field) => subTypes.add(qType.createChild(field)));
+        break;
+      case DataTypeKind.LIST:
+        if (traverseCollections) {
+          subTypes.add(
+              QualifiedDataType(null, (qType.type as ListType).elementType));
+        }
+        break;
+      case DataTypeKind.MAP:
+        if (traverseCollections) {
+          subTypes
+            ..add(QualifiedDataType(null, (qType.type as MapType).keyType))
+            ..add(QualifiedDataType(null, (qType.type as MapType).valueType));
+        }
         break;
       default:
         break;
     }
+
+    subTypes.forEach((subType) => traverseDataType(subType, onType,
+        namedOnly: namedOnly, traverseCollections: traverseCollections));
   }
 
   static void traverseValue(QualifiedDataType qType, dynamic value,

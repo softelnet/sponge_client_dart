@@ -15,6 +15,7 @@
 import 'package:test/test.dart';
 
 import 'client_integration_test.dart' as client_integration_test;
+import 'data_type_utils_test.dart' as data_type_utils_test;
 import 'sub_action_specification_test.dart' as sub_action_specification_test;
 import 'utils_test.dart' as utils_test;
 
@@ -22,6 +23,8 @@ void main() async {
   group('All', () {
     group('Integration', client_integration_test.main);
     group('Sub-actions', sub_action_specification_test.main);
+    group('Data type utils', data_type_utils_test.main);
+
     group('Utils', utils_test.main);
   });
 }

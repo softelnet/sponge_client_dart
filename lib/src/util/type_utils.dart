@@ -30,13 +30,13 @@ class DataTypeUtils {
 
   // Bypasses annotated values. Doesn't support collections inside the path with the exception of the last path element.
   static dynamic getSubValue(dynamic value, String path,
-          {bool returnAnnotated = false}) =>
+          {bool returnAnnotatedTarget = false}) =>
       _getSubValueByPathElements(value, getPathElements(path),
-          returnAnnotated: returnAnnotated);
+          returnAnnotatedTarget: returnAnnotatedTarget);
 
   static dynamic _getSubValueByPathElements(
       dynamic value, List<String> pathElements,
-      {bool returnAnnotated = false}) {
+      {bool returnAnnotatedTarget = false}) {
     pathElements.forEach((element) {
       value = value is AnnotatedValue ? (value as AnnotatedValue).value : value;
       if (value == null) {
@@ -48,7 +48,7 @@ class DataTypeUtils {
       value = (value as Map)[element];
     });
 
-    if (!returnAnnotated) {
+    if (!returnAnnotatedTarget) {
       value = value is AnnotatedValue ? (value as AnnotatedValue).value : value;
     }
 
@@ -59,12 +59,12 @@ class DataTypeUtils {
   static void setSubValue(dynamic value, String path, dynamic subValue) {
     var elements = getPathElements(path);
 
-    Validate.isTrue(
-        elements.isNotEmpty, 'The $path is empty or points to the same value');
+    Validate.isTrue(elements.isNotEmpty,
+        'The path \'$path\' is empty or points to the same value');
     if (elements.length > 1) {
       value = _getSubValueByPathElements(
           value, elements.sublist(0, elements.length - 1),
-          returnAnnotated: false);
+          returnAnnotatedTarget: false);
     }
 
     Validate.notNull(value, 'The parent value of $path is null');

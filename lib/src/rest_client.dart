@@ -107,10 +107,10 @@ class SpongeRestClient {
     return request;
   }
 
-  R _setupResponse<R extends SpongeResponse>(R response) {
+  R _setupResponse<R extends SpongeResponse>(String operation, R response) {
     if (response.errorCode != null) {
       _logger.fine(() =>
-          'Error response (${response.errorCode}): ${response.errorMessage}\n${response.detailedErrorMessage ?? ""}');
+          'Error response for $operation (${response.errorCode}): ${response.errorMessage}\n${response.detailedErrorMessage ?? ""}');
 
       if (_configuration.throwExceptionOnErrorResponse) {
         switch (response.errorCode) {
@@ -139,8 +139,10 @@ class SpongeRestClient {
     context ??= SpongeRequestContext();
 
     try {
-      return _setupResponse(await _doExecute(
-          operation, _setupRequest(request), fromJson, context));
+      return _setupResponse(
+          operation,
+          await _doExecute(
+              operation, _setupRequest(request), fromJson, context));
     } on InvalidAuthTokenException {
       // Relogin if set up and necessary.
       if (_currentAuthToken != null && _configuration.relogin) {
@@ -149,8 +151,10 @@ class SpongeRestClient {
         // Clear the request auth token.
         request.authToken = null;
 
-        return _setupResponse(await _doExecute(
-            operation, _setupRequest(request), fromJson, context));
+        return _setupResponse(
+            operation,
+            await _doExecute(
+                operation, _setupRequest(request), fromJson, context));
       } else {
         rethrow;
       }

@@ -1,3 +1,9 @@
+## 1.9.0 (2019-04-15)
+
+* Added a new type `StreamType`.
+* Added a new REST API error code `ERROR_CODE_INCORRECT_USERNAME_PASSWORD ("SPONGE004")`.
+* Dependencies upgrade.
+
 ## 1.8.0 (2019-03-04)
 
 * API change: Action arguments and result metadata are now specified as data types. `ArgMeta` and `ResultMeta` classes have been removed.

@@ -14,7 +14,7 @@
 
 /// The Sponge client constants.
 abstract class SpongeClientConstants {
-  static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.8';
+  static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.9';
 
   static const int API_VERSION = 1;
   static const String CONTENT_TYPE_JSON = "application/json;charset=utf-8";

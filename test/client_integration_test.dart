@@ -559,7 +559,8 @@ void main() {
 
       List<QualifiedDataType> namedQTypes = [];
       SpongeUtils.traverseActionArguments(
-          meta, (qType) => namedQTypes.add(qType), namedOnly: true);
+          meta, (qType) => namedQTypes.add(qType),
+          namedOnly: true);
 
       expect(namedQTypes[0].path, equals('book'));
       expect(identical(namedQTypes[0].type, meta.getArg('book')), isTrue);
@@ -847,6 +848,28 @@ void main() {
         ..configuration.password = 'password';
       expect(() async => await client.reload(),
           throwsA(const TypeMatcher<SpongeClientException>()));
+    });
+    test('testAutoUseAuthTokenTrue', () async {
+      var client = await getClient();
+      client.configuration
+        ..username = 'john'
+        ..password = 'password'
+        ..autoUseAuthToken = true;
+
+      expect(client.currentAuthToken, isNull);
+      await client.getActions();
+      expect(client.currentAuthToken, isNotNull);
+    });
+    test('testAutoUseAuthTokenFalse', () async {
+      var client = await getClient();
+      client.configuration
+        ..username = 'john'
+        ..password = 'password'
+        ..autoUseAuthToken = false;
+
+      expect(client.currentAuthToken, isNull);
+      await client.getActions();
+      expect(client.currentAuthToken, isNull);
     });
   });
 

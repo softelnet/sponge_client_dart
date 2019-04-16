@@ -1,3 +1,7 @@
+## 1.9.1 (not released yet)
+
+* Added support for automatic use of auth tokens.
+
 ## 1.9.0 (2019-04-15)
 
 * Added a new type `StreamType`.

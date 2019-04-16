@@ -53,7 +53,11 @@ class SpongeRestClient {
   String get _url => _configuration.url;
 
   int _currentRequestId = 0;
+  int get currentRequestId => _currentRequestId;
+
   String _currentAuthToken;
+  String get currentAuthToken => _currentAuthToken;
+
   MapCache<String, ActionMeta> _actionMetaCache;
   final TypeConverter _typeConverter;
 
@@ -139,10 +143,13 @@ class SpongeRestClient {
     context ??= SpongeRequestContext();
 
     try {
-      return _setupResponse(
-          operation,
-          await _doExecute(
-              operation, _setupRequest(request), fromJson, context));
+      if (_configuration.autoUseAuthToken &&
+          _currentAuthToken == null &&
+          request.authToken == null) {
+        await login();
+      }
+
+      return await _executeDelegate(operation, request, fromJson, context);
     } on InvalidAuthTokenException {
       // Relogin if set up and necessary.
       if (_currentAuthToken != null && _configuration.relogin) {
@@ -151,14 +158,22 @@ class SpongeRestClient {
         // Clear the request auth token.
         request.authToken = null;
 
-        return _setupResponse(
-            operation,
-            await _doExecute(
-                operation, _setupRequest(request), fromJson, context));
+        return await _executeDelegate(operation, request, fromJson, context);
       } else {
         rethrow;
       }
     }
+  }
+
+  Future<SpongeResponse> _executeDelegate(
+      String operation,
+      SpongeRequest request,
+      _ResponseFromJsonCallback fromJson,
+      SpongeRequestContext context) async {
+    context ??= SpongeRequestContext();
+
+    return _setupResponse(operation,
+        await _doExecute(operation, _setupRequest(request), fromJson, context));
   }
 
   void _fireOnRequestSerializedListener(
@@ -233,7 +248,7 @@ class SpongeRestClient {
       {SpongeRequestContext context}) async {
     return await _lock.synchronized(() async {
       _currentAuthToken = null;
-      LoginResponse response = await _execute(
+      LoginResponse response = await _executeDelegate(
           SpongeClientConstants.OPERATION_LOGIN,
           request,
           (json) => LoginResponse.fromJson(json),

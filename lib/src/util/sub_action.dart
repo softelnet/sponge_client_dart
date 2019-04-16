@@ -64,7 +64,7 @@ class SubActionSpec {
         Validate.isTrue(
             targetType.kind ==
                 DataTypeUtils.getSubType(sourceType, substitution.source).kind,
-            'The target argument type ${targetType.kind} of ${substitution.target} is incompatible with'
+            'The target argument type ${targetType.kind} of ${substitution.target} in ${subActionMeta.name} is incompatible with'
             ' the source type ${sourceType.kind} of ${substitution.source}');
       });
     }

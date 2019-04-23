@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:sponge_client_dart/src/meta.dart';
+import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 
 /// A base response.
@@ -61,17 +62,27 @@ class ActionCallResponse extends SpongeResponse {
 
 /// A get actions response.
 class GetActionsResponse extends SpongeResponse {
-  GetActionsResponse(this.actions);
+  GetActionsResponse(
+    this.actions, {
+    this.types,
+  });
 
   /// The available actions.
   List<ActionMeta> actions;
 
+  /// The registered types used in the actions.
+  Map<String, DataType> types;
+
   factory GetActionsResponse.fromJson(Map<String, dynamic> json) =>
       SpongeResponse.setupFromJson(
-          GetActionsResponse((json['actions'] as List)
-                  ?.map((action) => ActionMeta.fromJson(action))
-                  ?.toList()) ??
-              [],
+          GetActionsResponse(
+            (json['actions'] as List)
+                    ?.map((action) => ActionMeta.fromJson(action))
+                    ?.toList() ??
+                [],
+            types: (json['types'] as Map)?.map((name, typeJson) =>
+                MapEntry(name, DataType.fromJson(typeJson))),
+          ),
           json);
 }
 

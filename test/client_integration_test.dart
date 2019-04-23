@@ -322,6 +322,63 @@ void main() {
       book2.forEach((key, value) => expect(book3[key], equals(value)));
       expect(book3['comment'], isNull);
     });
+
+    test('testRegisteredTypeArgAction', () async {
+      var client = await getClient();
+      var request = GetActionsRequest()
+        ..name = 'RegisteredTypeArgAction'
+        ..registeredTypes = true;
+
+      Map<String, DataType> types =
+          (await client.getActionsByRequest(request)).types;
+      expect(types.length, equals(1));
+      var personType = types['Person'] as RecordType;
+      expect(personType, isNotNull);
+      expect(personType.fields.length, equals(2));
+      expect(personType.fields[0].name, equals('firstName'));
+      expect(personType.fields[0].kind, equals(DataTypeKind.STRING));
+      expect(personType.fields[1].name, equals('surname'));
+      expect(personType.fields[1].kind, equals(DataTypeKind.STRING));
+
+      String surname = await client.call('RegisteredTypeArgAction', [
+        {'firstName': 'James', 'surname': 'Joyce'}
+      ]);
+      expect(surname, equals('Joyce'));
+    });
+    test('testInheritedRegisteredTypeArgAction', () async {
+      var client = await getClient();
+      var request = GetActionsRequest()
+        ..name = 'InheritedRegisteredTypeArgAction'
+        ..registeredTypes = true;
+
+      Map<String, DataType> types =
+          (await client.getActionsByRequest(request)).types;
+      expect(types.length, equals(2));
+
+      var personType = types['Person'] as RecordType;
+      expect(personType, isNotNull);
+      expect(personType.fields.length, equals(2));
+      expect(personType.fields[0].name, equals('firstName'));
+      expect(personType.fields[0].kind, equals(DataTypeKind.STRING));
+      expect(personType.fields[1].name, equals('surname'));
+      expect(personType.fields[1].kind, equals(DataTypeKind.STRING));
+
+      var citizenType = types['Citizen'] as RecordType;
+      expect(citizenType, isNotNull);
+      expect(citizenType.fields.length, equals(3));
+      expect(citizenType.fields[0].name, equals('firstName'));
+      expect(citizenType.fields[0].kind, equals(DataTypeKind.STRING));
+      expect(citizenType.fields[1].name, equals('surname'));
+      expect(citizenType.fields[1].kind, equals(DataTypeKind.STRING));
+      expect(citizenType.fields[2].name, equals('country'));
+      expect(citizenType.fields[2].kind, equals(DataTypeKind.STRING));
+
+      String sentence = await client.call('InheritedRegisteredTypeArgAction', [
+        {'firstName': 'John', 'surname': 'Brown', 'country': 'UK'}
+      ]);
+      expect(sentence, equals('John comes from UK'));
+    });
+
     test('testNestedRecordAsArgAction', () async {
       var client = await getClient();
       ActionMeta actionMeta =

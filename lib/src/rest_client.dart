@@ -26,6 +26,7 @@ import 'package:sponge_client_dart/src/listener.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/request.dart';
 import 'package:sponge_client_dart/src/response.dart';
+import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_converter.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
@@ -335,7 +336,17 @@ class SpongeRestClient {
       }
     }
 
+    if (response.types != null) {
+      for (var type in response.types.values) {
+        await _unmarshalDataType(type);
+      }
+    }
+
     return response;
+  }
+
+  Future<void> _unmarshalDataType(DataType type) async {
+    type.defaultValue = await _typeConverter.unmarshal(type, type.defaultValue);
   }
 
   Future<void> _unmarshalActionMeta(ActionMeta actionMeta) async {
@@ -344,14 +355,11 @@ class SpongeRestClient {
     }
 
     for (var argType in actionMeta.args) {
-      argType.defaultValue =
-          await _typeConverter.unmarshal(argType, argType.defaultValue);
+      await _unmarshalDataType(argType);
     }
 
     if (actionMeta.result != null) {
-      var resultType = actionMeta.result;
-      resultType.defaultValue =
-          await _typeConverter.unmarshal(resultType, resultType.defaultValue);
+      await _unmarshalDataType(actionMeta.result);
     }
   }
 

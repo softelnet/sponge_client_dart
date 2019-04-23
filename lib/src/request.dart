@@ -92,11 +92,15 @@ class GetActionsRequest extends SpongeRequest {
   /// The metadata required flag (optional).
   bool metadataRequired;
 
+  /// The flag for requesting registered types in the result (defaults to `false`).
+  bool registeredTypes;
+
   @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'name': name,
       'metadataRequired': metadataRequired,
+      'registeredTypes': registeredTypes,
     });
 }
 

@@ -81,6 +81,7 @@ DataType _typeFromJson(Map<String, dynamic> json) {
 class DataType<T> {
   DataType(
     this.kind, {
+    this.registeredType,
     this.name,
     this.label,
     this.description,
@@ -98,6 +99,9 @@ class DataType<T> {
 
   /// The data type kind.
   final DataTypeKind kind;
+
+  /// The optional corresponding registered data type name.
+  String registeredType;
 
   /// The data type location name.
   String name;
@@ -138,6 +142,7 @@ class DataType<T> {
 
   @protected
   static DataType fromJsonBase(DataType type, Map<String, dynamic> json) {
+    type.registeredType = json['registeredType'];
     type.name = json['name'];
     type.label = json['label'];
     type.description = json['description'];
@@ -464,7 +469,11 @@ class ObjectType extends DataType<dynamic> {
 /// A record type. This type requires a list of record field types. A value of this type has to be an instance of Map<String, dynamic> with
 /// elements corresponding to the field names and values.
 class RecordType extends DataType<Map<String, dynamic>> {
-  RecordType(this.fields) : super(DataTypeKind.RECORD) {
+  RecordType(
+    this.fields, {
+    this.baseType,
+    this.inheritationApplied = false,
+  }) : super(DataTypeKind.RECORD) {
     _fieldsMap = Map.fromIterable(this.fields,
         key: (field) => field.name, value: (field) => field);
   }
@@ -472,13 +481,23 @@ class RecordType extends DataType<Map<String, dynamic>> {
   /// The field types.
   final List<DataType> fields;
 
+  /// The base record type.
+  final RecordType baseType;
+
+  /// The flag that tells if inheritance has been applied to this type.
+  final bool inheritationApplied;
+
   Map<String, DataType> _fieldsMap;
 
   factory RecordType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(
-          RecordType((json['fields'] as List)
-              ?.map((arg) => DataType.fromJson(arg))
-              ?.toList()),
+          RecordType(
+            (json['fields'] as List)
+                ?.map((arg) => DataType.fromJson(arg))
+                ?.toList(),
+            baseType: DataType.fromJson(json['baseType']),
+            inheritationApplied: json['inheritationApplied'],
+          ),
           json);
 
   Map<String, dynamic> toJson() => super.toJson()

@@ -288,10 +288,7 @@ class NumberTypeUnitConverter extends UnitTypeConverter<num, NumberType> {
   NumberTypeUnitConverter() : super(DataTypeKind.NUMBER);
 }
 
-typedef Future<dynamic> ObjectUnitTypeMarshallerCallback(
-    TypeConverter converter, dynamic value);
-
-typedef Future<dynamic> ObjectUnitTypeUnmarshallerCallback(
+typedef Future<dynamic> ObjectTypeUnitConverterMapper(
     TypeConverter converter, dynamic value);
 
 class ObjectTypeUnitConverter extends UnitTypeConverter<dynamic, ObjectType> {
@@ -299,38 +296,36 @@ class ObjectTypeUnitConverter extends UnitTypeConverter<dynamic, ObjectType> {
       : super(DataTypeKind.OBJECT);
 
   final bool _useTransparentIfNotFound;
-  final Map<String, ObjectUnitTypeMarshallerCallback> marshallers = Map();
-  final Map<String, ObjectUnitTypeUnmarshallerCallback> unmarshallers = Map();
+  final Map<String, ObjectTypeUnitConverterMapper> marshalers = Map();
+  final Map<String, ObjectTypeUnitConverterMapper> unmarshalers = Map();
 
   @override
   Future<dynamic> marshal(
       TypeConverter converter, ObjectType type, dynamic value) async {
-    if (!marshallers.containsKey(type.className)) {
+    if (!marshalers.containsKey(type.className)) {
       if (_useTransparentIfNotFound) {
         return value;
       } else {
         throw Exception('Unsupported object type class name ${type.className}');
       }
     }
-    return marshallers[type.className](converter, value);
+    return marshalers[type.className](converter, value);
   }
 
   @override
   Future<dynamic> unmarshal(
       TypeConverter converter, ObjectType type, dynamic value) async {
-    if (!unmarshallers.containsKey(type.className)) {
+    if (!unmarshalers.containsKey(type.className)) {
       throw Exception('Unsupported object type class name ${type.className}');
     }
-    return unmarshallers[type.className](converter, value);
+    return unmarshalers[type.className](converter, value);
   }
 
-  void addMarshaller(
-          String className, ObjectUnitTypeMarshallerCallback callback) =>
-      marshallers[className] = callback;
+  void addMarshaler(String className, ObjectTypeUnitConverterMapper mapper) =>
+      marshalers[className] = mapper;
 
-  void addUnmarshaller(
-          String className, ObjectUnitTypeUnmarshallerCallback callback) =>
-      unmarshallers[className] = callback;
+  void addUnmarshaler(String className, ObjectTypeUnitConverterMapper mapper) =>
+      unmarshalers[className] = mapper;
 }
 
 class RecordTypeUnitConverter

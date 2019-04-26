@@ -71,8 +71,8 @@ CompoundComplexObject createTestCompoundComplexObject() {
 
 ObjectTypeUnitConverter createObjectTypeUnitConverter([bool useTransparentIfNotFound = false]) =>
     ObjectTypeUnitConverter(useTransparentIfNotFound)
-      ..addMarshaller('org.openksavi.sponge.restapi.test.base.CompoundComplexObject',
+      ..addMarshaler('org.openksavi.sponge.restapi.test.base.CompoundComplexObject',
           (_, value) async => (value as CompoundComplexObject)?.toJson())
-      ..addUnmarshaller(
+      ..addUnmarshaler(
           'org.openksavi.sponge.restapi.test.base.CompoundComplexObject',
           (_, value) async => CompoundComplexObject.fromJson(value));

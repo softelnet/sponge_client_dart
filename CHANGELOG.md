@@ -3,6 +3,7 @@
 * Added `DataType.registeredType`.
 * Added support for `RecordType` inheritance.
 * Added support for automatic use of auth tokens.
+* Added support for custom REST API operations.
 
 ## 1.9.0 (2019-04-15)
 

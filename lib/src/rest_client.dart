@@ -139,8 +139,10 @@ class SpongeRestClient {
     return response;
   }
 
-  Future<SpongeResponse> _execute(String operation, SpongeRequest request,
-      _ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
+  /// Sends the request to the server and returns the response.
+  Future<R> execute<T extends SpongeRequest, R extends SpongeResponse>(
+      String operation, T request, ResponseFromJsonCallback<R> fromJson,
+      [SpongeRequestContext context]) async {
     context ??= SpongeRequestContext();
 
     try {
@@ -169,7 +171,7 @@ class SpongeRestClient {
   Future<SpongeResponse> _executeDelegate(
       String operation,
       SpongeRequest request,
-      _ResponseFromJsonCallback fromJson,
+      ResponseFromJsonCallback fromJson,
       SpongeRequestContext context) async {
     context ??= SpongeRequestContext();
 
@@ -201,7 +203,7 @@ class SpongeRestClient {
   }
 
   Future<SpongeResponse> _doExecute(String operation, SpongeRequest request,
-      _ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
+      ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
     String requestBody = json.encode(request.toJson());
 
     _logger.finer(() =>
@@ -236,7 +238,7 @@ class SpongeRestClient {
   /// Sends the `version` request to the server and returns the response.
   Future<GetVersionResponse> getVersionByRequest(GetVersionRequest request,
           {SpongeRequestContext context}) async =>
-      await _execute(SpongeClientConstants.OPERATION_VERSION, request,
+      await execute(SpongeClientConstants.OPERATION_VERSION, request,
           (json) => GetVersionResponse.fromJson(json), context);
 
   /// Sends the `version` request to the server and returns the version.
@@ -270,7 +272,7 @@ class SpongeRestClient {
   Future<LogoutResponse> logoutByRequest(LogoutRequest request,
       {SpongeRequestContext context}) async {
     return await _lock.synchronized(() async {
-      LogoutResponse response = await _execute(
+      LogoutResponse response = await execute(
           SpongeClientConstants.OPERATION_LOGOUT,
           request,
           (json) => LogoutResponse.fromJson(json),
@@ -290,7 +292,7 @@ class SpongeRestClient {
   Future<GetKnowledgeBasesResponse> getKnowledgeBasesByRequest(
           GetKnowledgeBasesRequest request,
           {SpongeRequestContext context}) async =>
-      await _execute(SpongeClientConstants.OPERATION_KNOWLEDGE_BASES, request,
+      await execute(SpongeClientConstants.OPERATION_KNOWLEDGE_BASES, request,
           (json) => GetKnowledgeBasesResponse.fromJson(json), context);
 
   /// Sends the `knowledgeBases` request to the server and returns the list of available
@@ -314,7 +316,7 @@ class SpongeRestClient {
 
   Future<GetActionsResponse> _doGetActionsByRequest(GetActionsRequest request,
       bool populateCache, SpongeRequestContext context) async {
-    GetActionsResponse response = await _execute(
+    GetActionsResponse response = await execute(
         SpongeClientConstants.OPERATION_ACTIONS,
         request,
         (json) => GetActionsResponse.fromJson(json),
@@ -473,7 +475,7 @@ class SpongeRestClient {
 
     request.args = await _marshalActionCallArgs(actionMeta, request.args);
 
-    ActionCallResponse response = await _execute(
+    ActionCallResponse response = await execute(
         SpongeClientConstants.OPERATION_CALL,
         request,
         (json) => ActionCallResponse.fromJson(json),
@@ -566,7 +568,7 @@ class SpongeRestClient {
     request.current =
         await _marshalProvideActionArgsCurrent(actionMeta, request.current);
 
-    ProvideActionArgsResponse response = await _execute(
+    ProvideActionArgsResponse response = await execute(
         SpongeClientConstants.OPERATION_ACTION_ARGS,
         request,
         (json) => ProvideActionArgsResponse.fromJson(json),
@@ -592,7 +594,7 @@ class SpongeRestClient {
   /// Sends the `send` request to the server and returns the response.
   Future<SendEventResponse> sendByRequest(SendEventRequest request,
           {SpongeRequestContext context}) async =>
-      await _execute(SpongeClientConstants.OPERATION_SEND, request,
+      await execute(SpongeClientConstants.OPERATION_SEND, request,
           (json) => SendEventResponse.fromJson(json), context);
 
   /// Sends the event named [eventName] with optional [attributes] to the server.
@@ -604,7 +606,7 @@ class SpongeRestClient {
   /// Sends the `reload` request to the server and returns the response.
   Future<ReloadResponse> reloadByRequest(ReloadRequest request,
           {SpongeRequestContext context}) async =>
-      await _execute(SpongeClientConstants.OPERATION_RELOAD, request,
+      await execute(SpongeClientConstants.OPERATION_RELOAD, request,
           (json) => ReloadResponse.fromJson(json), context);
 
   /// Sends the `reload` request to the server.
@@ -637,5 +639,5 @@ class SpongeRestClient {
   }
 }
 
-typedef R _ResponseFromJsonCallback<R extends SpongeResponse>(
+typedef R ResponseFromJsonCallback<R extends SpongeResponse>(
     Map<String, dynamic> json);

@@ -139,8 +139,11 @@ class SpongeRestClient {
     return response;
   }
 
-  bool _isRequestAnonymous(SpongeRequest request) => _configuration.username == null && request.username == null
-      && _configuration.password == null && request.password == null;
+  bool _isRequestAnonymous(SpongeRequest request) =>
+      _configuration.username == null &&
+      request.username == null &&
+      _configuration.password == null &&
+      request.password == null;
 
   /// Sends the request to the server and returns the response.
   Future<R> execute<T extends SpongeRequest, R extends SpongeResponse>(
@@ -151,7 +154,8 @@ class SpongeRestClient {
     try {
       if (_configuration.autoUseAuthToken &&
           _currentAuthToken == null &&
-          request.authToken == null && !_isRequestAnonymous(request)) {
+          request.authToken == null &&
+          !_isRequestAnonymous(request)) {
         await login();
       }
 

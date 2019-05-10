@@ -1,4 +1,4 @@
-## 1.9.1 (not released yet)
+## 1.10.0 (2019-05-10)
 
 * Added `DataType.registeredType`.
 * Added support for `RecordType` inheritance.

@@ -17,7 +17,7 @@ abstract class SpongeClientConstants {
   static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.10';
 
   static const int API_VERSION = 1;
-  static const String CONTENT_TYPE_JSON = "application/json;charset=utf-8";
+  static const String CONTENT_TYPE_JSON = 'application/json;charset=utf-8';
   static const int DEFAULT_PORT = 1836;
   static const String DEFAULT_PATH = 'sponge.json/v$API_VERSION';
 
@@ -28,7 +28,8 @@ abstract class SpongeClientConstants {
   static const String OPERATION_ACTIONS = 'actions';
   static const String OPERATION_CALL = 'call';
   static const String OPERATION_SEND = 'send';
-  static const String OPERATION_ACTION_ARGS = "actionArgs";
+  static const String OPERATION_ACTION_ARGS = 'actionArgs';
+  static const String OPERATION_EVENT_TYPES = 'eventTypes';
 
   static const String OPERATION_RELOAD = 'reload';
 

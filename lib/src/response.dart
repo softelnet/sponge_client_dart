@@ -165,3 +165,18 @@ class ProvideActionArgsResponse extends SpongeResponse {
                   MapEntry(argName, ProvidedValue.fromJson(argValueJson)))),
           json);
 }
+
+/// A get event types response.
+class GetEventTypesResponse extends SpongeResponse {
+  GetEventTypesResponse(this.eventTypes);
+
+  /// The available event types.
+  Map<String, RecordType> eventTypes;
+
+  factory GetEventTypesResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(
+          GetEventTypesResponse((json['eventTypes'] as Map)?.map(
+              (name, typeJson) =>
+                  MapEntry(name, DataType.fromJson(typeJson) as RecordType))),
+          json);
+}

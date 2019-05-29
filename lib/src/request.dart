@@ -176,3 +176,17 @@ class ProvideActionArgsRequest extends SpongeRequest
       'qualifiedVersion': qualifiedVersion,
     });
 }
+
+/// A get event types request.
+class GetEventTypesRequest extends SpongeRequest {
+  GetEventTypesRequest(this.name);
+
+  /// The event name or the regular expression.
+  final String name;
+
+  @override
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'name': name,
+    });
+}

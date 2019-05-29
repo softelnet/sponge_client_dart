@@ -655,6 +655,24 @@ void main() {
     });
   });
 
+  group('REST API Client eventTypes', () {
+    test('testGetEventTypes', () async {
+      var client = await getClient();
+      var eventTypes = await client.getEventTypes();
+
+      expect(eventTypes.length, equals(1));
+
+      var recordType = eventTypes['alarm'];
+      expect(recordType.fields.length, equals(2));
+      expect(recordType.fields[0].kind, equals(DataTypeKind.STRING));
+      expect(recordType.fields[0].name, equals('source'));
+      expect(recordType.fields[0].label, equals('Source'));
+      expect(recordType.fields[1].kind, equals(DataTypeKind.INTEGER));
+      expect(recordType.fields[1].name, equals('severity'));
+      expect(recordType.fields[1].label, equals('Severity'));
+    });
+  });
+
   // Tests mirroring ActionMetaCacheTest.java.
   group('REST API Client action meta cache', () {
     test('testActionCacheOn', () async {

@@ -598,6 +598,29 @@ class SpongeRestClient {
               ProvideActionArgsRequest(actionName, argNames, current)))
           .provided;
 
+  /// Sends the `eventTypes` request to the server.
+  Future<GetEventTypesResponse> getEventTypesByRequest(
+      GetEventTypesRequest request,
+      {SpongeRequestContext context}) async {
+    GetEventTypesResponse response = await execute(
+        SpongeClientConstants.OPERATION_EVENT_TYPES,
+        request,
+        (json) => GetEventTypesResponse.fromJson(json),
+        context);
+
+    if (response?.eventTypes != null) {
+      for (var eventType in response.eventTypes.values) {
+        await _unmarshalDataType(eventType);
+      }
+    }
+
+    return response;
+  }
+
+  /// Sends the `eventTypes` request to the server.
+  Future<Map<String, RecordType>> getEventTypes({String name}) async =>
+      (await getEventTypesByRequest(GetEventTypesRequest(name))).eventTypes;
+
   /// Sends the `send` request to the server and returns the response.
   Future<SendEventResponse> sendByRequest(SendEventRequest request,
           {SpongeRequestContext context}) async =>

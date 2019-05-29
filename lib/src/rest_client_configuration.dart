@@ -24,6 +24,8 @@ class SpongeRestClientConfiguration {
     this.verifyProcessorVersion = true,
     this.useActionMetaCache = true,
     this.actionMetaCacheMaxSize = -1,
+    this.useEventTypeCache = true,
+    this.eventTypeCacheMaxSize = -1,
     this.throwExceptionOnErrorResponse = true,
   });
 
@@ -56,6 +58,13 @@ class SpongeRestClientConfiguration {
   /// The maximum size of the action meta cache. The default value (-1) implies that
   /// there is no maximum size.
   int actionMetaCacheMaxSize;
+
+  /// The flag telling if the client should use the event type cache.
+  bool useEventTypeCache;
+
+  /// The maximum size of the event type cache. The default value (-1) implies that
+  /// there is no maximum size.
+  int eventTypeCacheMaxSize;
 
   /// The flag that instructs the client to throw an exception when a response is an error response.
   /// Defaults to `true`.

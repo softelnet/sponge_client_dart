@@ -43,6 +43,7 @@ class SpongeRestClient {
     TypeConverter typeConverter,
   }) : _typeConverter = typeConverter ?? DefaultTypeConverter() {
     _actionMetaCache = _createActionMetaCache();
+    _eventTypeCache = _createEventTypeCache();
   }
 
   static final Logger _logger = Logger('SpongeRestClient');
@@ -60,6 +61,7 @@ class SpongeRestClient {
   String get currentAuthToken => _currentAuthToken;
 
   MapCache<String, ActionMeta> _actionMetaCache;
+  MapCache<String, RecordType> _eventTypeCache;
   final TypeConverter _typeConverter;
 
   /// The type converter.
@@ -599,9 +601,10 @@ class SpongeRestClient {
           .provided;
 
   /// Sends the `eventTypes` request to the server.
-  Future<GetEventTypesResponse> getEventTypesByRequest(
+  Future<GetEventTypesResponse> _doGetEventTypesByRequest(
       GetEventTypesRequest request,
-      {SpongeRequestContext context}) async {
+      bool populateCache,
+      SpongeRequestContext context) async {
     GetEventTypesResponse response = await execute(
         SpongeClientConstants.OPERATION_EVENT_TYPES,
         request,
@@ -612,14 +615,59 @@ class SpongeRestClient {
       for (var eventType in response.eventTypes.values) {
         await _unmarshalDataType(eventType);
       }
+
+      // Populate the event type cache.
+      if (populateCache &&
+          configuration.useEventTypeCache &&
+          _eventTypeCache != null) {
+        for (var entry in response.eventTypes.entries) {
+          await _eventTypeCache.set(entry.key, entry.value);
+        }
+      }
     }
 
     return response;
   }
 
   /// Sends the `eventTypes` request to the server.
+  Future<GetEventTypesResponse> getEventTypesByRequest(
+          GetEventTypesRequest request,
+          {SpongeRequestContext context}) async =>
+      await _doGetEventTypesByRequest(request, true, context);
+
+  /// Sends the `eventTypes` request to the server.
   Future<Map<String, RecordType>> getEventTypes({String name}) async =>
       (await getEventTypesByRequest(GetEventTypesRequest(name))).eventTypes;
+
+  /// Returns the event type for the specified event type name or `null` if there is no such event type.
+  ///
+  /// This method may fetch the event type from the server or use the event type cache if configured.
+  /// If you want to prevent fetching the event type from the server, set [allowFetchEventType] to `false`.
+  /// The default value is `true`.
+  Future<RecordType> getEventType(String eventTypeName,
+      {bool allowFetchEventType = true, SpongeRequestContext context}) async {
+    allowFetchEventType = allowFetchEventType ?? true;
+    if (_configuration.useEventTypeCache && _eventTypeCache != null) {
+      RecordType eventType = await _eventTypeCache.get(eventTypeName);
+      // Populate the cache if not found.
+      return eventType ??
+          (allowFetchEventType
+              ? await _eventTypeCache.get(eventTypeName,
+                  ifAbsent: (name) async =>
+                      await _fetchEventType(name, context))
+              : null);
+    } else {
+      return allowFetchEventType
+          ? await _fetchEventType(eventTypeName, context)
+          : null;
+    }
+  }
+
+  Future<RecordType> _fetchEventType(
+          String eventTypeName, SpongeRequestContext context) async =>
+      (await _doGetEventTypesByRequest(
+              GetEventTypesRequest(eventTypeName), false, context))
+          .eventTypes[eventTypeName];
 
   /// Sends the `send` request to the server and returns the response.
   Future<SendEventResponse> sendByRequest(SendEventRequest request,
@@ -644,21 +692,41 @@ class SpongeRestClient {
     await reloadByRequest(ReloadRequest());
   }
 
-  MapCache<String, ActionMeta> _createActionMetaCache() {
-    if (!_configuration.useActionMetaCache) {
+  MapCache<String, ActionMeta> _createActionMetaCache() => _createCache(
+      _configuration.useActionMetaCache, _configuration.actionMetaCacheMaxSize);
+
+  MapCache<String, RecordType> _createEventTypeCache() => _createCache(
+      _configuration.useEventTypeCache, _configuration.eventTypeCacheMaxSize);
+
+  MapCache<K, V> _createCache<K, V>(bool useCache, int maxSize) {
+    if (!useCache) {
       return null;
     } else {
-      int metaCacheMaxSize = _configuration.actionMetaCacheMaxSize ?? -1;
-      return metaCacheMaxSize > -1
-          ? MapCache.lru(maximumSize: metaCacheMaxSize)
+      int cacheMaxSize = maxSize ?? -1;
+      return cacheMaxSize > -1
+          ? MapCache.lru(maximumSize: cacheMaxSize)
           : MapCache();
     }
   }
 
   /// Clears the action metadata cache.
-  Future<void> clearCache() async => await _lock.synchronized(() async {
+  Future<void> clearActionMetaCache() async =>
+      await _lock.synchronized(() async {
         // Must recreate the cache because of the internal cache implementation.
         _actionMetaCache = _createActionMetaCache();
+      });
+
+  /// Clears the event type cache.
+  Future<void> clearEventTypeCache() async =>
+      await _lock.synchronized(() async {
+        // Must recreate the cache because of the internal cache implementation.
+        _eventTypeCache = _createEventTypeCache();
+      });
+
+  /// Clears caches.
+  Future<void> clearCache() async => await _lock.synchronized(() async {
+        await clearActionMetaCache();
+        await clearEventTypeCache();
       });
 
   /// Clears the session, i.e. the auth token.

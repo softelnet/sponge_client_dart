@@ -673,6 +673,20 @@ void main() {
     });
   });
 
+  group('REST API Client getEventType', () {
+    test('testGetEventType', () async {
+      var client = await getClient();
+      RecordType recordType = await client.getEventType('alarm');
+      expect(recordType.fields.length, equals(2));
+      expect(recordType.fields[0].kind, equals(DataTypeKind.STRING));
+      expect(recordType.fields[0].name, equals('source'));
+      expect(recordType.fields[0].label, equals('Source'));
+      expect(recordType.fields[1].kind, equals(DataTypeKind.INTEGER));
+      expect(recordType.fields[1].name, equals('severity'));
+      expect(recordType.fields[1].label, equals('Severity'));
+    });
+  });
+
   // Tests mirroring ActionMetaCacheTest.java.
   group('REST API Client action meta cache', () {
     test('testActionCacheOn', () async {
@@ -737,6 +751,79 @@ void main() {
       expect(await client.getActionMeta(actionName), isNotNull);
     });
   });
+
+  // Tests mirroring EventTypeCacheTest.java.
+  group('REST API Client event type cache', () {
+    test('testEventTypeCacheOn', () async {
+      var client = await getClient();
+      String eventTypeName = 'alarm';
+      expect(
+          await client.getEventType(eventTypeName, allowFetchEventType: false),
+          isNull);
+
+      RecordType eventType = await client.getEventType(eventTypeName);
+      expect(eventType, isNotNull);
+      expect(
+          await client.getEventType(eventTypeName, allowFetchEventType: false),
+          isNotNull);
+
+      expect(identical(eventType, await client.getEventType(eventTypeName)),
+          isTrue);
+
+      await client.clearCache();
+      expect(
+          await client.getEventType(eventTypeName, allowFetchEventType: false),
+          isNull);
+      expect(identical(eventType, await client.getEventType(eventTypeName)),
+          isFalse);
+      expect(await client.getEventType(eventTypeName), isNotNull);
+    });
+    test('testEventTypeCacheOff', () async {
+      var client = (await getClient())..configuration.useEventTypeCache = false;
+
+      String eventTypeName = 'alarm';
+      RecordType eventType = await client.getEventType(eventTypeName);
+      expect(eventType, isNotNull);
+      expect(await client.getEventType(eventTypeName), isNotNull);
+      expect(identical(eventType, await client.getEventType(eventTypeName)),
+          isFalse);
+      await client.clearCache();
+      expect(await client.getEventType(eventTypeName), isNotNull);
+    });
+    test('testEventTypeCacheOnGetEventTypes', () async {
+      var client = await getClient();
+      String eventTypeName = 'alarm';
+      expect(
+          await client.getEventType(eventTypeName, allowFetchEventType: false),
+          isNull);
+
+      await client.getEventTypes();
+      expect(
+          await client.getEventType(eventTypeName, allowFetchEventType: false),
+          isNotNull);
+
+      expect(await client.getEventType(eventTypeName), isNotNull);
+
+      await client.clearCache();
+      expect(
+          await client.getEventType(eventTypeName, allowFetchEventType: false),
+          isNull);
+
+      await client.getEventTypes();
+      expect(
+          await client.getEventType(eventTypeName, allowFetchEventType: false),
+          isNotNull);
+    });
+    test('testFetchEventType', () async {
+      var client = await getClient();
+      String eventTypeName = 'alarm';
+      expect(
+          await client.getEventType(eventTypeName, allowFetchEventType: false),
+          isNull);
+      expect(await client.getEventType(eventTypeName), isNotNull);
+    });
+  });
+
   // Tests mirroring AuthTokenExpirationTest.java.
   group('REST API Client token expiration', () {
     test('testAuthTokeExpirationRelogin', () async {

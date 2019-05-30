@@ -662,7 +662,7 @@ void main() {
 
       expect(eventTypes.length, equals(1));
 
-      var recordType = eventTypes['alarm'];
+      var recordType = eventTypes['notification'];
       expect(recordType.fields.length, equals(2));
       expect(recordType.fields[0].kind, equals(DataTypeKind.STRING));
       expect(recordType.fields[0].name, equals('source'));
@@ -676,7 +676,7 @@ void main() {
   group('REST API Client getEventType', () {
     test('testGetEventType', () async {
       var client = await getClient();
-      RecordType recordType = await client.getEventType('alarm');
+      RecordType recordType = await client.getEventType('notification');
       expect(recordType.fields.length, equals(2));
       expect(recordType.fields[0].kind, equals(DataTypeKind.STRING));
       expect(recordType.fields[0].name, equals('source'));
@@ -756,7 +756,7 @@ void main() {
   group('REST API Client event type cache', () {
     test('testEventTypeCacheOn', () async {
       var client = await getClient();
-      String eventTypeName = 'alarm';
+      String eventTypeName = 'notification';
       expect(
           await client.getEventType(eventTypeName, allowFetchEventType: false),
           isNull);
@@ -781,7 +781,7 @@ void main() {
     test('testEventTypeCacheOff', () async {
       var client = (await getClient())..configuration.useEventTypeCache = false;
 
-      String eventTypeName = 'alarm';
+      String eventTypeName = 'notification';
       RecordType eventType = await client.getEventType(eventTypeName);
       expect(eventType, isNotNull);
       expect(await client.getEventType(eventTypeName), isNotNull);
@@ -792,7 +792,7 @@ void main() {
     });
     test('testEventTypeCacheOnGetEventTypes', () async {
       var client = await getClient();
-      String eventTypeName = 'alarm';
+      String eventTypeName = 'notification';
       expect(
           await client.getEventType(eventTypeName, allowFetchEventType: false),
           isNull);
@@ -816,7 +816,7 @@ void main() {
     });
     test('testFetchEventType', () async {
       var client = await getClient();
-      String eventTypeName = 'alarm';
+      String eventTypeName = 'notification';
       expect(
           await client.getEventType(eventTypeName, allowFetchEventType: false),
           isNull);
@@ -990,7 +990,7 @@ void main() {
       var client = await getClient()
         ..configuration.username = 'john'
         ..configuration.password = 'password';
-      expect((await client.getKnowledgeBases()).length, equals(3));
+      expect((await client.getKnowledgeBases()).length, equals(5));
     });
     test('testKnowledgeBasesUser2', () async {
       var client = await getClient()

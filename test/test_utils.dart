@@ -35,10 +35,10 @@ class TestUtils {
           [bool useTransparentIfNotFound = false]) =>
       ObjectTypeUnitConverter(useTransparentIfNotFound)
         ..addMarshaler(
-            'org.openksavi.sponge.restapi.test.base.CompoundComplexObject',
+            'org.openksavi.sponge.remoteapi.test.base.CompoundComplexObject',
             (_, value) async => (value as CompoundComplexObject)?.toJson())
         ..addUnmarshaler(
-            'org.openksavi.sponge.restapi.test.base.CompoundComplexObject',
+            'org.openksavi.sponge.remoteapi.test.base.CompoundComplexObject',
             (_, value) async => CompoundComplexObject.fromJson(value));
 
   static void assertBookRecordType(RecordType bookType) {

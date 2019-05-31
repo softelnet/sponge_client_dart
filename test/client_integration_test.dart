@@ -38,7 +38,7 @@ import 'logger_configuration.dart';
 import 'test_constants.dart';
 import 'test_utils.dart';
 
-/// This integration test requires the sponge-examples-project-rest-api-client-test-service/RestApiClientTestServiceMain
+/// This integration test requires the sponge-examples-project-remote-api-client-test-service/RemoteApiClientTestServiceMain
 /// service running on the localhost.
 ///
 /// Note: No other tests should be running using this service at the same time.

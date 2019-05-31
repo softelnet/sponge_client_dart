@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:sponge_client_dart/src/type_converter.dart';
-
 class ComplexObject {
   ComplexObject({this.id, this.name, this.bigDecimal, this.date});
   int id;
@@ -58,21 +56,3 @@ class CompoundComplexObject {
             )
           : null;
 }
-
-CompoundComplexObject createTestCompoundComplexObject() {
-  var complexObject = ComplexObject(
-      id: 1,
-      name: 'TestComplexObject1',
-      bigDecimal: 1.25,
-      date: DateTime.now());
-  return CompoundComplexObject(
-      id: 1, name: 'TestCompoundComplexObject1', complexObject: complexObject);
-}
-
-ObjectTypeUnitConverter createObjectTypeUnitConverter([bool useTransparentIfNotFound = false]) =>
-    ObjectTypeUnitConverter(useTransparentIfNotFound)
-      ..addMarshaler('org.openksavi.sponge.restapi.test.base.CompoundComplexObject',
-          (_, value) async => (value as CompoundComplexObject)?.toJson())
-      ..addUnmarshaler(
-          'org.openksavi.sponge.restapi.test.base.CompoundComplexObject',
-          (_, value) async => CompoundComplexObject.fromJson(value));

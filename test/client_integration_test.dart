@@ -36,6 +36,7 @@ import 'package:timezone/timezone.dart';
 import 'complex_object.dart';
 import 'logger_configuration.dart';
 import 'test_constants.dart';
+import 'test_utils.dart';
 
 /// This integration test requires the sponge-examples-project-rest-api-client-test-service/RestApiClientTestServiceMain
 /// service running on the localhost.
@@ -275,18 +276,7 @@ void main() {
       var client = await getClient();
       ActionMeta actionMeta =
           await client.getActionMeta('RecordAsResultAction');
-      RecordType recordType = actionMeta.result as RecordType;
-      expect(recordType.kind, equals(DataTypeKind.RECORD));
-      expect(recordType.name, equals('book'));
-      expect(recordType.fields.length, equals(4));
-      expect(recordType.fields[0].name, equals('id'));
-      expect(recordType.fields[0].kind, equals(DataTypeKind.INTEGER));
-      expect(recordType.fields[1].name, equals('author'));
-      expect(recordType.fields[1].kind, equals(DataTypeKind.STRING));
-      expect(recordType.fields[2].name, equals('title'));
-      expect(recordType.fields[2].kind, equals(DataTypeKind.STRING));
-      expect(recordType.fields[3].name, equals('comment'));
-      expect(recordType.fields[3].kind, equals(DataTypeKind.STRING));
+      TestUtils.assertBookRecordType(actionMeta.result as RecordType);
 
       Map<String, Object> book1 = await client.call(actionMeta.name, [1]);
       expect(book1.length, equals(4));
@@ -297,17 +287,7 @@ void main() {
       expect(book1['comment'], isNull);
 
       actionMeta = await client.getActionMeta('RecordAsArgAction');
-      recordType = actionMeta.args[0] as RecordType;
-      expect(recordType.kind, equals(DataTypeKind.RECORD));
-      expect(recordType.fields.length, equals(4));
-      expect(recordType.fields[0].name, equals('id'));
-      expect(recordType.fields[0].kind, equals(DataTypeKind.INTEGER));
-      expect(recordType.fields[1].name, equals('author'));
-      expect(recordType.fields[1].kind, equals(DataTypeKind.STRING));
-      expect(recordType.fields[2].name, equals('title'));
-      expect(recordType.fields[2].kind, equals(DataTypeKind.STRING));
-      expect(recordType.fields[3].name, equals('comment'));
-      expect(recordType.fields[3].kind, equals(DataTypeKind.STRING));
+      TestUtils.assertBookRecordType(actionMeta.args[0] as RecordType);
 
       var book2 = {
         'id': 5,
@@ -332,13 +312,7 @@ void main() {
       Map<String, DataType> types =
           (await client.getActionsByRequest(request)).types;
       expect(types.length, equals(1));
-      var personType = types['Person'] as RecordType;
-      expect(personType, isNotNull);
-      expect(personType.fields.length, equals(2));
-      expect(personType.fields[0].name, equals('firstName'));
-      expect(personType.fields[0].kind, equals(DataTypeKind.STRING));
-      expect(personType.fields[1].name, equals('surname'));
-      expect(personType.fields[1].kind, equals(DataTypeKind.STRING));
+      TestUtils.assertPersonRecordType(types['Person'] as RecordType);
 
       String surname = await client.call('RegisteredTypeArgAction', [
         {'firstName': 'James', 'surname': 'Joyce'}
@@ -355,23 +329,8 @@ void main() {
           (await client.getActionsByRequest(request)).types;
       expect(types.length, equals(2));
 
-      var personType = types['Person'] as RecordType;
-      expect(personType, isNotNull);
-      expect(personType.fields.length, equals(2));
-      expect(personType.fields[0].name, equals('firstName'));
-      expect(personType.fields[0].kind, equals(DataTypeKind.STRING));
-      expect(personType.fields[1].name, equals('surname'));
-      expect(personType.fields[1].kind, equals(DataTypeKind.STRING));
-
-      var citizenType = types['Citizen'] as RecordType;
-      expect(citizenType, isNotNull);
-      expect(citizenType.fields.length, equals(3));
-      expect(citizenType.fields[0].name, equals('firstName'));
-      expect(citizenType.fields[0].kind, equals(DataTypeKind.STRING));
-      expect(citizenType.fields[1].name, equals('surname'));
-      expect(citizenType.fields[1].kind, equals(DataTypeKind.STRING));
-      expect(citizenType.fields[2].name, equals('country'));
-      expect(citizenType.fields[2].kind, equals(DataTypeKind.STRING));
+      TestUtils.assertPersonRecordType(types['Person'] as RecordType);
+      TestUtils.assertCitizenRecordType(types['Citizen'] as RecordType);
 
       String sentence = await client.call('InheritedRegisteredTypeArgAction', [
         {'firstName': 'John', 'surname': 'Brown', 'country': 'UK'}
@@ -661,29 +620,14 @@ void main() {
       var eventTypes = await client.getEventTypes();
 
       expect(eventTypes.length, equals(1));
-
-      var recordType = eventTypes['notification'];
-      expect(recordType.fields.length, equals(2));
-      expect(recordType.fields[0].kind, equals(DataTypeKind.STRING));
-      expect(recordType.fields[0].name, equals('source'));
-      expect(recordType.fields[0].label, equals('Source'));
-      expect(recordType.fields[1].kind, equals(DataTypeKind.INTEGER));
-      expect(recordType.fields[1].name, equals('severity'));
-      expect(recordType.fields[1].label, equals('Severity'));
+      TestUtils.assertNotificationRecordType(eventTypes['notification']);
     });
   });
 
   group('REST API Client getEventType', () {
     test('testGetEventType', () async {
       var client = await getClient();
-      RecordType recordType = await client.getEventType('notification');
-      expect(recordType.fields.length, equals(2));
-      expect(recordType.fields[0].kind, equals(DataTypeKind.STRING));
-      expect(recordType.fields[0].name, equals('source'));
-      expect(recordType.fields[0].label, equals('Source'));
-      expect(recordType.fields[1].kind, equals(DataTypeKind.INTEGER));
-      expect(recordType.fields[1].name, equals('severity'));
-      expect(recordType.fields[1].label, equals('Severity'));
+      TestUtils.assertNotificationRecordType(await client.getEventType('notification'));
     });
   });
 
@@ -869,8 +813,8 @@ void main() {
   group('REST API Client complex object', () {
     test('testRestCallComplexObject', () async {
       var client = await getClient()
-        ..typeConverter.register(createObjectTypeUnitConverter());
-      var compoundObject = createTestCompoundComplexObject();
+        ..typeConverter.register(TestUtils.createObjectTypeUnitConverter());
+      var compoundObject = TestUtils.createTestCompoundComplexObject();
 
       CompoundComplexObject result =
           await client.call('ComplexObjectAction', [compoundObject]);
@@ -886,8 +830,8 @@ void main() {
     });
     test('testRestCallComplexObjectNoMeta', () async {
       var client = await getClient()
-        ..typeConverter.register(createObjectTypeUnitConverter());
-      var compoundObject = createTestCompoundComplexObject();
+        ..typeConverter.register(TestUtils.createObjectTypeUnitConverter());
+      var compoundObject = TestUtils.createTestCompoundComplexObject();
 
       var value = (await client.call(
           'ComplexObjectAction', [compoundObject], null, false));
@@ -908,8 +852,8 @@ void main() {
     });
     test('testRestCallComplexObjectList', () async {
       var client = await getClient()
-        ..typeConverter.register(createObjectTypeUnitConverter());
-      var compoundObject = createTestCompoundComplexObject();
+        ..typeConverter.register(TestUtils.createObjectTypeUnitConverter());
+      var compoundObject = TestUtils.createTestCompoundComplexObject();
 
       List resultList = await client.call('ComplexObjectListAction', [
         [compoundObject]
@@ -928,9 +872,9 @@ void main() {
     });
     test('testRestCallComplexObjectList', () async {
       var client = await getClient()
-        ..typeConverter.register(createObjectTypeUnitConverter(true));
+        ..typeConverter.register(TestUtils.createObjectTypeUnitConverter(true));
 
-      var compoundObject = createTestCompoundComplexObject();
+      var compoundObject = TestUtils.createTestCompoundComplexObject();
       Map<String, CompoundComplexObject> map = {'first': compoundObject};
 
       var returnValue = await client.call('ComplexObjectHierarchyAction', [
@@ -990,7 +934,7 @@ void main() {
       var client = await getClient()
         ..configuration.username = 'john'
         ..configuration.password = 'password';
-      expect((await client.getKnowledgeBases()).length, equals(5));
+      expect((await client.getKnowledgeBases()).length, equals(4));
     });
     test('testKnowledgeBasesUser2', () async {
       var client = await getClient()

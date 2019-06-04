@@ -21,6 +21,8 @@ class SpongeEvent {
     @required this.name,
     @required this.time,
     @required this.priority,
+    this.label,
+    this.description,
     Map<String, dynamic> attributes,
   }) : this.attributes = attributes ?? {};
 
@@ -28,5 +30,7 @@ class SpongeEvent {
   String name;
   DateTime time;
   int priority;
+  String label;
+  String description;
   Map<String, dynamic> attributes;
 }

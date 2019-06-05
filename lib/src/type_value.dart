@@ -85,6 +85,7 @@ class ProvidedValue<T> {
     this.value,
     this.valuePresent,
     this.annotatedValueSet,
+    this.annotatedElementValueSet,
   });
 
   /// The value.
@@ -94,7 +95,7 @@ class ProvidedValue<T> {
   bool valuePresent;
 
   /// The possible value set with optional annotations. For example it may be a list of string values to choose from.
-  /// If there is no value set for this argument, this property should is `null`.
+  /// If there is no value set, this property should is `null`.
   List<AnnotatedValue<T>> annotatedValueSet;
 
   /// The utility getter for the possible value set without labels.
@@ -102,10 +103,23 @@ class ProvidedValue<T> {
       ?.map((annotatedValue) => annotatedValue.value)
       ?.toList();
 
+  /// The possible element value set (with optional annotations) for a list type. For example it may be a list of string
+  /// values to multiple choice. Applicable only for list types. If there is no element value set,
+  /// this property is `null`.
+  List<AnnotatedValue> annotatedElementValueSet;
+
+  /// The utility getter for the possible element value set without labels.
+  List get elementValueSet => annotatedElementValueSet
+      ?.map((annotatedValue) => annotatedValue.value)
+      ?.toList();
+
   factory ProvidedValue.fromJson(Map<String, dynamic> json) => ProvidedValue(
         value: json['value'],
         valuePresent: json['valuePresent'],
         annotatedValueSet: (json['annotatedValueSet'] as List)
+            ?.map((arg) => AnnotatedValue.fromJson(arg))
+            ?.toList(),
+        annotatedElementValueSet: (json['annotatedElementValueSet'] as List)
             ?.map((arg) => AnnotatedValue.fromJson(arg))
             ?.toList(),
       );

@@ -388,8 +388,20 @@ class SpongeRestClient {
 
       if (argValue.annotatedValueSet != null) {
         for (var annotatedValue in argValue.annotatedValueSet) {
-          annotatedValue.value =
-              await _typeConverter.unmarshal(argType, annotatedValue.value);
+          if (annotatedValue != null) {
+            annotatedValue.value =
+                await _typeConverter.unmarshal(argType, annotatedValue.value);
+          }
+        }
+      }
+
+      if (argValue.annotatedElementValueSet != null &&
+          SpongeUtils.supportsElementValueSet(argType)) {
+        for (var annotatedValue in argValue.annotatedElementValueSet) {
+          if (annotatedValue != null) {
+            annotatedValue.value = await _typeConverter.unmarshal(
+                (argType as ListType).elementType, annotatedValue.value);
+          }
         }
       }
     }

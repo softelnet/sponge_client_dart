@@ -35,14 +35,15 @@ class ValueSetMeta {
 /// A provided object metadata.
 class ProvidedMeta {
   ProvidedMeta({
-    this.value,
+    this.value = false,
     this.valueSet,
     this.dependencies,
     this.readOnly = false,
     this.overwrite = false,
+    this.elementValueSet = false,
   });
 
-  /// The flag specifying if the value is provided.
+  /// The flag specifying if the value is provided. Defaults to `false`.
   bool value;
 
   /// The metadata specifying if the value set is provided. Defaults to `null`.
@@ -57,7 +58,12 @@ class ProvidedMeta {
   /// The flag specifying if the provided value of this object should overwrite the value set in a client code. Defaults to `false`.
   final bool overwrite;
 
+  /// The flag specifying if the list element value set is provided. Applicable only for list types. Defaults to `false`.
+  final bool elementValueSet;
+
   bool get hasValueSet => valueSet != null;
+
+  bool get hasElementValueSet => elementValueSet != null;
 
   factory ProvidedMeta.fromJson(Map<String, dynamic> json) {
     return json != null
@@ -68,6 +74,7 @@ class ProvidedMeta {
                 (json['dependencies'] as List)?.cast<String>()?.toList(),
             readOnly: json['readOnly'] ?? false,
             overwrite: json['overwrite'] ?? false,
+            elementValueSet: json['elementValueSet'] ?? false,
           )
         : null;
   }
@@ -78,6 +85,7 @@ class ProvidedMeta {
         'dependencies': dependencies,
         'readOnly': readOnly,
         'overwrite': overwrite,
+        'elementValueSet': elementValueSet,
       };
 }
 

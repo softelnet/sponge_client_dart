@@ -60,4 +60,7 @@ class SpongeUtils {
         QualifiedDataType(argType.name, argType), onType,
         namedOnly: namedOnly));
   }
+
+  static bool supportsElementValueSet(DataType dataType) =>
+      dataType is ListType;
 }

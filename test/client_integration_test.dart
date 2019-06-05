@@ -554,6 +554,33 @@ void main() {
       expect(
           await client.call(actionMeta.name, [values.last]), equals('value3'));
     });
+    test('testProvideActionArgsElementValueSet', () async {
+      var client = await getClient();
+      var actionName = 'FruitsElementValueSetAction';
+
+      var fruitsType =
+          (await client.getActionMeta(actionName)).args[0] as ListType;
+      expect(fruitsType.provided, isNotNull);
+      expect(fruitsType.provided.value, isFalse);
+      expect(fruitsType.provided.hasValueSet, isFalse);
+      expect(fruitsType.provided.hasElementValueSet, isTrue);
+
+      var provided = await client.provideActionArgs(actionName);
+      var elementValueSet = provided['fruits'].annotatedElementValueSet;
+      expect(elementValueSet.length, equals(3));
+      expect(elementValueSet[0].value, equals('apple'));
+      expect(elementValueSet[0].label, equals('Apple'));
+      expect(elementValueSet[1].value, equals('banana'));
+      expect(elementValueSet[1].label, equals('Banana'));
+      expect(elementValueSet[2].value, equals('lemon'));
+      expect(elementValueSet[2].label, equals('Lemon'));
+
+      expect(
+          await client.call(actionName, [
+            ['apple', 'lemon']
+          ]),
+          equals(2));
+    });
     test('testTraverseActionArguments', () async {
       var client = await getClient();
       ActionMeta meta = await client.getActionMeta('NestedRecordAsArgAction');
@@ -627,7 +654,8 @@ void main() {
   group('REST API Client getEventType', () {
     test('testGetEventType', () async {
       var client = await getClient();
-      TestUtils.assertNotificationRecordType(await client.getEventType('notification'));
+      TestUtils.assertNotificationRecordType(
+          await client.getEventType('notification'));
     });
   });
 

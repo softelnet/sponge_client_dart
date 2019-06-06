@@ -564,7 +564,7 @@ void main() {
       expect(fruitsType.provided, isNotNull);
       expect(fruitsType.provided.value, isFalse);
       expect(fruitsType.provided.hasValueSet, isFalse);
-      expect(fruitsType.provided.hasElementValueSet, isTrue);
+      expect(fruitsType.provided.elementValueSet, isTrue);
 
       var provided = await client.provideActionArgs(actionName);
       var elementValueSet = provided['fruits'].annotatedElementValueSet;

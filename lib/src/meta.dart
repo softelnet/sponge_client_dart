@@ -63,8 +63,6 @@ class ProvidedMeta {
 
   bool get hasValueSet => valueSet != null;
 
-  bool get hasElementValueSet => elementValueSet != null;
-
   factory ProvidedMeta.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ProvidedMeta(

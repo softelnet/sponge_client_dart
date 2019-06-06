@@ -22,7 +22,7 @@ class ValueSetMeta {
   ValueSetMeta({this.limited = true});
 
   /// The flag specifying if the value set is limited only to the provided values. Defaults to `true`.
-  bool limited = true;
+  final bool limited;
 
   factory ValueSetMeta.fromJson(Map<String, dynamic> json) =>
       json != null ? ValueSetMeta(limited: json['limited']) : null;

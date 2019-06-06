@@ -359,17 +359,28 @@ class IntegerType extends DataType<int> {
 
 /// A list type. This type requires an `elementType` parameter, which is is a type of list elements.
 class ListType extends CollectionType<List> {
-  ListType(this.elementType) : super(DataTypeKind.LIST);
+  ListType(
+    this.elementType, {
+    bool unique,
+  })  : this.unique = unique ?? false,
+        super(DataTypeKind.LIST);
 
   /// The list element type.
   final DataType elementType;
 
+  final bool unique;
+
   factory ListType.fromJson(Map<String, dynamic> json) => DataType.fromJsonBase(
-      ListType(DataType.fromJson(json['elementType'])), json);
+      ListType(
+        DataType.fromJson(json['elementType']),
+        unique: json['unique'],
+      ),
+      json);
 
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'elementType': elementType.toJson(),
+      'unique': unique,
     });
 }
 

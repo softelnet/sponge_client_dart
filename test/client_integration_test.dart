@@ -560,6 +560,7 @@ void main() {
 
       var fruitsType =
           (await client.getActionMeta(actionName)).args[0] as ListType;
+      expect(fruitsType.unique, isTrue);
       expect(fruitsType.provided, isNotNull);
       expect(fruitsType.provided.value, isFalse);
       expect(fruitsType.provided.hasValueSet, isFalse);

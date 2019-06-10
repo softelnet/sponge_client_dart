@@ -24,7 +24,6 @@ void main() async {
     group('Integration', client_integration_test.main);
     group('Sub-actions', sub_action_specification_test.main);
     group('Data type utils', data_type_utils_test.main);
-
     group('Utils', utils_test.main);
   });
 }

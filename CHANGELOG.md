@@ -1,3 +1,10 @@
+## 1.11.0 (not released yet)
+
+* API change: Base request and response properties have been moved to headers.
+* Added a new property `unique` to the ListType.
+* Added support for element value set for provided list types.
+* Dependencies upgrade.
+
 ## 1.10.0 (2019-05-10)
 
 * Added `DataType.registeredType`.

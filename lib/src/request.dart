@@ -1,4 +1,4 @@
-// Copyright 2018 The Sponge authors.
+// Copyright 2019 The Sponge authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,9 +14,9 @@
 
 import 'package:sponge_client_dart/src/meta.dart';
 
-/// A base request.
-class SpongeRequest {
-  SpongeRequest({
+/// A request header.
+class RequestHeader {
+  RequestHeader({
     this.id,
     this.username,
     this.password,
@@ -41,6 +41,24 @@ class SpongeRequest {
       'username': username,
       'password': password,
       'authToken': authToken,
+    };
+  }
+}
+
+/// A base request.
+class SpongeRequest {
+  SpongeRequest({
+    this.header,
+  }) {
+    this.header ??= RequestHeader();
+  }
+
+  /// The request header (optional).
+  RequestHeader header;
+
+  Map<String, dynamic> toJson() {
+    return {
+      'header': header?.toJson(),
     };
   }
 }
@@ -115,7 +133,7 @@ class LoginRequest extends SpongeRequest {
   LoginRequest(
     String username,
     String password,
-  ) : super(username: username, password: password);
+  ) : super(header: RequestHeader(username: username, password: password));
 }
 
 /// A logout request.

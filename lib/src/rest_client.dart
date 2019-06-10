@@ -93,21 +93,26 @@ class SpongeRestClient {
       _url + (_url.endsWith('/') ? '' : '/') + operation;
 
   T _setupRequest<T extends SpongeRequest>(T request) {
+    // Set empty header if none.
+    request.header ??= RequestHeader();
+
+    var header = request.header;
+
     if (_configuration.useRequestId) {
       int newRequestId = ++_currentRequestId;
-      request.id = '$newRequestId';
+      header.id = '$newRequestId';
     }
 
     // Must be isolate-safe.
     String authToken = _currentAuthToken;
     if (authToken != null) {
-      request.authToken ??= authToken;
+      header.authToken ??= authToken;
     } else {
-      if (_configuration.username != null && request.username == null) {
-        request.username = _configuration.username;
+      if (_configuration.username != null && header.username == null) {
+        header.username = _configuration.username;
       }
-      if (_configuration.password != null && request.password == null) {
-        request.password = _configuration.password;
+      if (_configuration.password != null && header.password == null) {
+        header.password = _configuration.password;
       }
     }
 
@@ -115,25 +120,29 @@ class SpongeRestClient {
   }
 
   R _setupResponse<R extends SpongeResponse>(String operation, R response) {
-    if (response.errorCode != null) {
+    // Set empty header if none.
+    response.header ??= ResponseHeader();
+
+    var header = response.header;
+    if (header.errorCode != null) {
       _logger.fine(() =>
-          'Error response for $operation (${response.errorCode}): ${response.errorMessage}\n${response.detailedErrorMessage ?? ""}');
+          'Error response for $operation (${header.errorCode}): ${header.errorMessage}\n${header.detailedErrorMessage ?? ""}');
 
       if (_configuration.throwExceptionOnErrorResponse) {
-        switch (response.errorCode) {
+        switch (header.errorCode) {
           case SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN:
-            throw InvalidAuthTokenException(response.errorCode,
-                response.errorMessage, response.detailedErrorMessage);
+            throw InvalidAuthTokenException(header.errorCode,
+                header.errorMessage, header.detailedErrorMessage);
           case SpongeClientConstants
               .ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION:
-            throw IncorrectKnowledgeBaseVersionException(response.errorCode,
-                response.errorMessage, response.detailedErrorMessage);
+            throw IncorrectKnowledgeBaseVersionException(header.errorCode,
+                header.errorMessage, header.detailedErrorMessage);
           case SpongeClientConstants.ERROR_CODE_INCORRECT_USERNAME_PASSWORD:
-            throw IncorrectUsernamePasswordException(response.errorCode,
-                response.errorMessage, response.detailedErrorMessage);
+            throw IncorrectUsernamePasswordException(header.errorCode,
+                header.errorMessage, header.detailedErrorMessage);
           default:
-            throw SpongeClientException(response.errorCode,
-                response.errorMessage, response.detailedErrorMessage);
+            throw SpongeClientException(header.errorCode, header.errorMessage,
+                header.detailedErrorMessage);
         }
       }
     }
@@ -143,9 +152,9 @@ class SpongeRestClient {
 
   bool _isRequestAnonymous(SpongeRequest request) =>
       _configuration.username == null &&
-      request.username == null &&
+      request.header.username == null &&
       _configuration.password == null &&
-      request.password == null;
+      request.header.password == null;
 
   /// Sends the request to the server and returns the response.
   Future<R> execute<T extends SpongeRequest, R extends SpongeResponse>(
@@ -153,10 +162,13 @@ class SpongeRestClient {
       [SpongeRequestContext context]) async {
     context ??= SpongeRequestContext();
 
+    // Set empty header if none.
+    request.header ??= RequestHeader();
+
     try {
       if (_configuration.autoUseAuthToken &&
           _currentAuthToken == null &&
-          request.authToken == null &&
+          request.header.authToken == null &&
           !_isRequestAnonymous(request)) {
         await login();
       }
@@ -168,7 +180,7 @@ class SpongeRestClient {
         await login();
 
         // Clear the request auth token.
-        request.authToken = null;
+        request.header.authToken = null;
 
         return await _executeDelegate(operation, request, fromJson, context);
       } else {

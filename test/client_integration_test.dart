@@ -61,12 +61,12 @@ void main() {
 
       var request = GetVersionRequest();
       var response = await client.getVersionByRequest(request);
-      expect(response.errorCode, isNull);
-      expect(response.errorMessage, isNull);
-      expect(response.detailedErrorMessage, isNull);
+      expect(response.header.errorCode, isNull);
+      expect(response.header.errorMessage, isNull);
+      expect(response.header.detailedErrorMessage, isNull);
       expect(SpongeUtils.isServerVersionCompatible(response.version), isTrue);
-      expect(response.id, equals('1'));
-      expect(response.id, equals(request.id));
+      expect(response.header.id, equals('1'));
+      expect(response.header.id, equals(request.header.id));
     });
   });
   group('REST API Client actions', () {
@@ -1019,10 +1019,10 @@ void main() {
 
       expect(httpResponse.statusCode, equals(200));
       var apiResponse = SpongeResponse.fromJson(json.decode(httpResponse.body));
-      expect(apiResponse.errorCode,
+      expect(apiResponse.header.errorCode,
           equals(SpongeClientConstants.DEFAULT_ERROR_CODE));
       expect(
-          apiResponse.errorMessage
+          apiResponse.header.errorMessage
               .contains('Unrecognized field "error_property"'),
           isTrue);
     });
@@ -1055,11 +1055,11 @@ void main() {
       expect(
           normalizeJson(requestStringList[0]),
           equals(
-              '{"id":null,"username":null,"password":null,"authToken":null}'));
+              '{"header":{"id":null,"username":null,"password":null,"authToken":null}}'));
       expect(
           normalizeJson(responseStringList[0]),
           equals(
-              '{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"version":"$version"}'));
+              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null},"version":"$version"}'));
     });
     test('testOneRequestListeners', () async {
       var client = await getClient();
@@ -1086,11 +1086,11 @@ void main() {
       expect(
           normalizeJson(actualRequestString),
           equals(
-              '{"id":null,"username":null,"password":null,"authToken":null}'));
+              '{"header":{"id":null,"username":null,"password":null,"authToken":null}}'));
       expect(
           normalizeJson(actualResponseString),
           equals(
-              '{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"version":"$version"}'));
+              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null},"version":"$version"}'));
     });
   });
 }

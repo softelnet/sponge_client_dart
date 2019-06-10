@@ -16,9 +16,9 @@ import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 
-/// A base response.
-class SpongeResponse {
-  SpongeResponse({
+/// A response header.
+class ResponseHeader {
+  ResponseHeader({
     this.id,
     this.errorCode,
     this.errorMessage,
@@ -37,16 +37,36 @@ class SpongeResponse {
   /// The detailed error message (optional).
   String detailedErrorMessage;
 
+  factory ResponseHeader.fromJson(Map<String, dynamic> json) {
+    return json != null
+        ? ResponseHeader(
+            id: json['id'],
+            errorCode: json['errorCode'],
+            errorMessage: json['errorMessage'],
+            detailedErrorMessage: json['detailedErrorMessage'],
+          )
+        : null;
+  }
+}
+
+/// A base response.
+class SpongeResponse {
+  SpongeResponse({
+    this.header,
+  }) {
+    this.header ??= ResponseHeader();
+  }
+
+  /// The request header (optional).
+  ResponseHeader header;
+
   factory SpongeResponse.fromJson(Map<String, dynamic> json) =>
       SpongeResponse.setupFromJson(SpongeResponse(), json);
 
   static dynamic setupFromJson(
           SpongeResponse response, Map<String, dynamic> json) =>
       response
-        ..id = json['id']
-        ..errorCode = json['errorCode']
-        ..errorMessage = json['errorMessage']
-        ..detailedErrorMessage = json['detailedErrorMessage'];
+        ..header = ResponseHeader.fromJson(json['header']) ?? ResponseHeader();
 }
 
 /// An action call response.

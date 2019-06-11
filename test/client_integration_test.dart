@@ -48,6 +48,10 @@ void main() {
   getClient() async => SpongeRestClient(
       SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1'));
 
+  getGuestRestClient() async => await getClient()
+    ..configuration.username = 'joe'
+    ..configuration.password = 'password';
+
   // Tests mirroring BaseRestApiTestTemplate.java.
   group('REST API Client version', () {
     test('testVersion', () async {
@@ -629,7 +633,7 @@ void main() {
   });
   group('REST API Client send', () {
     test('testSend', () async {
-      var client = await getClient();
+      var client = await getGuestRestClient();
       var result = await client.send('alarm', attributes: {'attr1': 'Test'});
       expect(result, isNotNull);
     });

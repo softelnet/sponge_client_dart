@@ -17,6 +17,7 @@ import 'dart:convert';
 
 import 'package:http/http.dart';
 import 'package:logging/logging.dart';
+import 'package:meta/meta.dart';
 import 'package:quiver/cache.dart';
 import 'package:sponge_client_dart/src/context.dart';
 import 'package:sponge_client_dart/src/rest_client_configuration.dart';
@@ -92,7 +93,7 @@ class SpongeRestClient {
   String _getUrl(String operation) =>
       _url + (_url.endsWith('/') ? '' : '/') + operation;
 
-  T _setupRequest<T extends SpongeRequest>(T request) {
+  T setupRequest<T extends SpongeRequest>(T request) {
     // Set empty header if none.
     request.header ??= RequestHeader();
 
@@ -122,39 +123,75 @@ class SpongeRestClient {
   R _setupResponse<R extends SpongeResponse>(String operation, R response) {
     // Set empty header if none.
     response.header ??= ResponseHeader();
-
-    var header = response.header;
-    if (header.errorCode != null) {
-      _logger.fine(() =>
-          'Error response for $operation (${header.errorCode}): ${header.errorMessage}\n${header.detailedErrorMessage ?? ""}');
-
-      if (_configuration.throwExceptionOnErrorResponse) {
-        switch (header.errorCode) {
-          case SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN:
-            throw InvalidAuthTokenException(header.errorCode,
-                header.errorMessage, header.detailedErrorMessage);
-          case SpongeClientConstants
-              .ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION:
-            throw IncorrectKnowledgeBaseVersionException(header.errorCode,
-                header.errorMessage, header.detailedErrorMessage);
-          case SpongeClientConstants.ERROR_CODE_INCORRECT_USERNAME_PASSWORD:
-            throw IncorrectUsernamePasswordException(header.errorCode,
-                header.errorMessage, header.detailedErrorMessage);
-          default:
-            throw SpongeClientException(header.errorCode, header.errorMessage,
-                header.detailedErrorMessage);
-        }
-      }
-    }
+    handleResponseHeader(operation, response.header.errorCode,
+        response.header.errorMessage, response.header.detailedErrorMessage);
 
     return response;
   }
 
-  bool _isRequestAnonymous(SpongeRequest request) =>
+  void handleResponseHeader(String operation, String errorCode,
+      String errorMessage, String detailedErrorMessage) {
+    if (errorCode != null) {
+      _logger.fine(() =>
+          'Error response for $operation ($errorCode): $errorMessage\n${detailedErrorMessage ?? ""}');
+
+      if (_configuration.throwExceptionOnErrorResponse) {
+        switch (errorCode) {
+          case SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN:
+            throw InvalidAuthTokenException(
+                errorCode, errorMessage, detailedErrorMessage);
+          case SpongeClientConstants
+              .ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION:
+            throw IncorrectKnowledgeBaseVersionException(
+                errorCode, errorMessage, detailedErrorMessage);
+          case SpongeClientConstants.ERROR_CODE_INCORRECT_USERNAME_PASSWORD:
+            throw IncorrectUsernamePasswordException(
+                errorCode, errorMessage, detailedErrorMessage);
+          default:
+            throw SpongeClientException(
+                errorCode, errorMessage, detailedErrorMessage);
+        }
+      }
+    }
+  }
+
+  bool _isRequestAnonymous(String requestUsername, String requestPassword) =>
       _configuration.username == null &&
-      request.header.username == null &&
+      requestUsername == null &&
       _configuration.password == null &&
-      request.header.password == null;
+      requestPassword == null;
+
+
+  Future<T> executeWithAuthentication<T>({
+    @required String requestUsername,
+    @required String requestPassword,
+    @required String requestAuthToken,
+    @required Future<T> onExecute(),
+    @required void onClearAuthToken(),
+  }) async {
+    try {
+      if (_configuration.autoUseAuthToken &&
+          _currentAuthToken == null &&
+          requestAuthToken == null &&
+          !_isRequestAnonymous(requestUsername, requestPassword)) {
+        await login();
+      }
+
+      return await onExecute();
+    } on InvalidAuthTokenException {
+      // Relogin if set up and necessary.
+      if (_currentAuthToken != null && _configuration.relogin) {
+        await login();
+
+        // Clear the request auth token.
+        onClearAuthToken();
+
+        return await onExecute();
+      } else {
+        rethrow;
+      }
+    }
+  }
 
   /// Sends the request to the server and returns the response.
   Future<R> execute<T extends SpongeRequest, R extends SpongeResponse>(
@@ -165,28 +202,15 @@ class SpongeRestClient {
     // Set empty header if none.
     request.header ??= RequestHeader();
 
-    try {
-      if (_configuration.autoUseAuthToken &&
-          _currentAuthToken == null &&
-          request.header.authToken == null &&
-          !_isRequestAnonymous(request)) {
-        await login();
-      }
-
-      return await _executeDelegate(operation, request, fromJson, context);
-    } on InvalidAuthTokenException {
-      // Relogin if set up and necessary.
-      if (_currentAuthToken != null && _configuration.relogin) {
-        await login();
-
-        // Clear the request auth token.
-        request.header.authToken = null;
-
-        return await _executeDelegate(operation, request, fromJson, context);
-      } else {
-        rethrow;
-      }
-    }
+    return await executeWithAuthentication(
+        requestUsername: request.header.username,
+        requestPassword: request.header.password,
+        requestAuthToken: request.header.authToken,
+        onExecute: () async =>
+            await _executeDelegate(operation, request, fromJson, context),
+        onClearAuthToken: () {
+          request.header.authToken = null;
+        });
   }
 
   Future<SpongeResponse> _executeDelegate(
@@ -197,7 +221,7 @@ class SpongeRestClient {
     context ??= SpongeRequestContext();
 
     return _setupResponse(operation,
-        await _doExecute(operation, _setupRequest(request), fromJson, context));
+        await _doExecute(operation, setupRequest(request), fromJson, context));
   }
 
   void _fireOnRequestSerializedListener(

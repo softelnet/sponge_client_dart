@@ -128,6 +128,9 @@ class GetKnowledgeBasesRequest extends SpongeRequest {}
 /// A get version request
 class GetVersionRequest extends SpongeRequest {}
 
+/// A get features request
+class GetFeaturesRequest extends SpongeRequest {}
+
 /// A login request.
 class LoginRequest extends SpongeRequest {
   LoginRequest(

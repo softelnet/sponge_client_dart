@@ -63,6 +63,7 @@ class SpongeRestClient {
 
   MapCache<String, ActionMeta> _actionMetaCache;
   MapCache<String, RecordType> _eventTypeCache;
+  Map<String, dynamic> _featuresCache;
   final TypeConverter _typeConverter;
 
   /// The type converter.
@@ -160,7 +161,6 @@ class SpongeRestClient {
       requestUsername == null &&
       _configuration.password == null &&
       requestPassword == null;
-
 
   Future<T> executeWithAuthentication<T>({
     @required String requestUsername,
@@ -289,6 +289,20 @@ class SpongeRestClient {
   /// Sends the `version` request to the server and returns the version.
   Future<String> getVersion() async =>
       (await getVersionByRequest(GetVersionRequest())).version;
+
+  /// Sends the `features` request to the server and returns the response.
+  Future<GetFeaturesResponse> getFeaturesByRequest(GetFeaturesRequest request,
+          {SpongeRequestContext context}) async =>
+      await execute(SpongeClientConstants.OPERATION_FEATURES, request,
+          (json) => GetFeaturesResponse.fromJson(json), context);
+
+  /// Returns the Sponge API features by sending the `features` request to the server and returning the features or using the cache.
+  Future<Map<String, dynamic>> getFeatures() async {
+    _featuresCache ??=
+        (await getFeaturesByRequest(GetFeaturesRequest())).features;
+
+    return _featuresCache;
+  }
 
   /// Sends the `login` request to the server and returns the response. Sets the auth token
   /// in the client for further requests.
@@ -775,7 +789,10 @@ class SpongeRestClient {
   Future<void> clearCache() async => await _lock.synchronized(() async {
         await clearActionMetaCache();
         await clearEventTypeCache();
+        await clearFeaturesCache();
       });
+
+  Future<void> clearFeaturesCache() async => _featuresCache = null;
 
   /// Clears the session, i.e. the auth token.
   Future<void> clearSession() async {

@@ -133,6 +133,18 @@ class GetVersionResponse extends SpongeResponse {
       SpongeResponse.setupFromJson(GetVersionResponse(json['version']), json);
 }
 
+/// A get features response.
+class GetFeaturesResponse extends SpongeResponse {
+  GetFeaturesResponse(Map<String, dynamic> features)
+      : this.features = features ?? {};
+
+  /// The Sponge version.
+  Map<String, dynamic> features;
+
+  factory GetFeaturesResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(GetFeaturesResponse(json['features']), json);
+}
+
 /// A login response.
 class LoginResponse extends SpongeResponse {
   LoginResponse(this.authToken);

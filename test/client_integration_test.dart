@@ -73,6 +73,14 @@ void main() {
       expect(response.header.id, equals(request.header.id));
     });
   });
+  group('REST API Client features', () {
+    test('testFeatures', () async {
+      var client = await getClient();
+      Map<String, dynamic> features = await client.getFeatures();
+      expect(features.length, equals(1));
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED], isTrue);
+    });
+  });
   group('REST API Client actions', () {
     test('testActions', () async {
       var client = await getClient();

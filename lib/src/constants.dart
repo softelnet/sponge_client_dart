@@ -22,6 +22,7 @@ abstract class SpongeClientConstants {
   static const String DEFAULT_PATH = 'sponge.json/v$API_VERSION';
 
   static const String OPERATION_VERSION = 'version';
+  static const String OPERATION_FEATURES = 'features';
   static const String OPERATION_LOGIN = 'login';
   static const String OPERATION_LOGOUT = 'logout';
   static const String OPERATION_KNOWLEDGE_BASES = 'knowledgeBases';
@@ -39,4 +40,6 @@ abstract class SpongeClientConstants {
   static const String ERROR_CODE_INCORRECT_USERNAME_PASSWORD = 'SPONGE004';
 
   static const String ATTRIBUTE_PATH_SEPARATOR = '.';
+
+  static const String REMOTE_API_FEATURE_GRPC_ENABLED = 'grpcEnabled';
 }

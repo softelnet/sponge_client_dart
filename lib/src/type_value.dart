@@ -14,7 +14,12 @@
 
 import 'package:sponge_client_dart/src/type.dart';
 
-class AnnotatedValue<T> {
+abstract class DecoratedValue<T> {
+  /// The value.
+  T value;
+}
+
+class AnnotatedValue<T> implements DecoratedValue<T> {
   AnnotatedValue(
     this.value, {
     this.label,
@@ -23,7 +28,8 @@ class AnnotatedValue<T> {
   }) : this.features = features ?? {};
 
   /// The value.
-  dynamic value;
+  @override
+  T value;
 
   /// The optional value label.
   String label;
@@ -59,10 +65,11 @@ class AnnotatedValue<T> {
 }
 
 /// A dynamic value that specifies its type.
-class DynamicValue<T> {
+class DynamicValue<T> implements DecoratedValue<T> {
   DynamicValue(this.value, this.type);
 
   /// The value.
+  @override
   T value;
 
   /// The value type.

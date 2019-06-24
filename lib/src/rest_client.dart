@@ -737,10 +737,15 @@ class SpongeRestClient {
       await execute(SpongeClientConstants.OPERATION_SEND, request,
           (json) => SendEventResponse.fromJson(json), context);
 
-  /// Sends the event named [eventName] with optional [attributes] to the server.
-  Future<String> send(String eventName,
-          {Map<String, Object> attributes}) async =>
-      (await sendByRequest(SendEventRequest(eventName, attributes: attributes)))
+  /// Sends the event named [eventName] with optional [attributes], [label] and [description] to the server.
+  Future<String> send(
+    String eventName, {
+    Map<String, Object> attributes,
+    String label,
+    String description,
+  }) async =>
+      (await sendByRequest(SendEventRequest(eventName,
+              attributes: attributes, label: label, description: description)))
           .eventId;
 
   /// Sends the `reload` request to the server and returns the response.

@@ -150,6 +150,8 @@ class SendEventRequest extends SpongeRequest {
   SendEventRequest(
     this.name, {
     this.attributes,
+    this.label,
+    this.description,
   });
 
   /// The event name.
@@ -158,11 +160,19 @@ class SendEventRequest extends SpongeRequest {
   /// The event attributes (optional).
   final Map<String, Object> attributes;
 
+  /// The event label.
+  final String label;
+
+  /// The event description.
+  final String description;
+
   @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'name': name,
       'attributes': attributes,
+      'label': label,
+      'description': description,
     });
 }
 

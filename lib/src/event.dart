@@ -14,9 +14,9 @@
 
 import 'package:meta/meta.dart';
 
-/// A Sponge event.
-class SpongeEvent {
-  SpongeEvent({
+/// A Sponge Remote API event.
+class RemoteEvent {
+  RemoteEvent({
     @required this.id,
     @required this.name,
     @required this.time,

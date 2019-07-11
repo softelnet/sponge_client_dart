@@ -1,4 +1,4 @@
-## 1.11.0 (not released yet)
+## 1.11.0 (2019-07-11)
 
 * API change: Base request and response properties have been moved to headers.
 * Added label and description to REST API send event.

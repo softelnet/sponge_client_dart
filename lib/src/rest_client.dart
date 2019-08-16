@@ -48,7 +48,7 @@ class SpongeRestClient {
   }
 
   static final Logger _logger = Logger('SpongeRestClient');
-  SpongeRestClientConfiguration _configuration;
+  final SpongeRestClientConfiguration _configuration;
 
   /// The REST API client configuration.
   SpongeRestClientConfiguration get configuration => _configuration;

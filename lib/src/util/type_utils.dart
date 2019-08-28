@@ -55,7 +55,7 @@ class DataTypeUtils {
     return value;
   }
 
-  /// Supports sub-arguments and bypasses annotated values. The `value` has to a complex type.
+  /// Supports sub-arguments and bypasses annotated values. The `value` has to be a complex type.
   static void setSubValue(dynamic value, String path, dynamic subValue) {
     var elements = getPathElements(path);
 
@@ -159,32 +159,47 @@ class DataTypeUtils {
         namedOnly: namedOnly, traverseCollections: traverseCollections));
   }
 
-  static void traverseValue(QualifiedDataType qType, dynamic value,
-      void onValue(QualifiedDataType _qType, dynamic _value)) {
-    onValue(qType, value);
+  static dynamic traverseValue<T>(QualifiedDataType qType, dynamic value,
+      dynamic onValue(QualifiedDataType _qType, dynamic _value)) {
+    // OnValue may change the value.
+    value = onValue(qType, value);
 
     if (value == null) {
-      return;
+      return value;
     }
 
     // Bypass an annotated value.
+    AnnotatedValue annotatedValue;
     if (value is AnnotatedValue) {
+      annotatedValue = value;
       value = value.value;
     }
 
-    // Traverses only through record types.
-    switch (qType.type.kind) {
-      case DataTypeKind.RECORD:
-        (value as Map<String, dynamic>).forEach(
-            (String fieldName, dynamic fieldValue) => traverseValue(
+    if (value != null) {
+      // Traverses only through record types.
+      switch (qType.type.kind) {
+        case DataTypeKind.RECORD:
+          var valueMap = value as Map<String, dynamic>;
+          valueMap.forEach((String fieldName, dynamic fieldValue) {
+            valueMap[fieldName] = traverseValue(
                 qType.createChild(
                     (qType.type as RecordType).getFieldType(fieldName)),
                 fieldValue,
-                onValue));
-        break;
-      default:
-        break;
+                onValue);
+          });
+          break;
+        default:
+          break;
+      }
     }
+
+    // Reverse bypassing of an annotated value.
+    if (annotatedValue != null) {
+      annotatedValue.value = value;
+      value = annotatedValue;
+    }
+
+    return value;
   }
 
   static P getFeatureOrProperty<P>(

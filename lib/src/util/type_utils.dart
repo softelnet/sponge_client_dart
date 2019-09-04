@@ -29,27 +29,43 @@ class DataTypeUtils {
   }
 
   // Bypasses annotated values. Doesn't support collections inside the path with the exception of the last path element.
-  static dynamic getSubValue(dynamic value, String path,
-          {bool returnAnnotatedTarget = false}) =>
+  static dynamic getSubValue(
+    dynamic value,
+    String path, {
+    bool unwrapAnnotatedTarget = true,
+    bool unwrapDynamicTarget = true,
+  }) =>
       _getSubValueByPathElements(value, getPathElements(path),
-          returnAnnotatedTarget: returnAnnotatedTarget);
+          unwrapAnnotatedTarget: unwrapAnnotatedTarget, unwrapDynamicTarget: unwrapDynamicTarget);
 
   static dynamic _getSubValueByPathElements(
-      dynamic value, List<String> pathElements,
-      {bool returnAnnotatedTarget = false}) {
+    dynamic value,
+    List<String> pathElements, {
+    bool unwrapAnnotatedTarget = true,
+    bool unwrapDynamicTarget = true,
+  }) {
     pathElements.forEach((element) {
-      value = value is AnnotatedValue ? (value as AnnotatedValue).value : value;
+      if (value is AnnotatedValue) {
+        value = value.value;
+      }
       if (value == null) {
         return null;
       }
 
+      if (value is DynamicValue) {
+        value = value.value;
+      }
       // Verify Record/Map type.
-      Validate.isTrue(value is Map, 'The value path doesn\'t contain a record');
+      Validate.isTrue(value is Map, 'The value path at \`$element\`doesn\'t contain a record/map');
       value = (value as Map)[element];
     });
 
-    if (!returnAnnotatedTarget) {
+    if (unwrapAnnotatedTarget) {
       value = value is AnnotatedValue ? (value as AnnotatedValue).value : value;
+    }
+
+    if (unwrapDynamicTarget) {
+      value = value is DynamicValue ? (value as DynamicValue).value : value;
     }
 
     return value;
@@ -64,7 +80,7 @@ class DataTypeUtils {
     if (elements.length > 1) {
       value = _getSubValueByPathElements(
           value, elements.sublist(0, elements.length - 1),
-          returnAnnotatedTarget: false);
+          unwrapAnnotatedTarget: true, unwrapDynamicTarget: true);
     }
 
     Validate.notNull(value, 'The parent value of $path is null');

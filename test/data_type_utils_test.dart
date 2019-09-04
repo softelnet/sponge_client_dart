@@ -105,7 +105,7 @@ void main() {
           'a': {
             'b': {'c': AnnotatedValue('test')}
           }
-        }, 'a.b.c', returnAnnotatedTarget: true)
+        }, 'a.b.c', unwrapAnnotatedTarget: false)
             .value,
         equals('test'));
 
@@ -117,7 +117,7 @@ void main() {
                   }
                 }),
                 'a.b',
-                returnAnnotatedTarget: true)
+                unwrapAnnotatedTarget: false)
             .value,
         equals({'c': 'test'}));
 
@@ -129,7 +129,7 @@ void main() {
                   })
                 }),
                 'a',
-                returnAnnotatedTarget: true)
+                unwrapAnnotatedTarget: false)
             .value,
         equals({
           'b': {'c': 'test'}
@@ -142,7 +142,7 @@ void main() {
                   }
                 }),
                 'this',
-                returnAnnotatedTarget: true)
+                unwrapAnnotatedTarget: false)
             .value,
         equals({
           'a': {
@@ -152,14 +152,14 @@ void main() {
 
     expect(
         DataTypeUtils.getSubValue(AnnotatedValue(null), 'this',
-                returnAnnotatedTarget: true)
+                unwrapAnnotatedTarget: false)
             .value,
         isNull);
 
     // Annotated values in the path are skipped.
     expect(
         DataTypeUtils.getSubValue(AnnotatedValue(null), 'a',
-            returnAnnotatedTarget: true),
+            unwrapAnnotatedTarget: false),
         isNull);
   });
   test('setSubValue', () {

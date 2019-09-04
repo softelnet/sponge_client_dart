@@ -337,7 +337,7 @@ class RecordTypeUnitConverter
       Map<String, dynamic> value) async {
     var fieldMap = _createFieldMap(type);
 
-    Map result = {};
+    Map<String, dynamic> result = {};
     for (var entry in value.entries) {
       result[entry.key] = await converter.marshal(
           _getFieldType(fieldMap, type, entry.key), entry.value);

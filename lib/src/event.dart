@@ -12,7 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'package:meta/meta.dart';
+import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/type_converter.dart';
 
 /// A Sponge Remote API event.
 class RemoteEvent {
@@ -33,4 +37,19 @@ class RemoteEvent {
   String label;
   String description;
   Map<String, dynamic> attributes;
+
+  Future<Map<String, dynamic>> convertToJson(
+      RecordType eventType, TypeConverter converter) async {
+    return {
+      'id': id,
+      'name': name,
+      'time': DateTimeTypeUnitConverter.marshalInstant(time),
+      'priority': priority,
+      'label': label,
+      'description': description,
+      'attributes': attributes != null
+          ? await converter.marshal(eventType, attributes)
+          : {},
+    };
+  }
 }

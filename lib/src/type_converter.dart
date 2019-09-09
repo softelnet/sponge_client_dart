@@ -175,8 +175,7 @@ class DateTimeTypeUnitConverter
         throw Exception(
             'The Dart implementation of ${type.dateTimeKind} requires format');
       case DateTimeKind.INSTANT:
-        // Formatter not used.
-        return (value as DateTime).toUtc().toIso8601String();
+        return marshalInstant(value);
     }
 
     throw Exception('Unsupported DateTime kind ${type.dateTimeKind}');
@@ -208,6 +207,11 @@ class DateTimeTypeUnitConverter
     DynamicValue result = DynamicValue.fromJson(value);
     result.value = await converter.unmarshal(result.type, result.value);
     return result;
+  }
+
+  static String marshalInstant(dynamic value) {
+    // Formatter not used.
+    return value != null ? (value as DateTime).toUtc().toIso8601String() : null;
   }
 }
 

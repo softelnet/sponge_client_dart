@@ -42,4 +42,6 @@ abstract class SpongeClientConstants {
   static const String ATTRIBUTE_PATH_SEPARATOR = '.';
 
   static const String REMOTE_API_FEATURE_GRPC_ENABLED = 'grpcEnabled';
+
+  static const String REMOTE_EVENT_OBJECT_TYPE_CLASS_NAME = 'org.openksavi.sponge.restapi.model.RemoteEvent';
 }

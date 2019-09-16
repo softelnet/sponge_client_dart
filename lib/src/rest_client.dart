@@ -584,7 +584,7 @@ class SpongeRestClient {
     for (int i = 0; i < actionMeta.args.length; i++) {
       var argType = actionMeta.args[i];
       Validate.isTrue(argType.optional || argType.nullable || args[i] != null,
-          'Action argument ${argType.label ?? argType.name} is not set');
+          'The ${argType.label ?? argType.name} action argument is not set');
     }
   }
 

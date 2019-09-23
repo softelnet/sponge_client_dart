@@ -1,3 +1,10 @@
+## 1.12.0 (not released yet)
+
+* Improved `RemoteEvent` marshaling.
+* DynamicValue unwrapping in `DataTypeUtils`.
+* Added a return value in the `DataTypeUtils.traverseValue` method.
+* Dependencies upgrade.
+  
 ## 1.11.0 (2019-07-11)
 
 * API change: Base request and response properties have been moved to headers.

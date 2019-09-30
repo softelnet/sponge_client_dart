@@ -1,5 +1,5 @@
 name: sponge_client_dart
-version: 1.11.0
+version: 1.12.0
 
 description: Sponge client for Dart. It simplifies connecting to a remote Sponge service.
 author: The Sponge Team <sponge_team@softelnet.com>

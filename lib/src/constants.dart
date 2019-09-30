@@ -14,7 +14,7 @@
 
 /// The Sponge client constants.
 abstract class SpongeClientConstants {
-  static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.11';
+  static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.12';
 
   static const int API_VERSION = 1;
   static const String CONTENT_TYPE_JSON = 'application/json;charset=utf-8';
@@ -43,5 +43,6 @@ abstract class SpongeClientConstants {
 
   static const String REMOTE_API_FEATURE_GRPC_ENABLED = 'grpcEnabled';
 
-  static const String REMOTE_EVENT_OBJECT_TYPE_CLASS_NAME = 'org.openksavi.sponge.restapi.model.RemoteEvent';
+  static const String REMOTE_EVENT_OBJECT_TYPE_CLASS_NAME =
+      'org.openksavi.sponge.restapi.model.RemoteEvent';
 }

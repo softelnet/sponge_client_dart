@@ -36,7 +36,8 @@ class DataTypeUtils {
     bool unwrapDynamicTarget = true,
   }) =>
       _getSubValueByPathElements(value, getPathElements(path),
-          unwrapAnnotatedTarget: unwrapAnnotatedTarget, unwrapDynamicTarget: unwrapDynamicTarget);
+          unwrapAnnotatedTarget: unwrapAnnotatedTarget,
+          unwrapDynamicTarget: unwrapDynamicTarget);
 
   static dynamic _getSubValueByPathElements(
     dynamic value,
@@ -56,7 +57,8 @@ class DataTypeUtils {
         value = value.value;
       }
       // Verify Record/Map type.
-      Validate.isTrue(value is Map, 'The value path at \`$element\`doesn\'t contain a record/map');
+      Validate.isTrue(value is Map,
+          'The value path at \`$element\`doesn\'t contain a record/map');
       value = (value as Map)[element];
     });
 

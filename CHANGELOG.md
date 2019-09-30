@@ -1,4 +1,4 @@
-## 1.12.0 (not released yet)
+## 1.12.0 (2019-09-30)
 
 * Improved `RemoteEvent` marshaling.
 * DynamicValue unwrapping in `DataTypeUtils`.

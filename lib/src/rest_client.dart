@@ -141,12 +141,11 @@ class SpongeRestClient {
           case SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN:
             throw InvalidAuthTokenException(
                 errorCode, errorMessage, detailedErrorMessage);
-          case SpongeClientConstants
-              .ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION:
-            throw IncorrectKnowledgeBaseVersionException(
+          case SpongeClientConstants.ERROR_CODE_INVALID_KB_VERSION:
+            throw InvalidKnowledgeBaseVersionException(
                 errorCode, errorMessage, detailedErrorMessage);
-          case SpongeClientConstants.ERROR_CODE_INCORRECT_USERNAME_PASSWORD:
-            throw IncorrectUsernamePasswordException(
+          case SpongeClientConstants.ERROR_CODE_INVALID_USERNAME_PASSWORD:
+            throw InvalidUsernamePasswordException(
                 errorCode, errorMessage, detailedErrorMessage);
           default:
             throw SpongeClientException(
@@ -602,7 +601,7 @@ class SpongeRestClient {
     return result;
   }
 
-  Future<Map<String, Object>> _marshalProvideActionArgsCurrent(
+  Future<Map<String, Object>> _marshalAuxiliaryActionArgsCurrent(
       ActionMeta actionMeta, Map<String, Object> current) async {
     if (current == null || actionMeta?.args == null) {
       return current;
@@ -629,7 +628,7 @@ class SpongeRestClient {
         await _typeConverter.unmarshal(actionMeta.result, response.result);
   }
 
-  /// Sends the `actionArgs` request to the server. Fetches the provided action arguments from the server.
+  /// Sends the `provideActionArgs` request to the server. Fetches the provided action arguments from the server.
   Future<ProvideActionArgsResponse> provideActionArgsByRequest(
       ProvideActionArgsRequest request,
       {SpongeRequestContext context}) async {
@@ -637,10 +636,10 @@ class SpongeRestClient {
     _setupActionExecutionRequest(actionMeta, request);
 
     request.current =
-        await _marshalProvideActionArgsCurrent(actionMeta, request.current);
+        await _marshalAuxiliaryActionArgsCurrent(actionMeta, request.current);
 
     ProvideActionArgsResponse response = await execute(
-        SpongeClientConstants.OPERATION_ACTION_ARGS,
+        SpongeClientConstants.OPERATION_PROVIDE_ACTION_ARGS,
         request,
         (json) => ProvideActionArgsResponse.fromJson(json),
         context);
@@ -659,8 +658,31 @@ class SpongeRestClient {
     Map<String, Object> current,
   }) async =>
       (await provideActionArgsByRequest(
-              ProvideActionArgsRequest(actionName, argNames, current)))
+              ProvideActionArgsRequest(actionName, argNames, current: current)))
           .provided;
+
+  /// Sends the `submitActionArgs` request to the server to submit action arguments.
+  Future<SubmitActionArgsResponse> submitActionArgsByRequest(
+      SubmitActionArgsRequest request,
+      {SpongeRequestContext context}) async {
+    ActionMeta actionMeta = await getActionMeta(request.name);
+    _setupActionExecutionRequest(actionMeta, request);
+
+    request.current =
+        await _marshalAuxiliaryActionArgsCurrent(actionMeta, request.current);
+
+    return await execute(SpongeClientConstants.OPERATION_SUBMIT_ACTION_ARGS,
+        request, (json) => SubmitActionArgsResponse.fromJson(json), context);
+  }
+
+  /// Submits action arguments.
+  Future<void> submitActionArgs(
+    String actionName, {
+    List<String> argNames,
+    Map<String, Object> current,
+  }) async =>
+      (await submitActionArgsByRequest(
+          SubmitActionArgsRequest(actionName, argNames, current: current)));
 
   /// Sends the `eventTypes` request to the server.
   Future<GetEventTypesResponse> _doGetEventTypesByRequest(

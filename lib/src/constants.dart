@@ -29,15 +29,16 @@ abstract class SpongeClientConstants {
   static const String OPERATION_ACTIONS = 'actions';
   static const String OPERATION_CALL = 'call';
   static const String OPERATION_SEND = 'send';
-  static const String OPERATION_ACTION_ARGS = 'actionArgs';
+  static const String OPERATION_PROVIDE_ACTION_ARGS = 'provideActionArgs';
+  static const String OPERATION_SUBMIT_ACTION_ARGS = 'submitActionArgs';
   static const String OPERATION_EVENT_TYPES = 'eventTypes';
 
   static const String OPERATION_RELOAD = 'reload';
 
-  static const String DEFAULT_ERROR_CODE = 'SPONGE001';
-  static const String ERROR_CODE_INVALID_AUTH_TOKEN = 'SPONGE002';
-  static const String ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION = 'SPONGE003';
-  static const String ERROR_CODE_INCORRECT_USERNAME_PASSWORD = 'SPONGE004';
+  static const String ERROR_CODE_GENERIC = 'GENERIC';
+  static const String ERROR_CODE_INVALID_AUTH_TOKEN = 'INVALID_AUTH_TOKEN';
+  static const String ERROR_CODE_INVALID_KB_VERSION = 'INVALID_KB_VERSION';
+  static const String ERROR_CODE_INVALID_USERNAME_PASSWORD = 'INVALID_USERNAME_PASSWORD';
 
   static const String ATTRIBUTE_PATH_SEPARATOR = '.';
 

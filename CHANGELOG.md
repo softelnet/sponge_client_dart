@@ -1,3 +1,9 @@
+## 1.12.1 (not released yet)
+
+* Added support for submitting action arguments to the server.
+* API change: Renamed error codes.
+* Dependencies upgrade.
+  
 ## 1.12.0 (2019-09-30)
 
 * Improved `RemoteEvent` marshaling.

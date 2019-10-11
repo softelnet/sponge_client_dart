@@ -198,6 +198,14 @@ class ProvideActionArgsResponse extends SpongeResponse {
           json);
 }
 
+/// A submit action arguments response.
+class SubmitActionArgsResponse extends SpongeResponse {
+  SubmitActionArgsResponse();
+
+  factory SubmitActionArgsResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(SubmitActionArgsResponse(), json);
+}
+
 /// A get event types response.
 class GetEventTypesResponse extends SpongeResponse {
   GetEventTypesResponse(this.eventTypes);

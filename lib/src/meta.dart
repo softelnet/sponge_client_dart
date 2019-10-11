@@ -41,6 +41,7 @@ class ProvidedMeta {
     this.readOnly = false,
     this.overwrite = false,
     this.elementValueSet = false,
+    this.submit = false,
   });
 
   /// The flag specifying if the value is provided. Defaults to `false`.
@@ -61,6 +62,9 @@ class ProvidedMeta {
   /// The flag specifying if the list element value set is provided. Applicable only for list types. Defaults to `false`.
   final bool elementValueSet;
 
+  /// The flag specifying if the value can be submitted by a client.
+  final bool submit;
+
   bool get hasValueSet => valueSet != null;
 
   factory ProvidedMeta.fromJson(Map<String, dynamic> json) {
@@ -73,6 +77,7 @@ class ProvidedMeta {
             readOnly: json['readOnly'] ?? false,
             overwrite: json['overwrite'] ?? false,
             elementValueSet: json['elementValueSet'] ?? false,
+            submit: json['submit'] ?? false,
           )
         : null;
   }
@@ -84,6 +89,7 @@ class ProvidedMeta {
         'readOnly': readOnly,
         'overwrite': overwrite,
         'elementValueSet': elementValueSet,
+        'submit': submit,
       };
 }
 

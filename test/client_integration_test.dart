@@ -143,17 +143,17 @@ void main() {
 
       try {
         await client.call('UpperCase', [arg1]);
-        fail('$IncorrectKnowledgeBaseVersionException expected');
+        fail('$InvalidKnowledgeBaseVersionException expected');
       } catch (e) {
-        expect(e is IncorrectKnowledgeBaseVersionException, isTrue);
+        expect(e is InvalidKnowledgeBaseVersionException, isTrue);
         expect(
-            (e as IncorrectKnowledgeBaseVersionException).errorMessage,
+            (e as InvalidKnowledgeBaseVersionException).errorMessage,
             equals(
                 'The expected action qualified version (1.1) differs from the actual (2.2)'));
         expect(
             e.errorCode,
             equals(SpongeClientConstants
-                .ERROR_CODE_INCORRECT_KNOWLEDGE_BASE_VERSION));
+                .ERROR_CODE_INVALID_KB_VERSION));
       }
     });
     test('testCallBinaryArgAndResult', () async {
@@ -169,7 +169,7 @@ void main() {
         await client.call('LangErrorAction');
         fail('$SpongeClientException expected');
       } on SpongeClientException catch (e) {
-        expect(e.errorCode, equals(SpongeClientConstants.DEFAULT_ERROR_CODE));
+        expect(e.errorCode, equals(SpongeClientConstants.ERROR_CODE_GENERIC));
         expect(
             e.errorMessage,
             startsWith(
@@ -188,7 +188,7 @@ void main() {
         await client.call('KnowledgeBaseErrorAction');
         fail('$SpongeClientException expected');
       } on SpongeClientException catch (e) {
-        expect(e.errorCode, equals(SpongeClientConstants.DEFAULT_ERROR_CODE));
+        expect(e.errorCode, equals(SpongeClientConstants.ERROR_CODE_GENERIC));
         expect(e.errorMessage,
             startsWith('Exception: Knowledge base exception in'));
         expect(
@@ -1032,7 +1032,7 @@ void main() {
       expect(httpResponse.statusCode, equals(200));
       var apiResponse = SpongeResponse.fromJson(json.decode(httpResponse.body));
       expect(apiResponse.header.errorCode,
-          equals(SpongeClientConstants.DEFAULT_ERROR_CODE));
+          equals(SpongeClientConstants.ERROR_CODE_GENERIC));
       expect(
           apiResponse.header.errorMessage
               .contains('Unrecognized field "error_property"'),

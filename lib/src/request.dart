@@ -181,8 +181,40 @@ class ProvideActionArgsRequest extends SpongeRequest
     implements ActionExecutionRequest {
   ProvideActionArgsRequest(
     this.name,
-    this.argNames,
-    this.current, {
+    this.argNames, {
+    this.current,
+    this.qualifiedVersion,
+  });
+
+  /// The action name.
+  final String name;
+
+  /// The names of action arguments to provide.
+  final List<String> argNames;
+
+  /// The current values of action arguments in a client code.
+  Map<String, Object> current;
+
+  /// The action expected qualified version (optional).
+  ProcessorQualifiedVersion qualifiedVersion;
+
+  @override
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'name': name,
+      'argNames': argNames,
+      'current': current,
+      'qualifiedVersion': qualifiedVersion,
+    });
+}
+
+/// A submit action arguments request.
+class SubmitActionArgsRequest extends SpongeRequest
+    implements ActionExecutionRequest {
+  SubmitActionArgsRequest(
+    this.name,
+    this.argNames, {
+    this.current,
     this.qualifiedVersion,
   });
 

@@ -38,9 +38,9 @@ class SpongeClientException extends SpongeException {
   String toString() => errorMessage ?? 'Sponge error, code: $errorCode';
 }
 
-/// A Sponge client exception for incorrect knowledge base version.
-class IncorrectKnowledgeBaseVersionException extends SpongeClientException {
-  const IncorrectKnowledgeBaseVersionException([
+/// A Sponge client exception for invalid knowledge base version.
+class InvalidKnowledgeBaseVersionException extends SpongeClientException {
+  const InvalidKnowledgeBaseVersionException([
     String errorCode,
     String errorMessage,
     String detailedErrorMessage,
@@ -56,9 +56,9 @@ class InvalidAuthTokenException extends SpongeClientException {
   ]) : super(errorCode, errorMessage, detailedErrorMessage);
 }
 
-/// A Sponge client exception for incorrect username or password version.
-class IncorrectUsernamePasswordException extends SpongeClientException {
-  const IncorrectUsernamePasswordException([
+/// A Sponge client exception for invalid username or password version.
+class InvalidUsernamePasswordException extends SpongeClientException {
+  const InvalidUsernamePasswordException([
     String errorCode,
     String errorMessage,
     String detailedErrorMessage,

@@ -78,7 +78,8 @@ void main() {
       var client = await getClient();
       Map<String, dynamic> features = await client.getFeatures();
       expect(features.length, equals(1));
-      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED], isTrue);
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
+          isTrue);
     });
   });
   group('REST API Client actions', () {
@@ -150,10 +151,8 @@ void main() {
             (e as InvalidKnowledgeBaseVersionException).errorMessage,
             equals(
                 'The expected action qualified version (1.1) differs from the actual (2.2)'));
-        expect(
-            e.errorCode,
-            equals(SpongeClientConstants
-                .ERROR_CODE_INVALID_KB_VERSION));
+        expect(e.errorCode,
+            equals(SpongeClientConstants.ERROR_CODE_INVALID_KB_VERSION));
       }
     });
     test('testCallBinaryArgAndResult', () async {
@@ -419,8 +418,9 @@ void main() {
       // Reset the test state.
       await client.call(actionName, ['A', false, null, 1]);
 
-      Map<String, ProvidedValue> providedArgs =
-          await client.provideActionArgs(actionName);
+      Map<String, ProvidedValue> providedArgs = await client.provideActionArgs(
+          actionName,
+          provide: ['actuator1', 'actuator2', 'actuator3']);
       expect(providedArgs.length, equals(3));
       expect(providedArgs['actuator1'], isNotNull);
       expect(providedArgs['actuator1'].value, equals('A'));
@@ -439,7 +439,8 @@ void main() {
 
       await client.call(actionName, ['B', true, null, 10]);
 
-      providedArgs = await client.provideActionArgs(actionName);
+      providedArgs = await client.provideActionArgs(actionName,
+          provide: ['actuator1', 'actuator2', 'actuator3']);
       expect(providedArgs.length, equals(3));
       expect(providedArgs['actuator1'], isNotNull);
       expect(providedArgs['actuator1'].value, equals('B'));
@@ -492,7 +493,7 @@ void main() {
       expect(argTypes[4].provided.dependencies, equals(['actuator1']));
 
       Map<String, ProvidedValue> providedArgs =
-          await client.provideActionArgs(actionName, argNames: ['actuator1']);
+          await client.provideActionArgs(actionName, provide: ['actuator1']);
       expect(providedArgs.length, equals(1));
       expect(providedArgs['actuator1'], isNotNull);
       var actuator1value = providedArgs['actuator1'].value;
@@ -511,7 +512,7 @@ void main() {
       expect(providedArgs['actuator1'].valuePresent, isTrue);
 
       providedArgs = await client.provideActionArgs(actionName,
-          argNames: ['actuator2', 'actuator3', 'actuator5'],
+          provide: ['actuator2', 'actuator3', 'actuator5'],
           current: {'actuator1': actuator1value});
 
       expect(providedArgs.length, equals(3));
@@ -532,7 +533,7 @@ void main() {
       await client.call(actionName, ['B', true, 5, 10, 'Y']);
 
       providedArgs =
-          await client.provideActionArgs(actionName, argNames: ['actuator1']);
+          await client.provideActionArgs(actionName, provide: ['actuator1']);
       expect(providedArgs.length, equals(1));
       expect(providedArgs['actuator1'], isNotNull);
       actuator1value = providedArgs['actuator1'].value;
@@ -541,7 +542,7 @@ void main() {
       expect(providedArgs['actuator1'].valuePresent, isTrue);
 
       providedArgs = await client.provideActionArgs(actionName,
-          argNames: ['actuator2', 'actuator3', 'actuator5'],
+          provide: ['actuator2', 'actuator3', 'actuator5'],
           current: {'actuator1': actuator1value});
       expect(providedArgs.length, equals(3));
       expect(providedArgs['actuator2'], isNotNull);
@@ -561,8 +562,9 @@ void main() {
     test('testProvideActionArgByAction', () async {
       var client = await getClient();
       ActionMeta actionMeta = await client.getActionMeta('ProvideByAction');
-      List values =
-          (await client.provideActionArgs(actionMeta.name))['value'].valueSet;
+      List values = (await client
+              .provideActionArgs(actionMeta.name, provide: ['value']))['value']
+          .valueSet;
       expect(
           await client.call(actionMeta.name, [values.last]), equals('value3'));
     });
@@ -578,7 +580,8 @@ void main() {
       expect(fruitsType.provided.hasValueSet, isFalse);
       expect(fruitsType.provided.elementValueSet, isTrue);
 
-      var provided = await client.provideActionArgs(actionName);
+      var provided =
+          await client.provideActionArgs(actionName, provide: ['fruits']);
       var elementValueSet = provided['fruits'].annotatedElementValueSet;
       expect(elementValueSet.length, equals(3));
       expect(elementValueSet[0].value, equals('apple'));

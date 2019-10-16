@@ -229,4 +229,13 @@ class DataTypeUtils {
 
     return property ?? type.features[propertyName] ?? orElse();
   }
+
+  static bool isProvidedRead(DataType type) =>
+      type.provided != null &&
+      (type.provided.value ||
+          type.provided.valueSet != null ||
+          type.provided.elementValueSet);
+
+  static bool isProvidedWrite(DataType type) =>
+      type.provided != null && type.provided.submittable;
 }

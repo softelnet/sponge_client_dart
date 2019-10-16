@@ -180,8 +180,9 @@ class SendEventRequest extends SpongeRequest {
 class ProvideActionArgsRequest extends SpongeRequest
     implements ActionExecutionRequest {
   ProvideActionArgsRequest(
-    this.name,
-    this.argNames, {
+    this.name, {
+    this.provide,
+    this.submit,
     this.current,
     this.qualifiedVersion,
   });
@@ -190,7 +191,10 @@ class ProvideActionArgsRequest extends SpongeRequest
   final String name;
 
   /// The names of action arguments to provide.
-  final List<String> argNames;
+  final List<String> provide;
+
+  /// The names of action arguments to submit.
+  final List<String> submit;
 
   /// The current values of action arguments in a client code.
   Map<String, Object> current;
@@ -202,39 +206,8 @@ class ProvideActionArgsRequest extends SpongeRequest
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'name': name,
-      'argNames': argNames,
-      'current': current,
-      'qualifiedVersion': qualifiedVersion,
-    });
-}
-
-/// A submit action arguments request.
-class SubmitActionArgsRequest extends SpongeRequest
-    implements ActionExecutionRequest {
-  SubmitActionArgsRequest(
-    this.name,
-    this.argNames, {
-    this.current,
-    this.qualifiedVersion,
-  });
-
-  /// The action name.
-  final String name;
-
-  /// The names of action arguments to provide.
-  final List<String> argNames;
-
-  /// The current values of action arguments in a client code.
-  Map<String, Object> current;
-
-  /// The action expected qualified version (optional).
-  ProcessorQualifiedVersion qualifiedVersion;
-
-  @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll({
-      'name': name,
-      'argNames': argNames,
+      'provide': provide,
+      'submit': submit,
       'current': current,
       'qualifiedVersion': qualifiedVersion,
     });

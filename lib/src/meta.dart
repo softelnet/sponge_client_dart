@@ -41,7 +41,7 @@ class ProvidedMeta {
     this.readOnly = false,
     this.overwrite = false,
     this.elementValueSet = false,
-    this.submit = false,
+    this.submittable = false,
   });
 
   /// The flag specifying if the value is provided. Defaults to `false`.
@@ -63,7 +63,7 @@ class ProvidedMeta {
   final bool elementValueSet;
 
   /// The flag specifying if the value can be submitted by a client.
-  final bool submit;
+  final bool submittable;
 
   bool get hasValueSet => valueSet != null;
 
@@ -77,7 +77,7 @@ class ProvidedMeta {
             readOnly: json['readOnly'] ?? false,
             overwrite: json['overwrite'] ?? false,
             elementValueSet: json['elementValueSet'] ?? false,
-            submit: json['submit'] ?? false,
+            submittable: json['submittable'] ?? false,
           )
         : null;
   }
@@ -89,7 +89,7 @@ class ProvidedMeta {
         'readOnly': readOnly,
         'overwrite': overwrite,
         'elementValueSet': elementValueSet,
-        'submit': submit,
+        'submittable': submittable,
       };
 }
 

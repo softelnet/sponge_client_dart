@@ -30,7 +30,6 @@ abstract class SpongeClientConstants {
   static const String OPERATION_CALL = 'call';
   static const String OPERATION_SEND = 'send';
   static const String OPERATION_PROVIDE_ACTION_ARGS = 'provideActionArgs';
-  static const String OPERATION_SUBMIT_ACTION_ARGS = 'submitActionArgs';
   static const String OPERATION_EVENT_TYPES = 'eventTypes';
 
   static const String OPERATION_RELOAD = 'reload';

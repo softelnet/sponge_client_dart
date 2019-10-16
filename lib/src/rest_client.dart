@@ -651,38 +651,26 @@ class SpongeRestClient {
     return response;
   }
 
-  /// Fetches the provided action arguments from the server.
+  /// Submits action arguments to the server and/or fetches action arguments from the server.
   Future<Map<String, ProvidedValue>> provideActionArgs(
     String actionName, {
-    List<String> argNames,
+    List<String> provide,
+    List<String> submit,
     Map<String, Object> current,
   }) async =>
-      (await provideActionArgsByRequest(
-              ProvideActionArgsRequest(actionName, argNames, current: current)))
+      (await provideActionArgsByRequest(ProvideActionArgsRequest(actionName,
+              provide: provide, submit: submit, current: current)))
           .provided;
 
-  /// Sends the `submitActionArgs` request to the server to submit action arguments.
-  Future<SubmitActionArgsResponse> submitActionArgsByRequest(
-      SubmitActionArgsRequest request,
-      {SpongeRequestContext context}) async {
-    ActionMeta actionMeta = await getActionMeta(request.name);
-    _setupActionExecutionRequest(actionMeta, request);
-
-    request.current =
-        await _marshalAuxiliaryActionArgsCurrent(actionMeta, request.current);
-
-    return await execute(SpongeClientConstants.OPERATION_SUBMIT_ACTION_ARGS,
-        request, (json) => SubmitActionArgsResponse.fromJson(json), context);
-  }
-
-  /// Submits action arguments.
+  /// Submits action arguments. Internally invokes `provideActionArgs`.
   Future<void> submitActionArgs(
-    String actionName, {
-    List<String> argNames,
+    String actionName,
+    List<String> submit,
     Map<String, Object> current,
-  }) async =>
-      (await submitActionArgsByRequest(
-          SubmitActionArgsRequest(actionName, argNames, current: current)));
+  ) async {
+    await provideActionArgs(actionName,
+        provide: null, submit: submit, current: current);
+  }
 
   /// Sends the `eventTypes` request to the server.
   Future<GetEventTypesResponse> _doGetEventTypesByRequest(

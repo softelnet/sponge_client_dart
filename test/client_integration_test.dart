@@ -53,11 +53,19 @@ void main() {
     ..configuration.password = 'password';
 
   // Tests mirroring BaseRestApiTestTemplate.java.
-  group('REST API Client version', () {
+  group('REST API Client base opertions', () {
     test('testVersion', () async {
       var client = await getClient();
       expect(SpongeUtils.isServerVersionCompatible(await client.getVersion()),
           isTrue);
+    });
+    test('testResponseTimes', () async {
+      var client = await getClient();
+      var response = await client.getVersionByRequest(GetVersionRequest());
+      expect(response.header.requestTime, isNotNull);
+      expect(response.header.responseTime, isNotNull);
+      expect(response.header.responseTime.isBefore(response.header.requestTime),
+          isFalse);
     });
     test('testVersionWithId', () async {
       var client = await getClient();
@@ -72,8 +80,6 @@ void main() {
       expect(response.header.id, equals('1'));
       expect(response.header.id, equals(request.header.id));
     });
-  });
-  group('REST API Client features', () {
     test('testFeatures', () async {
       var client = await getClient();
       Map<String, dynamic> features = await client.getFeatures();
@@ -1126,8 +1132,8 @@ void main() {
               '{"header":{"id":null,"username":null,"password":null,"authToken":null}}'));
       expect(
           normalizeJson(responseStringList[0]),
-          equals(
-              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null},"version":"$version"}'));
+          matches(
+              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*"},"version":"$version"}'));
     });
     test('testOneRequestListeners', () async {
       var client = await getClient();
@@ -1157,8 +1163,8 @@ void main() {
               '{"header":{"id":null,"username":null,"password":null,"authToken":null}}'));
       expect(
           normalizeJson(actualResponseString),
-          equals(
-              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null},"version":"$version"}'));
+          matches(
+              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*"},"version":"$version"}'));
     });
   });
 }

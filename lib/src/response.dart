@@ -23,6 +23,8 @@ class ResponseHeader {
     this.errorCode,
     this.errorMessage,
     this.detailedErrorMessage,
+    this.requestTime,
+    this.responseTime,
   });
 
   /// The corresponding request id (optional).
@@ -37,6 +39,12 @@ class ResponseHeader {
   /// The detailed error message (optional).
   String detailedErrorMessage;
 
+  /// The optional request time.
+  DateTime requestTime;
+
+  /// The optional response time.
+  DateTime responseTime;
+
   factory ResponseHeader.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ResponseHeader(
@@ -44,6 +52,12 @@ class ResponseHeader {
             errorCode: json['errorCode'],
             errorMessage: json['errorMessage'],
             detailedErrorMessage: json['detailedErrorMessage'],
+            requestTime: json['requestTime'] != null
+                ? DateTime.parse(json['requestTime'])
+                : null,
+            responseTime: json['responseTime'] != null
+                ? DateTime.parse(json['responseTime'])
+                : null,
           )
         : null;
   }

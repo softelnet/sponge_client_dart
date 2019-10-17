@@ -597,6 +597,59 @@ void main() {
           ]),
           equals(2));
     });
+
+    test('testProvideActionArgsSubmit', () async {
+      var client = await getClient();
+      var actionName = 'SetActuatorSubmit';
+
+      // Reset the test state.
+      await client.call(actionName, ['A', false]);
+
+      List<DataType> argTypes = (await client.getActionMeta(actionName)).args;
+      expect(argTypes[0].provided.value, isTrue);
+      expect(argTypes[0].provided.hasValueSet, isTrue);
+      expect(argTypes[0].provided.valueSet.limited, isTrue);
+      expect(argTypes[0].provided.dependencies?.length, equals(0));
+      expect(argTypes[0].provided.readOnly, isFalse);
+      expect(argTypes[0].provided.submittable, isTrue);
+      expect(argTypes[1].provided.value, isTrue);
+      expect(argTypes[1].provided.hasValueSet, isFalse);
+      expect(argTypes[1].provided.dependencies?.length, equals(0));
+      expect(argTypes[1].provided.readOnly, isFalse);
+      expect(argTypes[1].provided.submittable, isFalse);
+
+      Map<String, ProvidedValue> providedArgs;
+
+      providedArgs = await client
+          .provideActionArgs(actionName, provide: ['actuator1', 'actuator2']);
+      expect(providedArgs.length, equals(2));
+      expect(providedArgs['actuator1'], isNotNull);
+      expect(providedArgs['actuator1'].value, equals('A'));
+      expect(providedArgs['actuator1'].valueSet, equals(['A', 'B', 'C']));
+      expect(providedArgs['actuator1'].valuePresent, isTrue);
+      expect(providedArgs['actuator2'], isNotNull);
+      expect(providedArgs['actuator2'].value, equals(false));
+      expect(providedArgs['actuator2'].valueSet, isNull);
+      expect(providedArgs['actuator2'].valuePresent, isTrue);
+
+      await client
+          .submitActionArgs(actionName, ['actuator1'], {'actuator1': 'B'});
+      expect(
+          (await client.provideActionArgs(actionName,
+                  provide: ['actuator1']))['actuator1']
+              .value,
+          equals('B'));
+
+      await client.call(actionName, ['C', true]);
+      expect(
+          (await client.provideActionArgs(actionName,
+                  provide: ['actuator1']))['actuator1']
+              .value,
+          equals('C'));
+
+      // Reset the test state.
+      await client.call(actionName, ['A', false]);
+    });
     test('testTraverseActionArguments', () async {
       var client = await getClient();
       ActionMeta meta = await client.getActionMeta('NestedRecordAsArgAction');

@@ -1,6 +1,8 @@
 ## 1.12.1 (not released yet)
 
 * Added support for submitting action arguments to the server.
+* Added support for features in action arguments provision.
+* Added the `Features` class that lists all predefined features.
 * API change: Renamed error codes.
 * Dependencies upgrade.
   

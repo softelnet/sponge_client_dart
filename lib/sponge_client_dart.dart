@@ -16,6 +16,7 @@ export 'src/constants.dart';
 export 'src/context.dart';
 export 'src/event.dart';
 export 'src/exception.dart';
+export 'src/features.dart';
 export 'src/listener.dart';
 export 'src/meta.dart';
 export 'src/request.dart';

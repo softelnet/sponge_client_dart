@@ -657,9 +657,13 @@ class SpongeRestClient {
     List<String> provide,
     List<String> submit,
     Map<String, Object> current,
+    Map<String, Map<String, Object>> features,
   }) async =>
       (await provideActionArgsByRequest(ProvideActionArgsRequest(actionName,
-              provide: provide, submit: submit, current: current)))
+              provide: provide,
+              submit: submit,
+              current: current,
+              features: features)))
           .provided;
 
   /// Submits action arguments. Internally invokes `provideActionArgs`.

@@ -16,6 +16,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:intl/intl.dart';
+import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:timezone/standalone.dart';
 
 import 'package:http/http.dart';
@@ -656,6 +657,240 @@ void main() {
       // Reset the test state.
       await client.call(actionName, ['A', false]);
     });
+
+    test('testProvideActionArgsPagingMeta', () async {
+      var client = await getClient();
+      var actionName = 'ViewFruitsPaging';
+      var argTypes = (await client.getActionMeta(actionName)).args;
+
+      expect(argTypes[0].provided, isNotNull);
+      expect(argTypes[0].provided.value, isTrue);
+      expect(argTypes[0].provided.valueSet, isNull);
+      expect(argTypes[0].features[Features.PROVIDE_VALUE_PAGINABLE], isTrue);
+      expect(
+          argTypes[0].features[Features.PROVIDE_VALUE_SET_PAGINABLE], isNull);
+
+      expect(argTypes[1].provided, isNotNull);
+      expect(argTypes[1].provided.value, isFalse);
+      expect(argTypes[1].provided.valueSet, isNotNull);
+      expect(argTypes[1].features[Features.PROVIDE_VALUE_PAGINABLE], isNull);
+      expect(
+          argTypes[1].features[Features.PROVIDE_VALUE_SET_PAGINABLE], isTrue);
+    });
+    test('testProvideActionArgsPagingValue', () async {
+      var client = await getClient();
+      var actionName = 'ViewFruitsPaging';
+      int valueLimit = 5;
+
+      var providedFruits =
+          (await client.provideActionArgs(actionName, provide: [
+        'fruits'
+      ], features: {
+        'fruits': {
+          Features.PROVIDE_VALUE_OFFSET: 0,
+          Features.PROVIDE_VALUE_LIMIT: valueLimit
+        }
+      }))['fruits'];
+
+      var fruits = providedFruits.value;
+      expect(fruits.length, equals(valueLimit));
+      expect(fruits, equals(['apple', 'orange', 'lemon', 'banana', 'cherry']));
+      expect(providedFruits.features[Features.PROVIDE_VALUE_OFFSET], equals(0));
+      expect(providedFruits.features[Features.PROVIDE_VALUE_LIMIT],
+          equals(valueLimit));
+
+      providedFruits = (await client.provideActionArgs(actionName, provide: [
+        'fruits'
+      ], features: {
+        'fruits': {
+          Features.PROVIDE_VALUE_OFFSET: valueLimit,
+          Features.PROVIDE_VALUE_LIMIT: valueLimit
+        }
+      }))['fruits'];
+
+      fruits = providedFruits.value;
+      expect(fruits.length, equals(valueLimit));
+      expect(
+          fruits, equals(['grapes', 'peach', 'mango', 'grapefruit', 'kiwi']));
+      expect(providedFruits.features[Features.PROVIDE_VALUE_OFFSET],
+          equals(valueLimit));
+      expect(providedFruits.features[Features.PROVIDE_VALUE_LIMIT],
+          equals(valueLimit));
+
+      providedFruits = (await client.provideActionArgs(actionName, provide: [
+        'fruits'
+      ], features: {
+        'fruits': {
+          Features.PROVIDE_VALUE_OFFSET: 2 * valueLimit,
+          Features.PROVIDE_VALUE_LIMIT: valueLimit
+        }
+      }))['fruits'];
+
+      fruits = providedFruits.value;
+      expect(fruits.length, equals(1));
+      expect(fruits, equals(['plum']));
+      expect(providedFruits.features[Features.PROVIDE_VALUE_OFFSET],
+          equals(2 * valueLimit));
+      expect(providedFruits.features[Features.PROVIDE_VALUE_LIMIT],
+          equals(valueLimit));
+
+      // All without paging
+      providedFruits = (await client
+          .provideActionArgs(actionName, provide: ['fruits']))['fruits'];
+
+      fruits = providedFruits.value;
+      expect(fruits.length, equals(11));
+      expect(
+          fruits,
+          equals([
+            'apple',
+            'orange',
+            'lemon',
+            'banana',
+            'cherry',
+            'grapes',
+            'peach',
+            'mango',
+            'grapefruit',
+            'kiwi',
+            'plum'
+          ]));
+      expect(providedFruits.features[Features.PROVIDE_VALUE_OFFSET], isNull);
+      expect(providedFruits.features[Features.PROVIDE_VALUE_LIMIT], isNull);
+    });
+
+    test('testActionsProvideArgsPagingValueSet', () async {
+      var client = await getClient();
+      var actionName = 'ViewFruitsPaging';
+
+      int valueSetLimit = 8;
+
+      var provided = (await client.provideActionArgs(actionName, provide: [
+        'favouriteFruit'
+      ], features: {
+        'favouriteFruit': {
+          Features.PROVIDE_VALUE_SET_OFFSET: 0,
+          Features.PROVIDE_VALUE_SET_LIMIT: valueSetLimit
+        }
+      }))['favouriteFruit'];
+
+      expect(
+          provided.valueSet,
+          equals([
+            'apple',
+            'orange',
+            'lemon',
+            'banana',
+            'cherry',
+            'grapes',
+            'peach',
+            'mango'
+          ]));
+      expect(provided.features[Features.PROVIDE_VALUE_SET_OFFSET], equals(0));
+      expect(provided.features[Features.PROVIDE_VALUE_SET_LIMIT],
+          equals(valueSetLimit));
+
+      provided = (await client.provideActionArgs(actionName, provide: [
+        'favouriteFruit'
+      ], features: {
+        'favouriteFruit': {
+          Features.PROVIDE_VALUE_SET_OFFSET: valueSetLimit,
+          Features.PROVIDE_VALUE_SET_LIMIT: valueSetLimit
+        }
+      }))['favouriteFruit'];
+
+      expect(
+          provided.valueSet,
+          equals([
+            'grapefruit',
+            'kiwi',
+            'plum',
+            'pear',
+            'strawberry',
+            'blackberry',
+            'pineapple',
+            'papaya'
+          ]));
+      expect(provided.features[Features.PROVIDE_VALUE_SET_OFFSET],
+          equals(valueSetLimit));
+      expect(provided.features[Features.PROVIDE_VALUE_SET_LIMIT],
+          equals(valueSetLimit));
+
+      provided = (await client.provideActionArgs(actionName, provide: [
+        'favouriteFruit'
+      ], features: {
+        'favouriteFruit': {
+          Features.PROVIDE_VALUE_SET_OFFSET: 2 * valueSetLimit,
+          Features.PROVIDE_VALUE_SET_LIMIT: valueSetLimit
+        }
+      }))['favouriteFruit'];
+
+      expect(provided.valueSet, equals(['melon']));
+      expect(provided.features[Features.PROVIDE_VALUE_SET_OFFSET],
+          equals(2 * valueSetLimit));
+      expect(provided.features[Features.PROVIDE_VALUE_SET_LIMIT],
+          equals(valueSetLimit));
+    });
+
+    test('testActionsProvideArgsPagingElementValueSet', () async {
+      var client = await getClient();
+      var actionName = 'ViewFavouriteFruitsPaging';
+
+      int elementValueSetLimit = 10;
+
+      var provided = (await client.provideActionArgs(actionName, provide: [
+        'favouriteFruits'
+      ], features: {
+        'favouriteFruits': {
+          Features.PROVIDE_ELEMENT_VALUE_SET_OFFSET: 0,
+          Features.PROVIDE_ELEMENT_VALUE_SET_LIMIT: elementValueSetLimit
+        }
+      }))['favouriteFruits'];
+
+      expect(
+          provided.elementValueSet,
+          equals([
+            'apple',
+            'orange',
+            'lemon',
+            'banana',
+            'cherry',
+            'grapes',
+            'peach',
+            'mango',
+            'grapefruit',
+            'kiwi'
+          ]));
+      expect(provided.features[Features.PROVIDE_ELEMENT_VALUE_SET_OFFSET],
+          equals(0));
+      expect(provided.features[Features.PROVIDE_ELEMENT_VALUE_SET_LIMIT],
+          equals(elementValueSetLimit));
+
+      provided = (await client.provideActionArgs(actionName, provide: [
+        'favouriteFruits'
+      ], features: {
+        'favouriteFruits': {
+          Features.PROVIDE_ELEMENT_VALUE_SET_OFFSET: elementValueSetLimit,
+          Features.PROVIDE_ELEMENT_VALUE_SET_LIMIT: elementValueSetLimit
+        }
+      }))['favouriteFruits'];
+      expect(
+          provided.elementValueSet,
+          equals([
+            'plum',
+            'pear',
+            'strawberry',
+            'blackberry',
+            'pineapple',
+            'papaya',
+            'melon'
+          ]));
+      expect(provided.features[Features.PROVIDE_ELEMENT_VALUE_SET_OFFSET],
+          equals(elementValueSetLimit));
+      expect(provided.features[Features.PROVIDE_ELEMENT_VALUE_SET_LIMIT],
+          equals(elementValueSetLimit));
+    });
+
     test('testTraverseActionArguments', () async {
       var client = await getClient();
       ActionMeta meta = await client.getActionMeta('NestedRecordAsArgAction');

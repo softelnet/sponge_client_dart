@@ -185,6 +185,7 @@ class ProvideActionArgsRequest extends SpongeRequest
     this.submit,
     this.current,
     this.qualifiedVersion,
+    this.features,
   });
 
   /// The action name.
@@ -202,6 +203,9 @@ class ProvideActionArgsRequest extends SpongeRequest
   /// The action expected qualified version (optional).
   ProcessorQualifiedVersion qualifiedVersion;
 
+  /// The features for arguments (optional).
+  Map<String, Map<String, Object>> features;
+
   @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
@@ -210,6 +214,7 @@ class ProvideActionArgsRequest extends SpongeRequest
       'submit': submit,
       'current': current,
       'qualifiedVersion': qualifiedVersion,
+      'features': features,
     });
 }
 

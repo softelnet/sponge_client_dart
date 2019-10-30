@@ -1,4 +1,4 @@
-## 1.12.1 (not released yet)
+## 1.13.0 (2019-10-30)
 
 * Added support for submitting action arguments to the server.
 * Added support for features in action arguments provision.

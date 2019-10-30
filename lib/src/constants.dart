@@ -14,7 +14,7 @@
 
 /// The Sponge client constants.
 abstract class SpongeClientConstants {
-  static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.12';
+  static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.13';
 
   static const int API_VERSION = 1;
   static const String CONTENT_TYPE_JSON = 'application/json;charset=utf-8';
@@ -37,7 +37,8 @@ abstract class SpongeClientConstants {
   static const String ERROR_CODE_GENERIC = 'GENERIC';
   static const String ERROR_CODE_INVALID_AUTH_TOKEN = 'INVALID_AUTH_TOKEN';
   static const String ERROR_CODE_INVALID_KB_VERSION = 'INVALID_KB_VERSION';
-  static const String ERROR_CODE_INVALID_USERNAME_PASSWORD = 'INVALID_USERNAME_PASSWORD';
+  static const String ERROR_CODE_INVALID_USERNAME_PASSWORD =
+      'INVALID_USERNAME_PASSWORD';
 
   static const String ATTRIBUTE_PATH_SEPARATOR = '.';
 

@@ -65,6 +65,7 @@ class Features {
   static const ACTION_ARG_LIST_READ_ACTION = 'readAction';
   static const ACTION_ARG_LIST_UPDATE_ACTION = 'updateAction';
   static const ACTION_ARG_LIST_DELETE_ACTION = 'deleteAction';
+  static const ACTION_ARG_LIST_ACTIVATE_ACTION = 'activateAction';
 
   static const BINARY_WIDTH = 'width';
   static const BINARY_HEIGHT = 'height';
@@ -74,6 +75,8 @@ class Features {
 
   static const WIDGET_SLIDER = 'slider';
   static const WIDGET_SWITCH = 'switch';
+
+  static const SCROLL = 'scroll';
 
   static const PROVIDE_VALUE_PAGINABLE = 'valuePaginable';
   static const PROVIDE_VALUE_OFFSET = 'valueOffset';

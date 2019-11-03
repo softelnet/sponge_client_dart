@@ -17,7 +17,7 @@ import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 
-enum SubActionType { create, read, update, delete, context }
+enum SubActionType { create, read, update, delete, activate, context }
 
 class SubActionSpec {
   SubActionSpec._(

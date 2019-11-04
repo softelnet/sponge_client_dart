@@ -1,3 +1,7 @@
+## 1.13.1 (not released yet)
+* API change: Renamed `label` to `valueLabel` and `description` to `valueDescription` in `AnnotatedValue`.
+* Added `AnnotatedValue.typeLabel` and `AnnotatedValue.typeDescription`.
+
 ## 1.13.0 (2019-10-30)
 
 * Added support for submitting action arguments to the server.

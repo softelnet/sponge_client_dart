@@ -40,11 +40,13 @@ abstract class TypeConverter {
       AnnotatedValue annotatedValue =
           value is AnnotatedValue ? value : AnnotatedValue(value);
       return AnnotatedValue(
-          await _getUnitConverter(type)
-              .marshal(this, type, annotatedValue.value),
-          label: annotatedValue.label,
-          description: annotatedValue.description,
-          features: annotatedValue.features);
+        await _getUnitConverter(type).marshal(this, type, annotatedValue.value),
+        valueLabel: annotatedValue.valueLabel,
+        valueDescription: annotatedValue.valueDescription,
+        features: annotatedValue.features,
+        typeLabel: annotatedValue.typeLabel,
+        typeDescription: annotatedValue.typeDescription,
+      );
     }
 
     return await _getUnitConverter(type).marshal(this, type, value);

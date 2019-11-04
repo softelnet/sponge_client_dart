@@ -22,9 +22,11 @@ abstract class DecoratedValue<T> {
 class AnnotatedValue<T> implements DecoratedValue<T> {
   AnnotatedValue(
     this.value, {
-    this.label,
-    this.description,
+    this.valueLabel,
+    this.valueDescription,
     Map<String, Object> features,
+    this.typeLabel,
+    this.typeDescription,
   }) : this.features = features ?? {};
 
   /// The value.
@@ -32,35 +34,47 @@ class AnnotatedValue<T> implements DecoratedValue<T> {
   T value;
 
   /// The optional value label.
-  String label;
+  String valueLabel;
 
   /// The optional value description.
-  String description;
+  String valueDescription;
 
   /// The annotated type features as a map of names to values.
   Map<String, Object> features;
 
+  /// The optional type label.
+  String typeLabel;
+
+  /// The optional type description.
+  String typeDescription;
+
   factory AnnotatedValue.fromJson(Map<String, dynamic> json) => AnnotatedValue(
         json['value'],
-        label: json['label'],
-        description: json['description'],
+        valueLabel: json['valueLabel'],
+        valueDescription: json['valueDescription'],
         features: json['features'] ?? {},
+        typeLabel: json['typeLabel'],
+        typeDescription: json['typeDescription'],
       );
 
   Map<String, dynamic> toJson() {
     return {
       'value': value,
-      'label': label,
-      'description': description,
+      'valueLabel': valueLabel,
+      'valueDescription': valueDescription,
       'features': features,
+      'typeLabel': typeLabel,
+      'typeDescription': typeDescription,
     };
   }
 
   AnnotatedValue<T> copy() => AnnotatedValue(
         value,
-        label: label,
-        description: description,
+        valueLabel: valueLabel,
+        valueDescription: valueDescription,
         features: Map.from(features),
+        typeLabel: typeLabel,
+        typeDescription: typeDescription,
       );
 }
 

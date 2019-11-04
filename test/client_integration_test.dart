@@ -510,11 +510,11 @@ void main() {
           providedArgs['actuator1'].annotatedValueSet;
       expect(actuator1AnnotatedValueSet.length, equals(3));
       expect(actuator1AnnotatedValueSet[0].value, equals('A'));
-      expect(actuator1AnnotatedValueSet[0].label, equals('Value A'));
+      expect(actuator1AnnotatedValueSet[0].valueLabel, equals('Value A'));
       expect(actuator1AnnotatedValueSet[1].value, equals('B'));
-      expect(actuator1AnnotatedValueSet[1].label, equals('Value B'));
+      expect(actuator1AnnotatedValueSet[1].valueLabel, equals('Value B'));
       expect(actuator1AnnotatedValueSet[2].value, equals('C'));
-      expect(actuator1AnnotatedValueSet[2].label, equals('Value C'));
+      expect(actuator1AnnotatedValueSet[2].valueLabel, equals('Value C'));
 
       expect(providedArgs['actuator1'].valuePresent, isTrue);
 
@@ -592,11 +592,11 @@ void main() {
       var elementValueSet = provided['fruits'].annotatedElementValueSet;
       expect(elementValueSet.length, equals(3));
       expect(elementValueSet[0].value, equals('apple'));
-      expect(elementValueSet[0].label, equals('Apple'));
+      expect(elementValueSet[0].valueLabel, equals('Apple'));
       expect(elementValueSet[1].value, equals('banana'));
-      expect(elementValueSet[1].label, equals('Banana'));
+      expect(elementValueSet[1].valueLabel, equals('Banana'));
       expect(elementValueSet[2].value, equals('lemon'));
-      expect(elementValueSet[2].label, equals('Lemon'));
+      expect(elementValueSet[2].valueLabel, equals('Lemon'));
 
       expect(
           await client.call(actionName, [

@@ -222,6 +222,11 @@ void main() {
       expect(result.features.length, equals(2));
       expect(result.features['feature1'], equals('value1'));
       expect(result.features['argFeature1'], equals('argFeature1Value1'));
+
+      expect(result.valueLabel, equals('Result value'));
+      expect(result.valueDescription, equals('Result value description'));
+      expect(result.typeLabel, equals('Result type'));
+      expect(result.typeDescription, equals('Result type description'));
     });
     test('testCallDynamicType', () async {
       var client = await getClient();

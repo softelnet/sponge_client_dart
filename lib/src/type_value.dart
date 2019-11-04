@@ -76,6 +76,16 @@ class AnnotatedValue<T> implements DecoratedValue<T> {
         typeLabel: typeLabel,
         typeDescription: typeDescription,
       );
+
+  void updateIfAbsent(AnnotatedValue<T> source) {
+    valueLabel ??= source.valueLabel;
+    valueDescription ??= source.valueDescription;
+    typeLabel ??= source.typeLabel;
+    typeDescription ??= source.typeDescription;
+    if (features.isEmpty) {
+      features.addAll(source.features);
+    }
+  }
 }
 
 /// A dynamic value that specifies its type.

@@ -238,4 +238,7 @@ class DataTypeUtils {
 
   static bool isProvidedWrite(DataType type) =>
       type.provided != null && type.provided.submittable;
+
+  static bool isValueNotSet(dynamic value) =>
+      value == null || value is AnnotatedValue && value.value == null;
 }

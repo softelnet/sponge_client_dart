@@ -15,6 +15,7 @@
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:timezone/timezone.dart';
 
@@ -63,4 +64,10 @@ class SpongeUtils {
 
   static bool supportsElementValueSet(DataType dataType) =>
       dataType is ListType;
+
+  static bool isAnnotatedValueMap(dynamic value) {
+    return value is Map &&
+        AnnotatedValue.FIELDS.length == value.length &&
+        AnnotatedValue.FIELDS.containsAll(value.keys);
+  }
 }

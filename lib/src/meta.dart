@@ -43,6 +43,7 @@ class ProvidedMeta {
     this.elementValueSet = false,
     this.submittable = false,
     this.lazyUpdate = false,
+    this.current = false,
   });
 
   /// The flag specifying if the value is provided. Defaults to `false`.
@@ -69,6 +70,9 @@ class ProvidedMeta {
   /// The flag specifying if the provided value should be updated lazily in a client code when a dependency changes (experimental).
   final bool lazyUpdate;
 
+  /// The flag specifying if the current value in a client code should be passed to a server.
+  final bool current;
+
   bool get hasValueSet => valueSet != null;
 
   factory ProvidedMeta.fromJson(Map<String, dynamic> json) {
@@ -83,6 +87,7 @@ class ProvidedMeta {
             elementValueSet: json['elementValueSet'] ?? false,
             submittable: json['submittable'] ?? false,
             lazyUpdate: json['lazyUpdate'] ?? false,
+            current: json['current'] ?? false,
           )
         : null;
   }
@@ -96,6 +101,7 @@ class ProvidedMeta {
         'elementValueSet': elementValueSet,
         'submittable': submittable,
         'lazyUpdate': lazyUpdate,
+        'current': current,
       };
 }
 

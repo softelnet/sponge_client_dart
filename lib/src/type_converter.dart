@@ -15,6 +15,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:timezone/timezone.dart';
@@ -35,12 +36,16 @@ abstract class TypeConverter {
       return null;
     }
 
-    if (type.annotated) {
-      // Transparently handle annotated values.
-      AnnotatedValue annotatedValue =
-          value is AnnotatedValue ? value : AnnotatedValue(value);
+    checkNotNull(type, message: 'The type must not be null');
+
+    if (type.annotated && value is AnnotatedValue) {
+      AnnotatedValue annotatedValue = value;
+
       return AnnotatedValue(
-        await _getUnitConverter(type).marshal(this, type, annotatedValue.value),
+        annotatedValue.value != null
+            ? await _getUnitConverter(type)
+                .marshal(this, type, annotatedValue.value)
+            : null,
         valueLabel: annotatedValue.valueLabel,
         valueDescription: annotatedValue.valueDescription,
         features: annotatedValue.features,
@@ -53,19 +58,22 @@ abstract class TypeConverter {
   }
 
   /// Unmarshals the [value] as [type].
-  Future<T> unmarshal<T, D extends DataType>(D type, dynamic value) async {
+  Future<dynamic> unmarshal<D extends DataType>(D type, dynamic value) async {
     if (value == null) {
       return null;
     }
 
-    if (type.annotated) {
-      Validate.isTrue(value is Map,
-          'Expected an annotated value as a map but got ${value.runtimeType}');
-      var annotatedValue = AnnotatedValue.fromJson(value);
-      annotatedValue.value = await _getUnitConverter(type)
-          .unmarshal(this, type, annotatedValue.value);
+    checkNotNull(type, message: 'The type must not be null');
 
-      return annotatedValue as T;
+    // Handle a wrapped annotated value.
+    if (type.annotated && SpongeUtils.isAnnotatedValueMap(value)) {
+      var annotatedValue = AnnotatedValue.fromJson(value);
+      if (annotatedValue.value != null) {
+        annotatedValue.value = await _getUnitConverter(type)
+            .unmarshal(this, type, annotatedValue.value);
+      }
+
+      return annotatedValue;
     }
 
     return await _getUnitConverter(type).unmarshal(this, type, value);
@@ -131,7 +139,8 @@ abstract class UnitTypeConverter<T, D extends DataType> {
   /// Unmarshals the [value] as [type].
   ///
   /// The [value] will never be null here.
-  Future<T> unmarshal(TypeConverter converter, D type, dynamic value) async =>
+  Future<dynamic> unmarshal(
+          TypeConverter converter, D type, dynamic value) async =>
       value;
 }
 
@@ -389,15 +398,26 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
   /// Note that the `value` is modified in this method.
   @override
   Future<dynamic> marshal(
-          TypeConverter converter, TypeType type, DataType value) async =>
-      value..defaultValue = await converter.marshal(value, value.defaultValue);
+      TypeConverter converter, TypeType type, DataType value) async {
+    var defaultValue = await converter.marshal(value, value.defaultValue);
+
+    // Unwrap AnnotatedValue.
+    if (value.annotated && defaultValue is AnnotatedValue) {
+      defaultValue = (defaultValue as AnnotatedValue).value;
+    }
+    value..defaultValue = defaultValue;
+  }
 
   @override
   Future<DataType> unmarshal(
       TypeConverter converter, TypeType type, dynamic value) async {
     DataType result = DataType.fromJson(value);
-    result.defaultValue =
-        await converter.unmarshal(result, result.defaultValue);
+    var defaultValue = await converter.unmarshal(result, result.defaultValue);
+    // Unwrap AnnotatedValue.
+    if (result.annotated && defaultValue is AnnotatedValue) {
+      defaultValue = (defaultValue as AnnotatedValue).value;
+    }
+    result.defaultValue = defaultValue;
     return result;
   }
 }

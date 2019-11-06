@@ -29,6 +29,15 @@ class AnnotatedValue<T> implements DecoratedValue<T> {
     this.typeDescription,
   }) : this.features = features ?? {};
 
+  static const Set<String> FIELDS = {
+    'value',
+    'valueLabel',
+    'valueDescription',
+    'features',
+    'typeLabel',
+    'typeDescription'
+  };
+
   /// The value.
   @override
   T value;

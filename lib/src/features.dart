@@ -18,6 +18,7 @@ class Features {
   static const INTENT = 'intent';
 
   static const VISIBLE = 'visible';
+  static const ENABLED = 'enabled';
 
   static const ICON = 'icon';
 

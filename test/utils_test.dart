@@ -13,9 +13,11 @@
 // limitations under the License.
 
 import 'package:sponge_client_dart/src/constants.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
+import 'dart:mirrors';
 
 void main() {
   group('Utils', () {
@@ -63,6 +65,21 @@ void main() {
           SpongeUtils.parseIsoDateTimeZone(
               '2019-02-07T15:16:17.000+01:00[Europe/Paris]'),
           equals(dateTimeZone));
+    });
+    test('isAnnotatedValueMap', () {
+      var reflectedClass = reflect(AnnotatedValue(null));
+
+      var fieldNames = reflectedClass.type.declarations.values
+          .where((declaration) =>
+              declaration is VariableMirror && !declaration.isStatic)
+          .map((declaration) => MirrorSystem.getName(declaration.simpleName))
+          .toSet();
+
+      Map<String, dynamic> exampleMap = Map.fromIterable(fieldNames,
+          key: (name) => name, value: (name) => null);
+
+      expect(SpongeUtils.isAnnotatedValueMap(exampleMap), isTrue);
+      expect(SpongeUtils.isAnnotatedValueMap({'value': null}), isFalse);
     });
   });
 }

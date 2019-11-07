@@ -896,6 +896,36 @@ void main() {
           equals(elementValueSetLimit));
     });
 
+    test('testActionsAnnotatedWithDefaultValue', () async {
+      var client = await getClient();
+      ActionMeta actionMeta =
+          await client.getActionMeta('AnnotatedWithDefaultValue');
+
+      expect(actionMeta.args[0].annotated, isTrue);
+      expect(actionMeta.args[0].defaultValue, equals('Value'));
+
+      var newValue = 'NEW VALUE';
+
+      expect(await client.call(actionMeta.name, [AnnotatedValue(newValue)]),
+          equals(newValue));
+    });
+    test('testActionsProvidedWithCurrentAndLazyUpdate', () async {
+      var client = await getClient();
+      ActionMeta actionMeta =
+          await client.getActionMeta('ProvidedWithCurrentAndLazyUpdate');
+
+      expect(actionMeta.args[0].annotated, isTrue);
+      expect(actionMeta.args[0].provided.current, isTrue);
+      expect(actionMeta.args[0].provided.lazyUpdate, isTrue);
+
+      var currentValue = 'NEW VALUE';
+
+      ProvidedValue provided = (await client.provideActionArgs(actionMeta.name,
+          provide: ['arg'],
+          current: {'arg': AnnotatedValue(currentValue)}))['arg'];
+
+      expect((provided.value as AnnotatedValue).value, equals(currentValue));
+    });
     test('testTraverseActionArguments', () async {
       var client = await getClient();
       ActionMeta meta = await client.getActionMeta('NestedRecordAsArgAction');

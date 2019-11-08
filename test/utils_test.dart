@@ -12,12 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:mirrors';
+
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:test/test.dart';
 import 'package:timezone/standalone.dart';
-import 'dart:mirrors';
 
 void main() {
   group('Utils', () {

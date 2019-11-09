@@ -23,6 +23,7 @@ class Features {
   static const ICON = 'icon';
 
   static const WIDGET = 'widget';
+  static const GROUP = 'group';
 
   static const RESPONSIVE = 'responsive';
 

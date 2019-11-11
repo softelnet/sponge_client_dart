@@ -32,6 +32,8 @@ class SubActionSpec {
   final List<SubActionArgSpec> argSubstitutions;
   final String expression;
 
+  bool get hasArgSubstitutions => argSubstitutions == null || argSubstitutions.isNotEmpty;
+
   void setup(ActionMeta subActionMeta, DataType sourceType) {
     Validate.notNull(subActionMeta, 'Sub-action $actionName not found');
 

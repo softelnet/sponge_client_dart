@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:sponge_client_dart/src/constants.dart';
+import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
@@ -99,11 +100,16 @@ class DataTypeUtils {
     elements.forEach((element) {
       Validate.notNull(subType, 'Argument $path not found');
 
-      // Verify Record/Map type.
-      Validate.isTrue(subType is RecordType,
-          'The element ${subType.name ?? subType.kind} is not a record');
-
-      subType = (subType as RecordType).getFieldType(element);
+      if (subType is RecordType) {
+        subType = (subType as RecordType).getFieldType(element);
+      } else if (subType is ListType) {
+        subType = (subType as ListType).elementType;
+        Validate.isTrue(subType.name == element,
+            'The list element type name ${subType.name} is different that $element');
+      } else {
+        throw SpongeClientException(
+            'The element ${subType.name ?? subType.kind} is not a record or a list');
+      }
     });
 
     return subType;

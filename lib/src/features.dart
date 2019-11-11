@@ -69,6 +69,8 @@ class Features {
   static const ACTION_ARG_LIST_DELETE_ACTION = 'deleteAction';
   static const ACTION_ARG_LIST_ACTIVATE_ACTION = 'activateAction';
 
+  static const ACTION_ARG_LIST_ACTIVATE_ACTION_VALUE_SUBMIT = 'submit';
+
   static const BINARY_WIDTH = 'width';
   static const BINARY_HEIGHT = 'height';
   static const BINARY_STROKE_WIDTH = 'strokeWidth';

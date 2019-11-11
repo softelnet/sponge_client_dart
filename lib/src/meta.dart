@@ -44,6 +44,7 @@ class ProvidedMeta {
     this.submittable = false,
     this.lazyUpdate = false,
     this.current = false,
+    this.optional = false,
   });
 
   /// The flag specifying if the value is provided. Defaults to `false`.
@@ -73,6 +74,10 @@ class ProvidedMeta {
   /// The flag specifying if the current value in a client code should be passed to a server.
   final bool current;
 
+  /// The flag specifying if the provided read is optional, i.e. a value may be provided implicitly,
+  /// for example when other value is submitted. It is not required to be provided at all.
+  final bool optional;
+
   bool get hasValueSet => valueSet != null;
 
   factory ProvidedMeta.fromJson(Map<String, dynamic> json) {
@@ -88,6 +93,7 @@ class ProvidedMeta {
             submittable: json['submittable'] ?? false,
             lazyUpdate: json['lazyUpdate'] ?? false,
             current: json['current'] ?? false,
+            optional: json['optional'] ?? false,
           )
         : null;
   }
@@ -102,6 +108,7 @@ class ProvidedMeta {
         'submittable': submittable,
         'lazyUpdate': lazyUpdate,
         'current': current,
+        'optional': optional,
       };
 }
 

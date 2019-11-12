@@ -917,6 +917,7 @@ void main() {
       expect(actionMeta.args[0].annotated, isTrue);
       expect(actionMeta.args[0].provided.current, isTrue);
       expect(actionMeta.args[0].provided.lazyUpdate, isTrue);
+      expect(actionMeta.args[0].provided.optional, isFalse);
 
       var currentValue = 'NEW VALUE';
 
@@ -925,6 +926,20 @@ void main() {
           current: {'arg': AnnotatedValue(currentValue)}))['arg'];
 
       expect((provided.value as AnnotatedValue).value, equals(currentValue));
+    });
+    test('testActionsProvidedWithOptional', () async {
+      var client = await getClient();
+      ActionMeta actionMeta =
+          await client.getActionMeta('ProvidedWithOptional');
+
+      expect(actionMeta.args[0].provided.current, isFalse);
+      expect(actionMeta.args[0].provided.lazyUpdate, isFalse);
+      expect(actionMeta.args[0].provided.optional, isTrue);
+
+      ProvidedValue provided =
+          (await client.provideActionArgs(actionMeta.name))['arg'];
+
+      expect(provided.value, equals('VALUE'));
     });
     test('testTraverseActionArguments', () async {
       var client = await getClient();

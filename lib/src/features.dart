@@ -82,15 +82,10 @@ class Features {
 
   static const SCROLL = 'scroll';
 
-  static const PROVIDE_VALUE_PAGINABLE = 'valuePaginable';
-  static const PROVIDE_VALUE_OFFSET = 'valueOffset';
-  static const PROVIDE_VALUE_LIMIT = 'valueLimit';
-  static const PROVIDE_VALUE_SET_PAGINABLE = 'valueSetPaginable';
-  static const PROVIDE_VALUE_SET_OFFSET = 'valueSetOffset';
-  static const PROVIDE_VALUE_SET_LIMIT = 'valueSetLimit';
-  static const PROVIDE_ELEMENT_VALUE_SET_PAGINABLE = 'elementValueSetPaginable';
-  static const PROVIDE_ELEMENT_VALUE_SET_OFFSET = 'elementValueSetOffset';
-  static const PROVIDE_ELEMENT_VALUE_SET_LIMIT = 'elementValueSetLimit';
+  static const PROVIDE_VALUE_PAGEABLE = 'pageable';
+  static const PROVIDE_VALUE_OFFSET = 'offset';
+  static const PROVIDE_VALUE_LIMIT = 'limit';
+  static const PROVIDE_VALUE_COUNT = 'count';
 
   static String getCharacteristic(Map<String, Object> features) {
     var characteristic = features[TYPE_CHARACTERISTIC];

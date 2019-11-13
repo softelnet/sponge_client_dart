@@ -671,16 +671,7 @@ void main() {
       expect(argTypes[0].provided, isNotNull);
       expect(argTypes[0].provided.value, isTrue);
       expect(argTypes[0].provided.valueSet, isNull);
-      expect(argTypes[0].features[Features.PROVIDE_VALUE_PAGINABLE], isTrue);
-      expect(
-          argTypes[0].features[Features.PROVIDE_VALUE_SET_PAGINABLE], isNull);
-
-      expect(argTypes[1].provided, isNotNull);
-      expect(argTypes[1].provided.value, isFalse);
-      expect(argTypes[1].provided.valueSet, isNotNull);
-      expect(argTypes[1].features[Features.PROVIDE_VALUE_PAGINABLE], isNull);
-      expect(
-          argTypes[1].features[Features.PROVIDE_VALUE_SET_PAGINABLE], isTrue);
+      expect(argTypes[0].features[Features.PROVIDE_VALUE_PAGEABLE], isTrue);
     });
     test('testProvideActionArgsPagingValue', () async {
       var client = await getClient();
@@ -697,12 +688,13 @@ void main() {
         }
       }))['fruits'];
 
-      var fruits = providedFruits.value;
-      expect(fruits.length, equals(valueLimit));
-      expect(fruits, equals(['apple', 'orange', 'lemon', 'banana', 'cherry']));
-      expect(providedFruits.features[Features.PROVIDE_VALUE_OFFSET], equals(0));
-      expect(providedFruits.features[Features.PROVIDE_VALUE_LIMIT],
-          equals(valueLimit));
+      AnnotatedValue fruits = providedFruits.value;
+      expect(fruits.value.length, equals(valueLimit));
+      expect(fruits.value,
+          equals(['apple', 'orange', 'lemon', 'banana', 'cherry']));
+      expect(fruits.features[Features.PROVIDE_VALUE_OFFSET], equals(0));
+      expect(fruits.features[Features.PROVIDE_VALUE_LIMIT], equals(valueLimit));
+      expect(fruits.features[Features.PROVIDE_VALUE_COUNT], equals(11));
 
       providedFruits = (await client.provideActionArgs(actionName, provide: [
         'fruits'
@@ -714,13 +706,13 @@ void main() {
       }))['fruits'];
 
       fruits = providedFruits.value;
-      expect(fruits.length, equals(valueLimit));
+      expect(fruits.value.length, equals(valueLimit));
+      expect(fruits.value,
+          equals(['grapes', 'peach', 'mango', 'grapefruit', 'kiwi']));
       expect(
-          fruits, equals(['grapes', 'peach', 'mango', 'grapefruit', 'kiwi']));
-      expect(providedFruits.features[Features.PROVIDE_VALUE_OFFSET],
-          equals(valueLimit));
-      expect(providedFruits.features[Features.PROVIDE_VALUE_LIMIT],
-          equals(valueLimit));
+          fruits.features[Features.PROVIDE_VALUE_OFFSET], equals(valueLimit));
+      expect(fruits.features[Features.PROVIDE_VALUE_LIMIT], equals(valueLimit));
+      expect(fruits.features[Features.PROVIDE_VALUE_COUNT], equals(11));
 
       providedFruits = (await client.provideActionArgs(actionName, provide: [
         'fruits'
@@ -732,168 +724,21 @@ void main() {
       }))['fruits'];
 
       fruits = providedFruits.value;
-      expect(fruits.length, equals(1));
-      expect(fruits, equals(['plum']));
-      expect(providedFruits.features[Features.PROVIDE_VALUE_OFFSET],
+      expect(fruits.value.length, equals(1));
+      expect(fruits.value, equals(['plum']));
+      expect(fruits.features[Features.PROVIDE_VALUE_OFFSET],
           equals(2 * valueLimit));
-      expect(providedFruits.features[Features.PROVIDE_VALUE_LIMIT],
-          equals(valueLimit));
+      expect(fruits.features[Features.PROVIDE_VALUE_LIMIT], equals(valueLimit));
+      expect(fruits.features[Features.PROVIDE_VALUE_COUNT], equals(11));
 
-      // All without paging
-      providedFruits = (await client
-          .provideActionArgs(actionName, provide: ['fruits']))['fruits'];
-
-      fruits = providedFruits.value;
-      expect(fruits.length, equals(11));
+      // Without paging.
       expect(
-          fruits,
-          equals([
-            'apple',
-            'orange',
-            'lemon',
-            'banana',
-            'cherry',
-            'grapes',
-            'peach',
-            'mango',
-            'grapefruit',
-            'kiwi',
-            'plum'
-          ]));
-      expect(providedFruits.features[Features.PROVIDE_VALUE_OFFSET], isNull);
-      expect(providedFruits.features[Features.PROVIDE_VALUE_LIMIT], isNull);
-    });
-
-    test('testActionsProvideArgsPagingValueSet', () async {
-      var client = await getClient();
-      var actionName = 'ViewFruitsPaging';
-
-      int valueSetLimit = 8;
-
-      var provided = (await client.provideActionArgs(actionName, provide: [
-        'favouriteFruit'
-      ], features: {
-        'favouriteFruit': {
-          Features.PROVIDE_VALUE_SET_OFFSET: 0,
-          Features.PROVIDE_VALUE_SET_LIMIT: valueSetLimit
-        }
-      }))['favouriteFruit'];
-
-      expect(
-          provided.valueSet,
-          equals([
-            'apple',
-            'orange',
-            'lemon',
-            'banana',
-            'cherry',
-            'grapes',
-            'peach',
-            'mango'
-          ]));
-      expect(provided.features[Features.PROVIDE_VALUE_SET_OFFSET], equals(0));
-      expect(provided.features[Features.PROVIDE_VALUE_SET_LIMIT],
-          equals(valueSetLimit));
-
-      provided = (await client.provideActionArgs(actionName, provide: [
-        'favouriteFruit'
-      ], features: {
-        'favouriteFruit': {
-          Features.PROVIDE_VALUE_SET_OFFSET: valueSetLimit,
-          Features.PROVIDE_VALUE_SET_LIMIT: valueSetLimit
-        }
-      }))['favouriteFruit'];
-
-      expect(
-          provided.valueSet,
-          equals([
-            'grapefruit',
-            'kiwi',
-            'plum',
-            'pear',
-            'strawberry',
-            'blackberry',
-            'pineapple',
-            'papaya'
-          ]));
-      expect(provided.features[Features.PROVIDE_VALUE_SET_OFFSET],
-          equals(valueSetLimit));
-      expect(provided.features[Features.PROVIDE_VALUE_SET_LIMIT],
-          equals(valueSetLimit));
-
-      provided = (await client.provideActionArgs(actionName, provide: [
-        'favouriteFruit'
-      ], features: {
-        'favouriteFruit': {
-          Features.PROVIDE_VALUE_SET_OFFSET: 2 * valueSetLimit,
-          Features.PROVIDE_VALUE_SET_LIMIT: valueSetLimit
-        }
-      }))['favouriteFruit'];
-
-      expect(provided.valueSet, equals(['melon']));
-      expect(provided.features[Features.PROVIDE_VALUE_SET_OFFSET],
-          equals(2 * valueSetLimit));
-      expect(provided.features[Features.PROVIDE_VALUE_SET_LIMIT],
-          equals(valueSetLimit));
-    });
-
-    test('testActionsProvideArgsPagingElementValueSet', () async {
-      var client = await getClient();
-      var actionName = 'ViewFavouriteFruitsPaging';
-
-      int elementValueSetLimit = 10;
-
-      var provided = (await client.provideActionArgs(actionName, provide: [
-        'favouriteFruits'
-      ], features: {
-        'favouriteFruits': {
-          Features.PROVIDE_ELEMENT_VALUE_SET_OFFSET: 0,
-          Features.PROVIDE_ELEMENT_VALUE_SET_LIMIT: elementValueSetLimit
-        }
-      }))['favouriteFruits'];
-
-      expect(
-          provided.elementValueSet,
-          equals([
-            'apple',
-            'orange',
-            'lemon',
-            'banana',
-            'cherry',
-            'grapes',
-            'peach',
-            'mango',
-            'grapefruit',
-            'kiwi'
-          ]));
-      expect(provided.features[Features.PROVIDE_ELEMENT_VALUE_SET_OFFSET],
-          equals(0));
-      expect(provided.features[Features.PROVIDE_ELEMENT_VALUE_SET_LIMIT],
-          equals(elementValueSetLimit));
-
-      provided = (await client.provideActionArgs(actionName, provide: [
-        'favouriteFruits'
-      ], features: {
-        'favouriteFruits': {
-          Features.PROVIDE_ELEMENT_VALUE_SET_OFFSET: elementValueSetLimit,
-          Features.PROVIDE_ELEMENT_VALUE_SET_LIMIT: elementValueSetLimit
-        }
-      }))['favouriteFruits'];
-      expect(
-          provided.elementValueSet,
-          equals([
-            'plum',
-            'pear',
-            'strawberry',
-            'blackberry',
-            'pineapple',
-            'papaya',
-            'melon'
-          ]));
-      expect(provided.features[Features.PROVIDE_ELEMENT_VALUE_SET_OFFSET],
-          equals(elementValueSetLimit));
-      expect(provided.features[Features.PROVIDE_ELEMENT_VALUE_SET_LIMIT],
-          equals(elementValueSetLimit));
+          () async =>
+              await client.provideActionArgs(actionName, provide: ['fruits']),
+          throwsA(predicate((e) =>
+              e is SpongeClientException &&
+              e.message ==
+                  'There are no features for argument fruits in example.ViewFruitsPaging')));
     });
 
     test('testActionsAnnotatedWithDefaultValue', () async {

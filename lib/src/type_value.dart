@@ -126,8 +126,7 @@ class ProvidedValue<T> {
     this.valuePresent,
     this.annotatedValueSet,
     this.annotatedElementValueSet,
-    Map<String, Object> features,
-  }) : this.features = features ?? {};
+  });
 
   /// The value.
   T value;
@@ -149,9 +148,6 @@ class ProvidedValue<T> {
   /// this property is `null`.
   List<AnnotatedValue> annotatedElementValueSet;
 
-  /// The optional provided features. Note that these features are not the same as those provided in annotated values.
-  Map<String, Object> features;
-
   /// The utility getter for the possible element value set without labels.
   List get elementValueSet => annotatedElementValueSet
       ?.map((annotatedValue) => annotatedValue.value)
@@ -166,6 +162,5 @@ class ProvidedValue<T> {
         annotatedElementValueSet: (json['annotatedElementValueSet'] as List)
             ?.map((arg) => AnnotatedValue.fromJson(arg))
             ?.toList(),
-        features: json['features'] ?? {},
       );
 }

@@ -19,6 +19,7 @@ class Features {
 
   static const VISIBLE = 'visible';
   static const ENABLED = 'enabled';
+  static const REFRESHABLE = 'refreshable';
 
   static const ICON = 'icon';
 

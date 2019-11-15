@@ -32,6 +32,13 @@ class ValueSetMeta {
       };
 }
 
+/// A provided mode.
+enum ProvidedMode {
+  EXPLICIT,
+  OPTIONAL,
+  IMPLICIT,
+}
+
 /// A provided object metadata.
 class ProvidedMeta {
   ProvidedMeta({
@@ -44,7 +51,7 @@ class ProvidedMeta {
     this.submittable = false,
     this.lazyUpdate = false,
     this.current = false,
-    this.optional = false,
+    this.mode = ProvidedMode.EXPLICIT,
   });
 
   /// The flag specifying if the value is provided. Defaults to `false`.
@@ -74,9 +81,11 @@ class ProvidedMeta {
   /// The flag specifying if the current value in a client code should be passed to a server.
   final bool current;
 
-  /// The flag specifying if the provided read is optional, i.e. a value may be provided implicitly,
-  /// for example when other value is submitted. It is not required to be provided at all.
-  final bool optional;
+  /// The provided read mode: `explicit` (a value has to specified to be provided in `provideArgs`), `optional` (a value
+  /// may or may not be specified to be provided in `provideArgs`) or `implicit` (a value shouldn't be specified to be provided
+  /// in `provideArgs`). Defaults to `explicit`. For example a value can be provided optionally or implicitly when an other
+  /// value is submitted.
+  final ProvidedMode mode;
 
   bool get hasValueSet => valueSet != null;
 
@@ -93,7 +102,7 @@ class ProvidedMeta {
             submittable: json['submittable'] ?? false,
             lazyUpdate: json['lazyUpdate'] ?? false,
             current: json['current'] ?? false,
-            optional: json['optional'] ?? false,
+            mode: fromJsonProvidedMode(json['mode']),
           )
         : null;
   }
@@ -108,8 +117,19 @@ class ProvidedMeta {
         'submittable': submittable,
         'lazyUpdate': lazyUpdate,
         'current': current,
-        'optional': optional,
+        'mode': _getProvidedModeValue(mode),
       };
+
+  static ProvidedMode fromJsonProvidedMode(String jsonProvidedMode) {
+    ProvidedMode mode = ProvidedMode.values.firstWhere(
+        (k) => _getProvidedModeValue(k) == jsonProvidedMode,
+        orElse: () => null);
+    return Validate.notNull(
+        mode, 'Unsupported provided mode $jsonProvidedMode');
+  }
+
+  static String _getProvidedModeValue(ProvidedMode mode) =>
+      mode.toString().split('.')[1];
 }
 
 /// A processor qualified version.

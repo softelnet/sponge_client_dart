@@ -762,7 +762,7 @@ void main() {
       expect(actionMeta.args[0].annotated, isTrue);
       expect(actionMeta.args[0].provided.current, isTrue);
       expect(actionMeta.args[0].provided.lazyUpdate, isTrue);
-      expect(actionMeta.args[0].provided.optional, isFalse);
+      expect(actionMeta.args[0].provided.mode, equals(ProvidedMode.EXPLICIT));
 
       var currentValue = 'NEW VALUE';
 
@@ -779,7 +779,7 @@ void main() {
 
       expect(actionMeta.args[0].provided.current, isFalse);
       expect(actionMeta.args[0].provided.lazyUpdate, isFalse);
-      expect(actionMeta.args[0].provided.optional, isTrue);
+      expect(actionMeta.args[0].provided.mode, equals(ProvidedMode.OPTIONAL));
 
       ProvidedValue provided =
           (await client.provideActionArgs(actionMeta.name))['arg'];

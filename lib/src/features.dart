@@ -46,6 +46,8 @@ class Features {
   static const TYPE_INTENT_VALUE_EVENT_NAMES = 'eventNames';
   static const TYPE_INTENT_VALUE_SUBSCRIBE = 'subscribe';
 
+  static const ACTION_INTENT_VALUE_RELOAD = 'reload';
+
   static const ACTION_REFRESH_EVENTS = 'refreshEvents';
 
   static const EVENT_HANDLER_ACTION = 'handlerAction';

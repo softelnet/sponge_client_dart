@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:collection/collection.dart';
+
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/type.dart';
@@ -76,10 +78,10 @@ class DataTypeUtils {
 
   /// Supports sub-arguments and bypasses annotated values. The `value` has to be a complex type.
   static void setSubValue(dynamic value, String path, dynamic subValue) {
+    Validate.isTrue(path != null && path.isNotEmpty, 'The path is empty');
+
     var elements = getPathElements(path);
 
-    Validate.isTrue(elements.isNotEmpty,
-        'The path \'$path\' is empty or points to the same value');
     if (elements.length > 1) {
       value = _getSubValueByPathElements(
           value, elements.sublist(0, elements.length - 1),
@@ -89,9 +91,17 @@ class DataTypeUtils {
     Validate.notNull(value, 'The parent value of $path is null');
 
     // Verify Record/Map type.
-    Validate.isTrue(value is Map, 'The value of $path is not a record');
+    Validate.isTrue(value is Map, 'The value of $path is not a record/map');
 
-    (value as Map)[elements.last] = subValue;
+    if (elements.isNotEmpty) {
+      (value as Map)[elements.last] = subValue;
+    } else {
+      Validate.isTrue(
+          subValue is Map, 'The new value of $path is not a record/map');
+      (value as Map)
+        ..clear()
+        ..addAll(subValue);
+    }
   }
 
   static DataType getSubType(DataType type, String path) {
@@ -247,4 +257,85 @@ class DataTypeUtils {
 
   static bool isValueNotSet(dynamic value) =>
       value == null || value is AnnotatedValue && value.value == null;
+
+  static dynamic cloneValue(dynamic value) {
+    if (value == null) {
+      return null;
+    }
+
+    if (value is AnnotatedValue) {
+      return value.copy();
+    } else if (value is DynamicValue) {
+      return DynamicValue(cloneValue(value.value), value.type);
+    } else if (value is List) {
+      return value.map((elem) => cloneValue(elem)).toList();
+    } else if (value is Map<String, dynamic>) {
+      Map<String, dynamic> result = {};
+      for (var entry in value.entries) {
+        result[entry.key] = cloneValue(entry.value);
+      }
+      return result;
+    } else if (value is Map) {
+      Map result = {};
+      for (var entry in value.entries) {
+        result[entry.key] = cloneValue(entry.value);
+      }
+      return result;
+    }
+
+    return value;
+  }
+
+  static bool equalsValue(dynamic a, dynamic b) {
+    if (a == null && b == null) {
+      return true;
+    } else if (a == null || b == null) {
+      return false;
+    }
+
+    if (a.runtimeType != b.runtimeType) {
+      return false;
+    }
+
+    if (a is AnnotatedValue) {
+      return b is AnnotatedValue
+          ? a == b && equalsValue(a.value, b.value)
+          : false;
+    } else if (a is DynamicValue) {
+      return b is DynamicValue
+          ? a == b && equalsValue(a.value, b.value)
+          : false;
+    } else if (a is List) {
+      if (b is List && a.length == b.length) {
+        for (int i = 0; i < a.length; i++) {
+          if (!equalsValue(a[i], b[i])) {
+            return false;
+          }
+        }
+
+        return true;
+      } else {
+        return false;
+      }
+    } else if (a is Map) {
+      // For maps, keys are not check for equality in any special way.
+      if (b is Map && a.length == b.length) {
+        if (!ListEquality().equals(a.keys, b.keys)) {
+          return false;
+        }
+
+        for (var key in a.keys) {
+          if (!equalsValue(a[key], b[key])) {
+            return false;
+          }
+        }
+
+        return true;
+      } else {
+        return false;
+      }
+    }
+
+    return a == b;
+  }
 }

@@ -12,14 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:equatable/equatable.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/util/type_utils.dart';
 
 abstract class DecoratedValue<T> {
   /// The value.
   T value;
 }
 
-class AnnotatedValue<T> implements DecoratedValue<T> {
+class AnnotatedValue<T> with EquatableMixin implements DecoratedValue<T> {
   AnnotatedValue(
     this.value, {
     this.valueLabel,
@@ -78,7 +80,7 @@ class AnnotatedValue<T> implements DecoratedValue<T> {
   }
 
   AnnotatedValue<T> copy() => AnnotatedValue(
-        value,
+        DataTypeUtils.cloneValue(value),
         valueLabel: valueLabel,
         valueDescription: valueDescription,
         features: Map.from(features),
@@ -95,10 +97,20 @@ class AnnotatedValue<T> implements DecoratedValue<T> {
       features.addAll(source.features);
     }
   }
+
+  @override
+  List<Object> get props => [
+        value,
+        valueLabel,
+        valueDescription,
+        features,
+        typeLabel,
+        typeDescription
+      ];
 }
 
 /// A dynamic value that specifies its type.
-class DynamicValue<T> implements DecoratedValue<T> {
+class DynamicValue<T> with EquatableMixin implements DecoratedValue<T> {
   DynamicValue(this.value, this.type);
 
   /// The value.
@@ -117,6 +129,9 @@ class DynamicValue<T> implements DecoratedValue<T> {
       'type': type.toJson(),
     };
   }
+
+  @override
+  List<Object> get props => [value, type];
 }
 
 /// A provided object value and a possible value set.

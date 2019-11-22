@@ -24,15 +24,21 @@ class SubActionSpec {
     this.actionName,
     this.type, {
     this.argSubstitutions,
+    this.resultSubstitution,
     this.expression,
   });
 
   final String actionName;
   final SubActionType type;
   final List<SubActionArgSpec> argSubstitutions;
+  final String resultSubstitution;
   final String expression;
 
-  bool get hasArgSubstitutions => argSubstitutions == null || argSubstitutions.isNotEmpty;
+  bool get hasArgSubstitutions =>
+      argSubstitutions == null || argSubstitutions.isNotEmpty;
+
+  // The value 1 means that there will be a default substitution.
+  int get argSubstitutionCount => argSubstitutions?.length ?? 1;
 
   void setup(ActionMeta subActionMeta, DataType sourceType) {
     Validate.notNull(subActionMeta, 'Sub-action $actionName not found');
@@ -70,15 +76,40 @@ class SubActionSpec {
             ' the source type ${sourceType.kind} of ${substitution.source}');
       });
     }
+
+    if (resultSubstitution != null) {
+      var parentType = resultSubstitution != DataTypeUtils.THIS
+          ? DataTypeUtils.getSubType(sourceType, resultSubstitution)
+          : sourceType;
+      Validate.isTrue(
+          subActionMeta.result.kind == parentType.kind,
+          'The sub-action $actionName result type ${subActionMeta.result.kind} is incompatible with'
+          ' the result substitution type ${parentType.kind} of $resultSubstitution');
+    }
   }
 
   factory SubActionSpec.parse(String expression, SubActionType type) {
-    var regExp = RegExp(r'^\s*((?:\w|\.)+)\s*(\(.*\))*\s*$');
-    Validate.isTrue(regExp.hasMatch(expression),
-        'Invalid action specification: $expression');
+    var regExp = RegExp(r'^\s*(?:(\w+)\s*=\s*)?(.+)$');
     var match = regExp.firstMatch(expression);
-    Validate.isTrue(
-        match.groupCount > 0, 'Invalid action specification: $expression');
+    Validate.isTrue(match != null && match.groupCount > 0,
+        'Invalid action specification: $expression');
+    var resultSubstitution = match.groupCount > 1 ? match.group(1) : null;
+    var actionFragment = match.groupCount > 1 ? match.group(2) : match.group(1);
+
+    SubActionSpec spec = _parseActionFragment(actionFragment, type);
+
+    return SubActionSpec._(spec.actionName, type,
+        argSubstitutions: spec.argSubstitutions,
+        resultSubstitution: resultSubstitution,
+        expression: expression);
+  }
+
+  static SubActionSpec _parseActionFragment(
+      String expression, SubActionType type) {
+    var regExp = RegExp(r'^\s*((?:\w|\.)+)\s*(\(.*\))*\s*$');
+    var match = regExp.firstMatch(expression);
+    Validate.isTrue(match != null && match.groupCount > 0,
+        'Invalid action specification: $expression');
     var actionName = match.group(1);
 
     List<SubActionArgSpec> argSubstitutions;

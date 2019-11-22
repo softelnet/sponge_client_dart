@@ -199,16 +199,18 @@ void main() {
       }
     };
 
+    DataTypeUtils.setSubValue(value, 'this', {
+      'a': {
+        'b': {'c': 'test5'}
+      }
+    });
     expect(
-        () => DataTypeUtils.setSubValue(value, 'this', {
-              'a': {
-                'b': {'c': 'test5'}
-              }
-            }),
-        throwsA(predicate((e) =>
-            e is SpongeException &&
-            e.message ==
-                'The path \'this\' is empty or points to the same value')));
+        value,
+        equals({
+          'a': {
+            'b': {'c': 'test5'}
+          }
+        }));
 
     expect(
         () => DataTypeUtils.setSubValue({

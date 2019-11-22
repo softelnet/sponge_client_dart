@@ -64,7 +64,7 @@ void main() {
         throwsA(
             predicate((e) => e.message == 'Invalid action specification: ')));
   });
-  test('Sub-action specification - empty', () {
+  test('Sub-action specification - empty substitution', () {
     expect(
         () => SubActionSpec.parse(
             'ContextAction(targetArg=)', SubActionType.context),
@@ -80,5 +80,24 @@ void main() {
         throwsA(predicate((e) =>
             e.message ==
             'Invalid argument in the action specification: ContextAction(targetArg.incorrect=sourceArg)')));
+  });
+  test('Sub-action specification - result substitution', () {
+    var subAction = SubActionSpec.parse(
+        'parentArg=ContextAction(targetArg=sourceArg)', SubActionType.context);
+    expect(subAction.actionName, 'ContextAction');
+    expect(subAction.argSubstitutions.length, 1);
+    expect(subAction.argSubstitutions[0].target, 'targetArg');
+    expect(subAction.argSubstitutions[0].source, 'sourceArg');
+    expect(subAction.resultSubstitution, 'parentArg');
+  });
+  test('Sub-action specification - result substitution  - whitespaces', () {
+    var subAction = SubActionSpec.parse(
+        ' parentArg = ContextAction( targetArg = sourceArg ) ',
+        SubActionType.context);
+    expect(subAction.actionName, 'ContextAction');
+    expect(subAction.argSubstitutions.length, 1);
+    expect(subAction.argSubstitutions[0].target, 'targetArg');
+    expect(subAction.argSubstitutions[0].source, 'sourceArg');
+    expect(subAction.resultSubstitution, 'parentArg');
   });
 }

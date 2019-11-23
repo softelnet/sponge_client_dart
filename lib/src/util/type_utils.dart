@@ -264,11 +264,15 @@ class DataTypeUtils {
     }
 
     if (value is AnnotatedValue) {
-      return value.copy();
+      return AnnotatedValue.of(value);
     } else if (value is DynamicValue) {
-      return DynamicValue(cloneValue(value.value), value.type);
+      return DynamicValue.of(value);
     } else if (value is List) {
-      return value.map((elem) => cloneValue(elem)).toList();
+      var result = value.toList();
+      for (int i = 0; i < result.length; i++) {
+        result[i] = cloneValue(result[i]);
+      }
+      return result;
     } else if (value is Map<String, dynamic>) {
       Map<String, dynamic> result = {};
       for (var entry in value.entries) {
@@ -276,9 +280,9 @@ class DataTypeUtils {
       }
       return result;
     } else if (value is Map) {
-      Map result = {};
-      for (var entry in value.entries) {
-        result[entry.key] = cloneValue(entry.value);
+      var result = Map.of(value);
+      for (var key in result.keys) {
+        result[key] = cloneValue(result[key]);
       }
       return result;
     }

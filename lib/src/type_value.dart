@@ -59,6 +59,15 @@ class AnnotatedValue<T> with EquatableMixin implements DecoratedValue<T> {
   /// The optional type description.
   String typeDescription;
 
+  factory AnnotatedValue.of(AnnotatedValue<T> other) => AnnotatedValue<T>(
+        DataTypeUtils.cloneValue(other.value),
+        valueLabel: other.valueLabel,
+        valueDescription: other.valueDescription,
+        features: Map.from(other.features),
+        typeLabel: other.typeLabel,
+        typeDescription: other.typeDescription,
+      );
+
   factory AnnotatedValue.fromJson(Map<String, dynamic> json) => AnnotatedValue(
         json['value'],
         valueLabel: json['valueLabel'],
@@ -78,15 +87,6 @@ class AnnotatedValue<T> with EquatableMixin implements DecoratedValue<T> {
       'typeDescription': typeDescription,
     };
   }
-
-  AnnotatedValue<T> copy() => AnnotatedValue(
-        DataTypeUtils.cloneValue(value),
-        valueLabel: valueLabel,
-        valueDescription: valueDescription,
-        features: Map.from(features),
-        typeLabel: typeLabel,
-        typeDescription: typeDescription,
-      );
 
   void updateIfAbsent(AnnotatedValue<T> source) {
     valueLabel ??= source.valueLabel;
@@ -119,6 +119,9 @@ class DynamicValue<T> with EquatableMixin implements DecoratedValue<T> {
 
   /// The value type.
   DataType type;
+
+  factory DynamicValue.of(DynamicValue<T> other) =>
+      DynamicValue<T>(DataTypeUtils.cloneValue(other.value), other.type);
 
   factory DynamicValue.fromJson(Map<String, dynamic> json) =>
       DynamicValue(json['value'], DataType.fromJson(json['type']));

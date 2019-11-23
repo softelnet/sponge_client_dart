@@ -105,6 +105,19 @@ class Features {
           Map<String, Object> features, String name, T orElse()) =>
       features.containsKey(name) ? features[name] : orElse();
 
+  static bool getBool(
+      Map<String, Object> features, String name, bool orElse()) {
+    if (!features.containsKey(name)) {
+      return orElse();
+    }
+
+    var value = features[name];
+
+    Validate.isTrue(value is bool, 'Feature $name should be a boolean');
+
+    return value;
+  }
+
   static dynamic findFeature(
           List<Map<String, Object>> featuresList, String name) =>
       featuresList

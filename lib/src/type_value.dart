@@ -16,12 +16,12 @@ import 'package:equatable/equatable.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 
-abstract class DecoratedValue<T> {
+abstract class DecoratedValue {
   /// The value.
-  T value;
+  dynamic value;
 }
 
-class AnnotatedValue<T> with EquatableMixin implements DecoratedValue<T> {
+class AnnotatedValue with EquatableMixin implements DecoratedValue {
   AnnotatedValue(
     this.value, {
     this.valueLabel,
@@ -42,7 +42,7 @@ class AnnotatedValue<T> with EquatableMixin implements DecoratedValue<T> {
 
   /// The value.
   @override
-  T value;
+  dynamic value;
 
   /// The optional value label.
   String valueLabel;
@@ -59,7 +59,7 @@ class AnnotatedValue<T> with EquatableMixin implements DecoratedValue<T> {
   /// The optional type description.
   String typeDescription;
 
-  factory AnnotatedValue.of(AnnotatedValue<T> other) => AnnotatedValue<T>(
+  factory AnnotatedValue.of(AnnotatedValue other) => AnnotatedValue(
         DataTypeUtils.cloneValue(other.value),
         valueLabel: other.valueLabel,
         valueDescription: other.valueDescription,
@@ -88,7 +88,7 @@ class AnnotatedValue<T> with EquatableMixin implements DecoratedValue<T> {
     };
   }
 
-  void updateIfAbsent(AnnotatedValue<T> source) {
+  void updateIfAbsent(AnnotatedValue source) {
     valueLabel ??= source.valueLabel;
     valueDescription ??= source.valueDescription;
     typeLabel ??= source.typeLabel;
@@ -110,18 +110,18 @@ class AnnotatedValue<T> with EquatableMixin implements DecoratedValue<T> {
 }
 
 /// A dynamic value that specifies its type.
-class DynamicValue<T> with EquatableMixin implements DecoratedValue<T> {
+class DynamicValue with EquatableMixin implements DecoratedValue {
   DynamicValue(this.value, this.type);
 
   /// The value.
   @override
-  T value;
+  dynamic value;
 
   /// The value type.
   DataType type;
 
-  factory DynamicValue.of(DynamicValue<T> other) =>
-      DynamicValue<T>(DataTypeUtils.cloneValue(other.value), other.type);
+  factory DynamicValue.of(DynamicValue other) =>
+      DynamicValue(DataTypeUtils.cloneValue(other.value), other.type);
 
   factory DynamicValue.fromJson(Map<String, dynamic> json) =>
       DynamicValue(json['value'], DataType.fromJson(json['type']));
@@ -154,7 +154,7 @@ class ProvidedValue<T> {
 
   /// The possible value set with optional annotations. For example it may be a list of string values to choose from.
   /// If there is no value set, this property should is `null`.
-  List<AnnotatedValue<T>> annotatedValueSet;
+  List<AnnotatedValue> annotatedValueSet;
 
   /// The utility getter for the possible value set without labels.
   List<T> get valueSet => annotatedValueSet

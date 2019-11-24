@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
@@ -219,5 +221,41 @@ void main() {
         throwsA(predicate((e) =>
             e is SpongeException &&
             e.message == 'The parent value of a.b.c is null')));
+  });
+
+  test('cloneValue', () {
+    dynamic value = {
+      'a': {
+        'b': {'c': 'test'}
+      }
+    };
+    expect(DataTypeUtils.cloneValue(value), equals(value));
+
+    value = AnnotatedValue({
+      'a': {
+        'b': {'c': 'test'}
+      }
+    });
+    expect(DataTypeUtils.cloneValue(value), equals(value));
+
+    value = AnnotatedValue({
+      'a': {
+        'b': AnnotatedValue({'c': 'test'})
+      }
+    });
+    expect(DataTypeUtils.cloneValue(value), equals(value));
+
+    value = AnnotatedValue({
+      'a': {
+        'b': [
+          AnnotatedValue({'c': 'test'}),
+          AnnotatedValue({'d': 'test'})
+        ]
+      }
+    });
+    expect(DataTypeUtils.cloneValue(value), equals(value));
+
+    value = Uint8List.fromList([1, 2, 3]);
+    expect(DataTypeUtils.cloneValue(value), equals(value));
   });
 }

@@ -2,6 +2,7 @@
 * API change: Renamed `label` to `valueLabel` and `description` to `valueDescription` in `AnnotatedValue`.
 * Added `AnnotatedValue.typeLabel` and `AnnotatedValue.typeDescription`.
 * Added `ProvidedMeta.mode` - a provided read mode: `explicit` (default), `optional` or `implicit`.
+* Added support for context action result substitution.
 * Removed support for features in an action arguments provision result itself (`ProvidedValue`). Such features can be provided in an `AnnotatedValue`.
 * Removed experimental support for pageable value set and element value set.
 

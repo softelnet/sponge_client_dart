@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:collection/collection.dart';
+import 'dart:typed_data';
 
+import 'package:collection/collection.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/type.dart';
@@ -267,6 +268,8 @@ class DataTypeUtils {
       return AnnotatedValue.of(value);
     } else if (value is DynamicValue) {
       return DynamicValue.of(value);
+    } else if (value is Uint8List) {
+      return Uint8List.fromList(value);
     } else if (value is List) {
       var result = value.toList();
       for (int i = 0; i < result.length; i++) {

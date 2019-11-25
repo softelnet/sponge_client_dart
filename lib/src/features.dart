@@ -58,6 +58,11 @@ class Features {
   static const STRING_OBSCURE = 'obscure';
 
   // Action features for the Action call widget.
+  static const ACTION_CALL_SHOW_CALL = 'showCall';
+  static const ACTION_CALL_SHOW_REFRESH = 'showRefresh';
+  static const ACTION_CALL_SHOW_CLEAR = 'showClear';
+  static const ACTION_CALL_SHOW_CANCEL = 'showCancel';
+
   static const ACTION_CALL_CALL_LABEL = 'callLabel';
   static const ACTION_CALL_REFRESH_LABEL = 'refreshLabel';
   static const ACTION_CALL_CLEAR_LABEL = 'clearLabel';

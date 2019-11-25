@@ -258,7 +258,6 @@ void main() {
     value = Uint8List.fromList([1, 2, 3]);
     expect(DataTypeUtils.cloneValue(value), equals(value));
   });
-
   test('equalsValue', () {
     dynamic value = {
       'a': {

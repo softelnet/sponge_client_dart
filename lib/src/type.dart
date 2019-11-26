@@ -119,7 +119,7 @@ class DataType<T> {
   String format;
 
   /// The default value (optional).
-  T defaultValue;
+  dynamic defaultValue;
 
   /// Tells if a value of this type may be `null`. The default is that a value must not be `null`,
   /// i.e. it is not nullable.

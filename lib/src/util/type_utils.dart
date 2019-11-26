@@ -359,4 +359,6 @@ class DataTypeUtils {
 
     return types;
   }
+
+  static dynamic unwrapAnnotatedValue(dynamic value) => value is AnnotatedValue ? value.value : value;
 }

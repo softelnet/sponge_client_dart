@@ -403,13 +403,7 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
     // Recursively marshal default values.
     // TODO The value should be cloned.
     for (var t in DataTypeUtils.getTypes(value)) {
-      var defaultValue = await converter.marshal(t, t.defaultValue);
-      // TODO Remove Unwrap AnnotatedValue.
-      if (t.annotated && defaultValue is AnnotatedValue) {
-        defaultValue = (defaultValue as AnnotatedValue).value;
-      }
-
-      t.defaultValue = defaultValue;
+      t.defaultValue = await converter.marshal(t, t.defaultValue);
     }
 
     return value;
@@ -422,13 +416,7 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
 
     // Recursively unmarshal default values.
     for (var t in DataTypeUtils.getTypes(result)) {
-      var defaultValue = await converter.unmarshal(t, t.defaultValue);
-      // TODO Remove Unwrap AnnotatedValue.
-      if (t.annotated && defaultValue is AnnotatedValue) {
-        defaultValue = (defaultValue as AnnotatedValue).value;
-      }
-
-      t.defaultValue = defaultValue;
+      t.defaultValue = await converter.unmarshal(t, t.defaultValue);
     }
 
     return result;

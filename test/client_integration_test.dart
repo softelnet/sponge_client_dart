@@ -271,7 +271,8 @@ void main() {
           ..defaultValue = 'DEF1',
         IntegerType()
           ..name = 'field2'
-          ..defaultValue = 0
+          ..annotated = true
+          ..defaultValue = AnnotatedValue(0)
       ])
         ..name = 'record';
 
@@ -286,7 +287,8 @@ void main() {
 
       var resultField2Type = resultRecordType.getFieldType('field2');
       expect(resultField2Type.name, equals('field2'));
-      expect(resultField2Type.defaultValue, equals(0));
+      expect(
+          (resultField2Type.defaultValue as AnnotatedValue).value, equals(0));
     });
     test('testCallDateTimeType', () async {
       var client = await getClient();
@@ -780,7 +782,8 @@ void main() {
           await client.getActionMeta('AnnotatedWithDefaultValue');
 
       expect(actionMeta.args[0].annotated, isTrue);
-      expect(actionMeta.args[0].defaultValue, equals('Value'));
+      expect((actionMeta.args[0].defaultValue as AnnotatedValue).value,
+          equals('Value'));
 
       var newValue = 'NEW VALUE';
 

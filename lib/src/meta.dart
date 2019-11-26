@@ -230,7 +230,7 @@ class ActionMeta {
   final List<DataType> args;
 
   /// The action result type (optional).
-  final DataType result;
+  DataType result;
 
   /// The callable flag.
   final bool callable;

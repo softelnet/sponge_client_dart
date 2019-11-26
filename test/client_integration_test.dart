@@ -250,10 +250,43 @@ void main() {
       var resultType = actionMeta.result;
       expect(resultType.kind, equals(DataTypeKind.TYPE));
 
-      expect(
-          await client.call(actionMeta.name, ['string']) is StringType, isTrue);
-      expect(await client.call(actionMeta.name, ['boolean']) is BooleanType,
+      expect(await client.call(actionMeta.name, ['string', null]) is StringType,
           isTrue);
+      expect(
+          await client.call(actionMeta.name, ['boolean', null]) is BooleanType,
+          isTrue);
+
+      var stringType = StringType()
+        ..name = 'string'
+        ..defaultValue = 'DEF';
+
+      StringType resultStringType =
+          await client.call(actionMeta.name, ['arg', stringType]);
+      expect(resultStringType.name, equals(stringType.name));
+      expect(resultStringType.defaultValue, equals(stringType.defaultValue));
+
+      var recordType = RecordType([
+        StringType()
+          ..name = 'field1'
+          ..defaultValue = 'DEF1',
+        IntegerType()
+          ..name = 'field2'
+          ..defaultValue = 0
+      ])
+        ..name = 'record';
+
+      RecordType resultRecordType =
+          await client.call(actionMeta.name, ['arg', recordType]);
+      expect(resultRecordType.name, equals(recordType.name));
+      expect(resultRecordType.fields.length, equals(2));
+
+      var resultField1Type = resultRecordType.getFieldType('field1');
+      expect(resultField1Type.name, equals('field1'));
+      expect(resultField1Type.defaultValue, equals('DEF1'));
+
+      var resultField2Type = resultRecordType.getFieldType('field2');
+      expect(resultField2Type.name, equals('field2'));
+      expect(resultField2Type.defaultValue, equals(0));
     });
     test('testCallDateTimeType', () async {
       var client = await getClient();

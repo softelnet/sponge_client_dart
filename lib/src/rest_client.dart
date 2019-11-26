@@ -397,16 +397,16 @@ class SpongeRestClient {
     }
 
     if (response.types != null) {
-      for (var type in response.types.values) {
-        await _unmarshalDataType(type);
+      for (var key in response.types.keys) {
+        response.types[key] = await _unmarshalDataType(response.types[key]);
       }
     }
 
     return response;
   }
 
-  Future<void> _unmarshalDataType(DataType type) async {
-    type.defaultValue = await _typeConverter.unmarshal(type, type.defaultValue);
+  Future<DataType> _unmarshalDataType(DataType type) async {
+    return await _typeConverter.unmarshal(TypeType(), type);
   }
 
   Future<void> _unmarshalActionMeta(ActionMeta actionMeta) async {
@@ -414,13 +414,11 @@ class SpongeRestClient {
       return;
     }
 
-    for (var argType in actionMeta.args) {
-      await _unmarshalDataType(argType);
+    for (int i = 0; i < actionMeta.args.length; i++) {
+      actionMeta.args[i] = await _unmarshalDataType(actionMeta.args[i]);
     }
 
-    if (actionMeta.result != null) {
-      await _unmarshalDataType(actionMeta.result);
-    }
+    actionMeta.result = await _unmarshalDataType(actionMeta.result);
   }
 
   Future<void> unmarshalProvidedActionArgValues(
@@ -688,8 +686,9 @@ class SpongeRestClient {
         context);
 
     if (response?.eventTypes != null) {
-      for (var eventType in response.eventTypes.values) {
-        await _unmarshalDataType(eventType);
+      for (var key in response.eventTypes.keys) {
+        response.eventTypes[key] =
+            await _unmarshalDataType(response.eventTypes[key]);
       }
 
       // Populate the event type cache.

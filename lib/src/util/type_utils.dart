@@ -152,7 +152,7 @@ class DataTypeUtils {
     return result;
   }
 
-  /// Traverses the data type but only through record types.
+  /// Traverses the data type.
   static void traverseDataType(
     QualifiedDataType qType,
     void onType(QualifiedDataType _), {
@@ -175,15 +175,13 @@ class DataTypeUtils {
         break;
       case DataTypeKind.LIST:
         if (traverseCollections) {
-          subTypes.add(
-              QualifiedDataType(null, (qType.type as ListType).elementType));
+          subTypes.add(qType.createChild((qType.type as ListType).elementType));
         }
         break;
       case DataTypeKind.MAP:
         if (traverseCollections) {
-          subTypes
-            ..add(QualifiedDataType(null, (qType.type as MapType).keyType))
-            ..add(QualifiedDataType(null, (qType.type as MapType).valueType));
+          subTypes.add(qType.createChild((qType.type as MapType).keyType));
+          subTypes.add(qType.createChild((qType.type as MapType).valueType));
         }
         break;
       default:
@@ -344,4 +342,21 @@ class DataTypeUtils {
 
   static bool isNull(dynamic value) =>
       value is AnnotatedValue ? value.value == null : value == null;
+
+  static List<QualifiedDataType> getQualifiedTypes(DataType type) {
+    List<QualifiedDataType> qTypes = [];
+    DataTypeUtils.traverseDataType(QualifiedDataType(null, type), qTypes.add,
+        namedOnly: false, traverseCollections: true);
+
+    return qTypes;
+  }
+
+  static List<DataType> getTypes(DataType type) {
+    List<DataType> types = [];
+    DataTypeUtils.traverseDataType(
+        QualifiedDataType(null, type), (qType) => types.add(qType.type),
+        namedOnly: false, traverseCollections: true);
+
+    return types;
+  }
 }

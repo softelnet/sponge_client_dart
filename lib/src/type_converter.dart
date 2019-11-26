@@ -16,6 +16,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:quiver/check.dart';
+import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:timezone/timezone.dart';
@@ -399,25 +400,37 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
   @override
   Future<dynamic> marshal(
       TypeConverter converter, TypeType type, DataType value) async {
-    var defaultValue = await converter.marshal(value, value.defaultValue);
+    // Recursively marshal default values.
+    // TODO The value should be cloned.
+    for (var t in DataTypeUtils.getTypes(value)) {
+      var defaultValue = await converter.marshal(t, t.defaultValue);
+      // TODO Remove Unwrap AnnotatedValue.
+      if (t.annotated && defaultValue is AnnotatedValue) {
+        defaultValue = (defaultValue as AnnotatedValue).value;
+      }
 
-    // Unwrap AnnotatedValue.
-    if (value.annotated && defaultValue is AnnotatedValue) {
-      defaultValue = (defaultValue as AnnotatedValue).value;
+      t.defaultValue = defaultValue;
     }
-    value..defaultValue = defaultValue;
+
+    return value;
   }
 
   @override
   Future<DataType> unmarshal(
       TypeConverter converter, TypeType type, dynamic value) async {
-    DataType result = DataType.fromJson(value);
-    var defaultValue = await converter.unmarshal(result, result.defaultValue);
-    // Unwrap AnnotatedValue.
-    if (result.annotated && defaultValue is AnnotatedValue) {
-      defaultValue = (defaultValue as AnnotatedValue).value;
+    DataType result = value is DataType ? value : DataType.fromJson(value);
+
+    // Recursively unmarshal default values.
+    for (var t in DataTypeUtils.getTypes(result)) {
+      var defaultValue = await converter.unmarshal(t, t.defaultValue);
+      // TODO Remove Unwrap AnnotatedValue.
+      if (t.annotated && defaultValue is AnnotatedValue) {
+        defaultValue = (defaultValue as AnnotatedValue).value;
+      }
+
+      t.defaultValue = defaultValue;
     }
-    result.defaultValue = defaultValue;
+
     return result;
   }
 }

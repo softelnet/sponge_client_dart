@@ -121,19 +121,18 @@ class DataTypeUtils {
     var subType = type;
 
     elements.forEach((element) {
-      Validate.notNull(subType, 'Argument $path not found');
+      Validate.notNull(subType, 'Argument \'$path\' not found');
 
       if (subType is DynamicType) {
         var dynamicValue = unwrapAnnotatedValue(value);
-        if (dynamicValue != null) {
-          Validate.isTrue(
-              dynamicValue is DynamicValue && dynamicValue.type != null,
-              'Unable to resolve a dynamic type from a dynamic value for $element in $path');
-          subType = (dynamicValue as DynamicValue).type;
-          value = (dynamicValue as DynamicValue).value;
-        }
 
-        // TODO What if null?
+        Validate.isTrue(dynamicValue is DynamicValue,
+            'A dynamic value for \'$element\' has to be present to resolve a type of \'$path\'');
+        Validate.notNull(dynamicValue.type,
+            'A dynamic value has no type set for \'$element\' in \'$path\'');
+
+        subType = (dynamicValue as DynamicValue).type;
+        value = (dynamicValue as DynamicValue).value;
       }
 
       if (subType is RecordType) {
@@ -143,11 +142,11 @@ class DataTypeUtils {
       } else if (subType is ListType) {
         subType = (subType as ListType).elementType;
         Validate.isTrue(subType.name == element,
-            'The list element type name ${subType.name} is different that $element');
+            'The list element type name \'${subType.name}\' is different that \'$element\'');
         value = null;
       } else {
         throw SpongeClientException(
-            'The element ${subType.name ?? subType.kind} is not a record or a list');
+            'The element \'${subType.name ?? subType.kind}\' is not a record or a list');
       }
     });
 

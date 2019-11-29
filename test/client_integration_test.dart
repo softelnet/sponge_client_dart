@@ -679,7 +679,7 @@ void main() {
       expect(providedArgs['actuator2'].valueSet, isNull);
       expect(providedArgs['actuator2'].valuePresent, isTrue);
 
-      await client.submitActionArgs(actionName, ['actuator1'],
+      await client.provideActionArgs(actionName, submit: ['actuator1'],
           current: {'actuator1': 'B'});
       expect(
           (await client.provideActionArgs(actionName,

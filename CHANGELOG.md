@@ -1,5 +1,6 @@
 ## 1.13.1 (not released yet)
 * API change: Renamed `label` to `valueLabel` and `description` to `valueDescription` in `AnnotatedValue`.
+* API change: Removed `SpongeRestClient.submitActionArgs`. Use `provideActionArgs` directly.
 * Added `AnnotatedValue.typeLabel` and `AnnotatedValue.typeDescription`.
 * Added `ProvidedMeta.mode` - a provided read mode: `explicit` (default), `optional` or `implicit`.
 * Added support for context action result substitution.

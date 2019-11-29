@@ -686,20 +686,6 @@ class SpongeRestClient {
         .provided;
   }
 
-  /// Submits action arguments. Internally invokes `provideActionArgs`.
-  Future<void> submitActionArgs(
-    String actionName,
-    List<String> submit, {
-    Map<String, Object> current,
-    Map<String, DataType> dynamicTypes,
-  }) async {
-    await provideActionArgs(actionName,
-        provide: null,
-        submit: submit,
-        current: current,
-        dynamicTypes: dynamicTypes);
-  }
-
   /// Sends the `eventTypes` request to the server.
   Future<GetEventTypesResponse> _doGetEventTypesByRequest(
       GetEventTypesRequest request,

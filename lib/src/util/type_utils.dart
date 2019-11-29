@@ -32,6 +32,17 @@ class DataTypeUtils {
     return path.split(SpongeClientConstants.ATTRIBUTE_PATH_SEPARATOR);
   }
 
+  static List<String> getPathPaths(String path) {
+    String lastPath;
+    return getPathElements(path).map((element) {
+      lastPath = (lastPath != null
+              ? lastPath + SpongeClientConstants.ATTRIBUTE_PATH_SEPARATOR
+              : '') +
+          element;
+      return lastPath;
+    }).toList();
+  }
+
   // Bypasses annotated values. Doesn't support collections inside the path with the exception of the last path element.
   static dynamic getSubValue(
     dynamic value,
@@ -105,18 +116,35 @@ class DataTypeUtils {
     }
   }
 
-  static DataType getSubType(DataType type, String path) {
+  static DataType getSubType(DataType type, String path, dynamic value) {
     var elements = getPathElements(path);
     var subType = type;
+
     elements.forEach((element) {
       Validate.notNull(subType, 'Argument $path not found');
 
+      if (subType is DynamicType) {
+        var dynamicValue = unwrapAnnotatedValue(value);
+        if (dynamicValue != null) {
+          Validate.isTrue(
+              dynamicValue is DynamicValue && dynamicValue.type != null,
+              'Unable to resolve a dynamic type from a dynamic value for $element in $path');
+          subType = (dynamicValue as DynamicValue).type;
+          value = (dynamicValue as DynamicValue).value;
+        }
+
+        // TODO What if null?
+      }
+
       if (subType is RecordType) {
         subType = (subType as RecordType).getFieldType(element);
+        var recordValue = unwrapAnnotatedValue(value);
+        value = recordValue != null ? recordValue[element] : null;
       } else if (subType is ListType) {
         subType = (subType as ListType).elementType;
         Validate.isTrue(subType.name == element,
             'The list element type name ${subType.name} is different that $element');
+        value = null;
       } else {
         throw SpongeClientException(
             'The element ${subType.name ?? subType.kind} is not a record or a list');
@@ -158,38 +186,64 @@ class DataTypeUtils {
     void onType(QualifiedDataType _), {
     bool namedOnly = true,
     bool traverseCollections = false,
+    dynamic value,
   }) {
     if (namedOnly && qType.type.name == null) {
       return;
     }
 
+    value = unwrapAnnotatedValue(value);
+
     onType(qType);
 
-    List<QualifiedDataType> subTypes = [];
-
     switch (qType.type.kind) {
+      case DataTypeKind.DYNAMIC:
+        if (value != null) {
+          Validate.isTrue(value is DynamicValue && value.type != null,
+              'Unable to resolve a dynamic type from a dynamic value');
+
+          traverseDataType(
+              QualifiedDataType(qType.path, (value as DynamicValue).type),
+              onType,
+              namedOnly: namedOnly,
+              traverseCollections: traverseCollections,
+              value: (value as DynamicValue)?.value);
+        }
+        break;
       case DataTypeKind.RECORD:
-        (qType.type as RecordType)
-            .fields
-            ?.forEach((field) => subTypes.add(qType.createChild(field)));
+        (qType.type as RecordType).fields?.forEach((field) {
+          traverseDataType(qType.createChild(field), onType,
+              namedOnly: namedOnly,
+              traverseCollections: traverseCollections,
+              value: value != null ? value[field.name] : null);
+        });
         break;
       case DataTypeKind.LIST:
         if (traverseCollections) {
-          subTypes.add(qType.createChild((qType.type as ListType).elementType));
+          traverseDataType(
+              qType.createChild((qType.type as ListType).elementType), onType,
+              namedOnly: namedOnly,
+              traverseCollections: traverseCollections,
+              value: null);
         }
         break;
       case DataTypeKind.MAP:
         if (traverseCollections) {
-          subTypes.add(qType.createChild((qType.type as MapType).keyType));
-          subTypes.add(qType.createChild((qType.type as MapType).valueType));
+          traverseDataType(
+              qType.createChild((qType.type as MapType).keyType), onType,
+              namedOnly: namedOnly,
+              traverseCollections: traverseCollections,
+              value: null);
+          traverseDataType(
+              qType.createChild((qType.type as MapType).valueType), onType,
+              namedOnly: namedOnly,
+              traverseCollections: traverseCollections,
+              value: null);
         }
         break;
       default:
         break;
     }
-
-    subTypes.forEach((subType) => traverseDataType(subType, onType,
-        namedOnly: namedOnly, traverseCollections: traverseCollections));
   }
 
   static dynamic traverseValue<T>(QualifiedDataType qType, dynamic value,
@@ -343,22 +397,32 @@ class DataTypeUtils {
   static bool isNull(dynamic value) =>
       value is AnnotatedValue ? value.value == null : value == null;
 
-  static List<QualifiedDataType> getQualifiedTypes(DataType type) {
-    List<QualifiedDataType> qTypes = [];
-    DataTypeUtils.traverseDataType(QualifiedDataType(null, type), qTypes.add,
-        namedOnly: false, traverseCollections: true);
-
-    return qTypes;
-  }
-
-  static List<DataType> getTypes(DataType type) {
+  static List<DataType> getTypes(DataType type, {dynamic value}) {
     List<DataType> types = [];
     DataTypeUtils.traverseDataType(
         QualifiedDataType(null, type), (qType) => types.add(qType.type),
-        namedOnly: false, traverseCollections: true);
+        namedOnly: false, traverseCollections: true, value: value);
 
     return types;
   }
 
-  static dynamic unwrapAnnotatedValue(dynamic value) => value is AnnotatedValue ? value.value : value;
+  static List<QualifiedDataType> getQualifiedTypes(DataType type,
+      {dynamic value}) {
+    List<QualifiedDataType> qTypes = [];
+    DataTypeUtils.traverseDataType(
+        QualifiedDataType(null, type), (qType) => qTypes.add(qType),
+        namedOnly: false, traverseCollections: true, value: value);
+
+    return qTypes;
+  }
+
+  static dynamic unwrapAnnotatedValue(dynamic value) =>
+      value is AnnotatedValue ? value.value : value;
+
+  static bool isTypePathNestedInDynamic(DataType rootType, String path) {
+    var paths = getPathPaths(path);
+    return paths.length > 1
+        ? paths.any((p) => getSubType(rootType, p, null) is DynamicType)
+        : false;
+  }
 }

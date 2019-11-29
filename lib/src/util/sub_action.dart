@@ -67,19 +67,23 @@ class SubActionSpec {
 
       // Type validation.
       argSubstitutions.asMap().forEach((i, substitution) {
+        // TODO Support context actions in dynamic types.
         var targetType = subActionMeta.getArg(substitution.target);
         // TODO Consider more strict type validation.
+        // TODO Support context actions in dynamic types.
         Validate.isTrue(
             targetType.kind ==
-                DataTypeUtils.getSubType(sourceType, substitution.source).kind,
+                DataTypeUtils.getSubType(sourceType, substitution.source, null)
+                    .kind,
             'The target argument type ${targetType.kind} of ${substitution.target} in ${subActionMeta.name} is incompatible with'
             ' the source type ${sourceType.kind} of ${substitution.source}');
       });
     }
 
     if (resultSubstitution != null) {
+      // TODO Support context actions in dynamic types.
       var parentType = resultSubstitution != DataTypeUtils.THIS
-          ? DataTypeUtils.getSubType(sourceType, resultSubstitution)
+          ? DataTypeUtils.getSubType(sourceType, resultSubstitution, null)
           : sourceType;
       Validate.isTrue(
           subActionMeta.result.kind == parentType.kind,

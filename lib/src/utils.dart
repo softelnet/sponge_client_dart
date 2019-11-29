@@ -53,15 +53,6 @@ class SpongeUtils {
         : DateTime.parse(tzDateTimeString);
   }
 
-  /// Traverses the action argument types but only through record types.
-  static void traverseActionArguments(
-      ActionMeta actionMeta, void onType(QualifiedDataType _),
-      {bool namedOnly = true}) {
-    actionMeta.args?.forEach((argType) => DataTypeUtils.traverseDataType(
-        QualifiedDataType(argType.name, argType), onType,
-        namedOnly: namedOnly));
-  }
-
   static bool supportsElementValueSet(DataType dataType) =>
       dataType is ListType;
 
@@ -69,5 +60,14 @@ class SpongeUtils {
     return value is Map &&
         AnnotatedValue.FIELDS.length == value.length &&
         AnnotatedValue.FIELDS.containsAll(value.keys);
+  }
+
+  /// Traverses the action argument types.
+  static void traverseActionArguments(
+      ActionMeta actionMeta, void onType(QualifiedDataType _),
+      {bool namedOnly = true}) {
+    actionMeta.args?.forEach((argType) => DataTypeUtils.traverseDataType(
+        QualifiedDataType(argType.name, argType), onType,
+        namedOnly: namedOnly));
   }
 }

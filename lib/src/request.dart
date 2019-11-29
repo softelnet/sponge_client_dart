@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:sponge_client_dart/src/meta.dart';
+import 'package:sponge_client_dart/src/type.dart';
 
 /// A request header.
 class RequestHeader {
@@ -184,6 +185,7 @@ class ProvideActionArgsRequest extends SpongeRequest
     this.provide,
     this.submit,
     this.current,
+    this.dynamicTypes,
     this.qualifiedVersion,
     this.features,
   });
@@ -200,6 +202,9 @@ class ProvideActionArgsRequest extends SpongeRequest
   /// The current values of action arguments in a client code.
   Map<String, Object> current;
 
+  /// The types of dynamic values used in `current` and `provide`.
+  Map<String, DataType> dynamicTypes;
+
   /// The action expected qualified version (optional).
   ProcessorQualifiedVersion qualifiedVersion;
 
@@ -213,6 +218,10 @@ class ProvideActionArgsRequest extends SpongeRequest
       'provide': provide,
       'submit': submit,
       'current': current,
+      'dynamicTypes': dynamicTypes != null
+          ? Map.fromIterable(dynamicTypes.entries,
+              key: (entry) => entry.key, value: (entry) => entry.value.toJson())
+          : null,
       'qualifiedVersion': qualifiedVersion,
       'features': features,
     });

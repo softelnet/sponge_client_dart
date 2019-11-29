@@ -3,6 +3,7 @@
 * Added `AnnotatedValue.typeLabel` and `AnnotatedValue.typeDescription`.
 * Added `ProvidedMeta.mode` - a provided read mode: `explicit` (default), `optional` or `implicit`.
 * Added support for context action result substitution.
+* Added high level classes (e.g. `ActionData`, `PageableList`) in the `data` package. Currently marked as experimental.
 * Removed support for features in an action arguments provision result itself (`ProvidedValue`). Such features can be provided in an `AnnotatedValue`.
 * Removed experimental support for pageable value set and element value set.
 

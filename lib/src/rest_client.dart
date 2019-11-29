@@ -421,15 +421,20 @@ class SpongeRestClient {
     actionMeta.result = await _unmarshalDataType(actionMeta.result);
   }
 
-  Future<void> unmarshalProvidedActionArgValues(
-      ActionMeta actionMeta, Map<String, ProvidedValue> argValues) async {
+  Future<void> _unmarshalProvidedActionArgValues(
+      ActionMeta actionMeta,
+      Map<String, ProvidedValue> argValues,
+      Map<String, DataType> dynamicTypes) async {
     if (argValues == null || actionMeta.args == null) {
       return;
     }
 
     for (var entry in argValues.entries) {
       ProvidedValue argValue = entry.value;
-      var argType = actionMeta.getArg(entry.key);
+      var argName = entry.key;
+      var argType = dynamicTypes != null && dynamicTypes.containsKey(argName)
+          ? dynamicTypes[argName]
+          : actionMeta.getArg(argName);
 
       argValue.value = await _typeConverter.unmarshal(argType, argValue.value);
 
@@ -600,16 +605,27 @@ class SpongeRestClient {
   }
 
   Future<Map<String, Object>> _marshalAuxiliaryActionArgsCurrent(
-      ActionMeta actionMeta, Map<String, Object> current) async {
-    if (current == null || actionMeta?.args == null) {
-      return current;
+      ActionMeta actionMeta,
+      Map<String, Object> current,
+      Map<String, DataType> dynamicTypes) async {
+    if (current == null) {
+      return null;
     }
 
     Map<String, Object> marshalled = {};
-    for (var entry in current.entries) {
-      var name = entry.key;
-      marshalled[name] =
-          await _typeConverter.marshal(actionMeta.getArg(name), entry.value);
+
+    if (actionMeta?.args == null) {
+      // Not marshalled.
+      marshalled.addAll(current);
+    } else {
+      for (var entry in current.entries) {
+        var name = entry.key;
+        marshalled[name] = await _typeConverter.marshal(
+            dynamicTypes != null && dynamicTypes.containsKey(name)
+                ? dynamicTypes[name]
+                : actionMeta.getArg(name),
+            entry.value);
+      }
     }
 
     return marshalled;
@@ -633,8 +649,8 @@ class SpongeRestClient {
     ActionMeta actionMeta = await getActionMeta(request.name);
     _setupActionExecutionRequest(actionMeta, request);
 
-    request.current =
-        await _marshalAuxiliaryActionArgsCurrent(actionMeta, request.current);
+    request.current = await _marshalAuxiliaryActionArgsCurrent(
+        actionMeta, request.current, request.dynamicTypes);
 
     ProvideActionArgsResponse response = await execute(
         SpongeClientConstants.OPERATION_PROVIDE_ACTION_ARGS,
@@ -643,7 +659,8 @@ class SpongeRestClient {
         context);
 
     if (actionMeta != null) {
-      await unmarshalProvidedActionArgValues(actionMeta, response.provided);
+      await _unmarshalProvidedActionArgValues(
+          actionMeta, response.provided, request.dynamicTypes);
     }
 
     return response;
@@ -655,23 +672,32 @@ class SpongeRestClient {
     List<String> provide,
     List<String> submit,
     Map<String, Object> current,
+    Map<String, DataType> dynamicTypes,
     Map<String, Map<String, Object>> features,
-  }) async =>
-      (await provideActionArgsByRequest(ProvideActionArgsRequest(actionName,
-              provide: provide,
-              submit: submit,
-              current: current,
-              features: features)))
-          .provided;
+  }) async {
+    return (await provideActionArgsByRequest(
+      ProvideActionArgsRequest(actionName,
+          provide: provide,
+          submit: submit,
+          current: current,
+          dynamicTypes: dynamicTypes,
+          features: features),
+    ))
+        .provided;
+  }
 
   /// Submits action arguments. Internally invokes `provideActionArgs`.
   Future<void> submitActionArgs(
     String actionName,
-    List<String> submit,
+    List<String> submit, {
     Map<String, Object> current,
-  ) async {
+    Map<String, DataType> dynamicTypes,
+  }) async {
     await provideActionArgs(actionName,
-        provide: null, submit: submit, current: current);
+        provide: null,
+        submit: submit,
+        current: current,
+        dynamicTypes: dynamicTypes);
   }
 
   /// Sends the `eventTypes` request to the server.

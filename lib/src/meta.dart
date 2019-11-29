@@ -262,9 +262,9 @@ class ActionMeta {
         : null;
   }
 
-  /// Supports sub-arguments.
-  DataType getArg(String path) =>
-      DataTypeUtils.getSubType(argsAsRecordType, path);
+  /// Supports sub-arguments and dynamic types.
+  DataType getArg(String path, {Map<String, dynamic> argsAsRecord}) =>
+      DataTypeUtils.getSubType(argsAsRecordType, path, argsAsRecord);
 
   int getArgIndex(String argName) {
     var index = args.indexWhere((arg) => arg.name == argName);

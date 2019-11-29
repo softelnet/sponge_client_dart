@@ -14,6 +14,9 @@
 
 export 'src/constants.dart';
 export 'src/context.dart';
+export 'src/data/action_data.dart';
+export 'src/data/event_data.dart';
+export 'src/data/pageable_list.dart';
 export 'src/event.dart';
 export 'src/exception.dart';
 export 'src/features.dart';

@@ -679,8 +679,8 @@ void main() {
       expect(providedArgs['actuator2'].valueSet, isNull);
       expect(providedArgs['actuator2'].valuePresent, isTrue);
 
-      await client.provideActionArgs(actionName, submit: ['actuator1'],
-          current: {'actuator1': 'B'});
+      await client.provideActionArgs(actionName,
+          submit: ['actuator1'], current: {'actuator1': 'B'});
       expect(
           (await client.provideActionArgs(actionName,
                   provide: ['actuator1']))['actuator1']
@@ -773,7 +773,7 @@ void main() {
           throwsA(predicate((e) =>
               e is SpongeClientException &&
               e.message ==
-                  'There are no features for argument fruits in example.ViewFruitsPaging')));
+                  'There is no feature offset for argument fruits in example.ViewFruitsPaging')));
     });
 
     test('testActionsAnnotatedWithDefaultValue', () async {

@@ -460,7 +460,7 @@ class NumberType extends DataType<num> {
 
 /// An object. This type requires a class name (typically a Java class name) as a constructor parameter.
 class ObjectType extends DataType<dynamic> {
-  ObjectType(this.className) : super(DataTypeKind.OBJECT);
+  ObjectType(this.className, {this.companionType}) : super(DataTypeKind.OBJECT);
 
   /// The feature name for the className.
   static const String FEATURE_CLASS_NAME = 'className';
@@ -468,12 +468,21 @@ class ObjectType extends DataType<dynamic> {
   /// The class name.
   final String className;
 
+  /// The optional companion type that provides metadata.
+  final DataType companionType;
+
   factory ObjectType.fromJson(Map<String, dynamic> json) =>
-      DataType.fromJsonBase(ObjectType(json['className']), json);
+      DataType.fromJsonBase(
+          ObjectType(
+            json['className'],
+            companionType: DataType.fromJson(json['companionType']),
+          ),
+          json);
 
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'className': className,
+      'companionType': companionType?.toJson(),
     });
 }
 

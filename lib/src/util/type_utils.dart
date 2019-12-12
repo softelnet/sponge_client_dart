@@ -240,6 +240,16 @@ class DataTypeUtils {
               value: null);
         }
         break;
+      case DataTypeKind.OBJECT:
+        var objectType = qType.type as ObjectType;
+        if (objectType.companionType != null) {
+          traverseDataType(qType.createChild(objectType.companionType), onType,
+              namedOnly: namedOnly,
+              traverseCollections: traverseCollections,
+              // Do not propagate the companion type value.
+              value: null);
+        }
+        break;
       default:
         break;
     }

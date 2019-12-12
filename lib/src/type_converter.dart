@@ -44,7 +44,7 @@ abstract class TypeConverter {
 
       return AnnotatedValue(
         annotatedValue.value != null
-            ? await _getUnitConverter(type)
+            ? await _getUnitConverterByType(type)
                 .marshal(this, type, annotatedValue.value)
             : null,
         valueLabel: annotatedValue.valueLabel,
@@ -55,7 +55,7 @@ abstract class TypeConverter {
       );
     }
 
-    return await _getUnitConverter(type).marshal(this, type, value);
+    return await _getUnitConverterByType(type).marshal(this, type, value);
   }
 
   /// Unmarshals the [value] as [type].
@@ -70,14 +70,14 @@ abstract class TypeConverter {
     if (type.annotated && SpongeUtils.isAnnotatedValueMap(value)) {
       var annotatedValue = AnnotatedValue.fromJson(value);
       if (annotatedValue.value != null) {
-        annotatedValue.value = await _getUnitConverter(type)
+        annotatedValue.value = await _getUnitConverterByType(type)
             .unmarshal(this, type, annotatedValue.value);
       }
 
       return annotatedValue;
     }
 
-    return await _getUnitConverter(type).unmarshal(this, type, value);
+    return await _getUnitConverterByType(type).unmarshal(this, type, value);
   }
 
   /// Registers the unit type converter.
@@ -95,8 +95,13 @@ abstract class TypeConverter {
   UnitTypeConverter unregister(DataTypeKind typeKind) =>
       _registry.remove(typeKind);
 
-  UnitTypeConverter<T, D> _getUnitConverter<T, D extends DataType>(D type) =>
-      Validate.notNull(_registry[type.kind], 'Unsupported type ${type.kind}');
+  UnitTypeConverter<T, D> _getUnitConverterByType<T, D extends DataType>(
+          D type) =>
+      _getUnitConverter(type.kind);
+
+  UnitTypeConverter<T, D> _getUnitConverter<T, D extends DataType>(
+          DataTypeKind typeKind) =>
+      Validate.notNull(_registry[typeKind], 'Unsupported type $typeKind');
 }
 
 /// A default type converter.
@@ -307,34 +312,56 @@ class NumberTypeUnitConverter extends UnitTypeConverter<num, NumberType> {
 typedef Future<dynamic> ObjectTypeUnitConverterMapper(
     TypeConverter converter, dynamic value);
 
+/// Doesn't support reflection.
 class ObjectTypeUnitConverter extends UnitTypeConverter<dynamic, ObjectType> {
-  ObjectTypeUnitConverter([this._useTransparentIfNotFound = false])
+  ObjectTypeUnitConverter([this.useTransparentIfNotFound = false])
       : super(DataTypeKind.OBJECT);
 
-  final bool _useTransparentIfNotFound;
+  bool useTransparentIfNotFound;
+
   final Map<String, ObjectTypeUnitConverterMapper> marshalers = Map();
   final Map<String, ObjectTypeUnitConverterMapper> unmarshalers = Map();
 
   @override
   Future<dynamic> marshal(
       TypeConverter converter, ObjectType type, dynamic value) async {
-    if (!marshalers.containsKey(type.className)) {
-      if (_useTransparentIfNotFound) {
-        return value;
-      } else {
-        throw Exception('Unsupported object type class name ${type.className}');
-      }
+    // Use marshaler if registered.
+    if (marshalers.containsKey(type.className)) {
+      return await marshalers[type.className](converter, value);
     }
-    return marshalers[type.className](converter, value);
+
+    // Reflection is not supported here.
+
+    if (type.companionType != null) {
+      return await converter.marshal(type.companionType, value);
+    }
+
+    if (!useTransparentIfNotFound) {
+      throw Exception('Unsupported object type class name ${type.className}');
+    }
+
+    return value;
   }
 
   @override
   Future<dynamic> unmarshal(
       TypeConverter converter, ObjectType type, dynamic value) async {
-    if (!unmarshalers.containsKey(type.className)) {
+    // Use unmarshaler if registered.
+    if (unmarshalers.containsKey(type.className)) {
+      return await unmarshalers[type.className](converter, value);
+    }
+
+    // Reflection is not supported here.
+
+    if (type.companionType != null) {
+      return await converter.unmarshal(type.companionType, value);
+    }
+
+    if (!useTransparentIfNotFound) {
       throw Exception('Unsupported object type class name ${type.className}');
     }
-    return unmarshalers[type.className](converter, value);
+
+    return value;
   }
 
   void addMarshaler(String className, ObjectTypeUnitConverterMapper mapper) =>

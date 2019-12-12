@@ -361,6 +361,38 @@ void main() {
       expect(book3['comment'], isNull);
     });
 
+    test('testCallObjectTypeWithCompanionType', () async {
+      void assertObjectTypeWithRecord(ObjectType type) {
+        expect(type.className,
+            equals('org.openksavi.sponge.examples.CustomObject'));
+        var argRecordType = type.companionType as RecordType;
+        expect(argRecordType.fields.length, equals(2));
+
+        expect(argRecordType.fields[0] is IntegerType, isTrue);
+        expect(argRecordType.fields[0].name, equals('id'));
+        expect(argRecordType.fields[0].label, equals('ID'));
+
+        expect(argRecordType.fields[1] is StringType, isTrue);
+        expect(argRecordType.fields[1].name, equals('name'));
+        expect(argRecordType.fields[1].label, equals('Name'));
+      }
+
+      var client = await getClient();
+      ActionMeta actionMeta =
+          await client.getActionMeta('ObjectTypeWithCompanionTypeAction');
+
+      expect(actionMeta.args.length, equals(1));
+      assertObjectTypeWithRecord(actionMeta.args[0] as ObjectType);
+      assertObjectTypeWithRecord(actionMeta.result as ObjectType);
+
+      var arg = {'id': 1, 'name': 'Name 1"'};
+
+      Map<String, dynamic> mapResult =
+          await client.call(actionMeta.name, [arg]);
+      expect(mapResult['id'], equals(arg['id']));
+      expect(mapResult['name'], equals((arg['name'] as String).toUpperCase()));
+    });
+
     test('testRegisteredTypeArgAction', () async {
       var client = await getClient();
       var request = GetActionsRequest()

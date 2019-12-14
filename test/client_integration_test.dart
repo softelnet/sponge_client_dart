@@ -77,7 +77,8 @@ void main() {
       expect(response.header.errorCode, isNull);
       expect(response.header.errorMessage, isNull);
       expect(response.header.detailedErrorMessage, isNull);
-      expect(SpongeUtils.isServerVersionCompatible(response.version), isTrue);
+      expect(
+          SpongeUtils.isServerVersionCompatible(response.body.version), isTrue);
       expect(response.header.id, equals('1'));
       expect(response.header.id, equals(request.header.id));
     });
@@ -395,12 +396,13 @@ void main() {
 
     test('testRegisteredTypeArgAction', () async {
       var client = await getClient();
-      var request = GetActionsRequest()
-        ..name = 'RegisteredTypeArgAction'
-        ..registeredTypes = true;
+      var request = GetActionsRequest(GetActionsRequestBody(
+        name: 'RegisteredTypeArgAction',
+        registeredTypes: true,
+      ));
 
       Map<String, DataType> types =
-          (await client.getActionsByRequest(request)).types;
+          (await client.getActionsByRequest(request)).body.types;
       expect(types.length, equals(1));
       TestUtils.assertPersonRecordType(types['Person'] as RecordType);
 
@@ -411,12 +413,13 @@ void main() {
     });
     test('testInheritedRegisteredTypeArgAction', () async {
       var client = await getClient();
-      var request = GetActionsRequest()
-        ..name = 'InheritedRegisteredTypeArgAction'
-        ..registeredTypes = true;
+      var request = GetActionsRequest(GetActionsRequestBody(
+        name: 'InheritedRegisteredTypeArgAction',
+        registeredTypes: true,
+      ));
 
       Map<String, DataType> types =
-          (await client.getActionsByRequest(request)).types;
+          (await client.getActionsByRequest(request)).body.types;
       expect(types.length, equals(2));
 
       TestUtils.assertPersonRecordType(types['Person'] as RecordType);
@@ -1289,8 +1292,10 @@ void main() {
           headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
           body: requestBody);
 
-      expect(httpResponse.statusCode, equals(200));
-      var apiResponse = SpongeResponse.fromJson(json.decode(httpResponse.body));
+      expect(httpResponse.statusCode, equals(500));
+      // Use a fake response.
+      var apiResponse =
+          GetVersionResponse.fromJson(json.decode(httpResponse.body));
       expect(apiResponse.header.errorCode,
           equals(SpongeClientConstants.ERROR_CODE_GENERIC));
       expect(
@@ -1331,7 +1336,7 @@ void main() {
       expect(
           normalizeJson(responseStringList[0]),
           matches(
-              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*"},"version":"$version"}'));
+              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*"},"body":{"version":"$version"}}'));
     });
     test('testOneRequestListeners', () async {
       var client = await getClient();
@@ -1349,6 +1354,7 @@ void main() {
                 actualResponseString = responseString);
       var version = (await client.getVersionByRequest(GetVersionRequest(),
               context: context))
+          .body
           .version;
 
       expect(SpongeUtils.isServerVersionCompatible(version), isTrue);
@@ -1362,7 +1368,7 @@ void main() {
       expect(
           normalizeJson(actualResponseString),
           matches(
-              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*"},"version":"$version"}'));
+              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*"},"body":{"version":"$version"}}'));
     });
   });
 }

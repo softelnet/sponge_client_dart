@@ -46,4 +46,6 @@ abstract class SpongeClientConstants {
 
   static const String REMOTE_EVENT_OBJECT_TYPE_CLASS_NAME =
       'org.openksavi.sponge.restapi.model.RemoteEvent';
+
+  static const int HTTP_CODE_ERROR = 500;
 }

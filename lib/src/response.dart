@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
@@ -63,8 +64,11 @@ class ResponseHeader {
   }
 }
 
+/// A response body.
+abstract class ResponseBody {}
+
 /// A base response.
-class SpongeResponse {
+abstract class SpongeResponse {
   SpongeResponse({
     this.header,
   }) {
@@ -74,30 +78,51 @@ class SpongeResponse {
   /// The request header (optional).
   ResponseHeader header;
 
-  factory SpongeResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(SpongeResponse(), json);
-
   static dynamic setupFromJson(
           SpongeResponse response, Map<String, dynamic> json) =>
       response
         ..header = ResponseHeader.fromJson(json['header']) ?? ResponseHeader();
 }
 
-/// An action call response.
-class ActionCallResponse extends SpongeResponse {
-  ActionCallResponse(this.result);
+/// A response with a body.
+abstract class BodySpongeResponse<T extends ResponseBody>
+    extends SpongeResponse {
+  BodySpongeResponse(this.body);
+
+  T body;
+}
+
+/// An action call response body.
+class ActionCallResponseBody implements ResponseBody {
+  ActionCallResponseBody({
+    @required this.result,
+  });
 
   /// The action result.
   dynamic result;
 
-  factory ActionCallResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(ActionCallResponse(json['result']), json);
+  factory ActionCallResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null
+          ? ActionCallResponseBody(
+              result: json['result'],
+            )
+          : null;
 }
 
-/// A get actions response.
-class GetActionsResponse extends SpongeResponse {
-  GetActionsResponse(
-    this.actions, {
+/// An action call response.
+class ActionCallResponse extends BodySpongeResponse<ActionCallResponseBody> {
+  ActionCallResponse(ActionCallResponseBody body) : super(body);
+
+  factory ActionCallResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(
+          ActionCallResponse(ActionCallResponseBody.fromJson(json['body'])),
+          json);
+}
+
+/// A get actions response body.
+class GetActionsResponseBody implements ResponseBody {
+  GetActionsResponseBody({
+    @required this.actions,
     this.types,
   });
 
@@ -107,67 +132,126 @@ class GetActionsResponse extends SpongeResponse {
   /// The registered types used in the actions.
   Map<String, DataType> types;
 
+  factory GetActionsResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null
+          ? GetActionsResponseBody(
+              actions: (json['actions'] as List)
+                      ?.map((action) => ActionMeta.fromJson(action))
+                      ?.toList() ??
+                  [],
+              types: (json['types'] as Map)?.map((name, typeJson) =>
+                  MapEntry(name, DataType.fromJson(typeJson))),
+            )
+          : null;
+}
+
+/// A get actions response.
+class GetActionsResponse extends BodySpongeResponse<GetActionsResponseBody> {
+  GetActionsResponse(GetActionsResponseBody body) : super(body);
+
   factory GetActionsResponse.fromJson(Map<String, dynamic> json) =>
       SpongeResponse.setupFromJson(
-          GetActionsResponse(
-            (json['actions'] as List)
-                    ?.map((action) => ActionMeta.fromJson(action))
-                    ?.toList() ??
-                [],
-            types: (json['types'] as Map)?.map((name, typeJson) =>
-                MapEntry(name, DataType.fromJson(typeJson))),
-          ),
+          GetActionsResponse(GetActionsResponseBody.fromJson(json['body'])),
           json);
 }
 
-/// A get knowledge bases response.
-class GetKnowledgeBasesResponse extends SpongeResponse {
-  GetKnowledgeBasesResponse(this.knowledgeBases);
+/// A get knowledge bases response body.
+class GetKnowledgeBasesResponseBody implements ResponseBody {
+  GetKnowledgeBasesResponseBody({
+    @required this.knowledgeBases,
+  });
 
   /// The available knowledge bases.
   List<KnowledgeBaseMeta> knowledgeBases;
 
+  factory GetKnowledgeBasesResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null
+          ? GetKnowledgeBasesResponseBody(
+              knowledgeBases: (json['knowledgeBases'] as List)
+                  ?.map((knowledgeBase) =>
+                      KnowledgeBaseMeta.fromJson(knowledgeBase))
+                  ?.toList())
+          : null;
+}
+
+/// A get knowledge bases response.
+class GetKnowledgeBasesResponse
+    extends BodySpongeResponse<GetKnowledgeBasesResponseBody> {
+  GetKnowledgeBasesResponse(GetKnowledgeBasesResponseBody body) : super(body);
+
   factory GetKnowledgeBasesResponse.fromJson(Map<String, dynamic> json) =>
       SpongeResponse.setupFromJson(
-          GetKnowledgeBasesResponse((json['knowledgeBases'] as List)
-              ?.map(
-                  (knowledgeBase) => KnowledgeBaseMeta.fromJson(knowledgeBase))
-              ?.toList()),
+          GetKnowledgeBasesResponse(
+              GetKnowledgeBasesResponseBody.fromJson(json['body'])),
           json);
 }
 
-/// A get version response.
-class GetVersionResponse extends SpongeResponse {
-  GetVersionResponse(this.version);
+/// A get version response body.
+class GetVersionResponseBody implements ResponseBody {
+  GetVersionResponseBody({
+    @required this.version,
+  });
 
   /// The Sponge version.
   String version;
 
-  factory GetVersionResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(GetVersionResponse(json['version']), json);
+  factory GetVersionResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null ? GetVersionResponseBody(version: json['version']) : null;
 }
 
-/// A get features response.
-class GetFeaturesResponse extends SpongeResponse {
-  GetFeaturesResponse(Map<String, dynamic> features)
-      : this.features = features ?? {};
+/// A get version response.
+class GetVersionResponse extends BodySpongeResponse<GetVersionResponseBody> {
+  GetVersionResponse(GetVersionResponseBody body) : super(body);
+
+  factory GetVersionResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(
+          GetVersionResponse(GetVersionResponseBody.fromJson(json['body'])),
+          json);
+}
+
+/// A get features response body.
+class GetFeaturesResponseBody implements ResponseBody {
+  GetFeaturesResponseBody({
+    @required Map<String, dynamic> features,
+  }) : this.features = features ?? {};
 
   /// The Sponge version.
   Map<String, dynamic> features;
 
-  factory GetFeaturesResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(GetFeaturesResponse(json['features']), json);
+  factory GetFeaturesResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null ? GetFeaturesResponseBody(features: json['features']) : null;
 }
 
-/// A login response.
-class LoginResponse extends SpongeResponse {
-  LoginResponse(this.authToken);
+/// A get features response.
+class GetFeaturesResponse extends BodySpongeResponse<GetFeaturesResponseBody> {
+  GetFeaturesResponse(GetFeaturesResponseBody body) : super(body);
+
+  factory GetFeaturesResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(
+          GetFeaturesResponse(GetFeaturesResponseBody.fromJson(json['body'])),
+          json);
+}
+
+/// A login response body.
+class LoginResponseBody implements ResponseBody {
+  LoginResponseBody({
+    @required this.authToken,
+  });
 
   /// The authentication token.
   String authToken;
 
+  factory LoginResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null ? LoginResponseBody(authToken: json['authToken']) : null;
+}
+
+/// A login response.
+class LoginResponse extends BodySpongeResponse<LoginResponseBody> {
+  LoginResponse(LoginResponseBody body) : super(body);
+
   factory LoginResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(LoginResponse(json['authToken']), json);
+      SpongeResponse.setupFromJson(
+          LoginResponse(LoginResponseBody.fromJson(json['body'])), json);
 }
 
 /// A logout response.
@@ -186,43 +270,84 @@ class ReloadResponse extends SpongeResponse {
       SpongeResponse.setupFromJson(ReloadResponse(), json);
 }
 
-/// A send event response.
-class SendEventResponse extends SpongeResponse {
-  SendEventResponse(this.eventId);
+/// A send event response body.
+class SendEventResponseBody implements ResponseBody {
+  SendEventResponseBody({
+    @required this.eventId,
+  });
 
   /// The event id.
   String eventId;
 
-  factory SendEventResponse.fromJson(Map<String, dynamic> json) =>
-      SpongeResponse.setupFromJson(SendEventResponse(json['eventId']), json);
+  factory SendEventResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null ? SendEventResponseBody(eventId: json['eventId']) : null;
 }
 
-/// A provide action arguments response.
-class ProvideActionArgsResponse extends SpongeResponse {
-  ProvideActionArgsResponse(this.provided);
+/// A send event response.
+class SendEventResponse extends BodySpongeResponse<SendEventResponseBody> {
+  SendEventResponse(SendEventResponseBody body) : super(body);
+
+  factory SendEventResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(
+          SendEventResponse(SendEventResponseBody.fromJson(json['body'])),
+          json);
+}
+
+/// A provide action arguments response body.
+class ProvideActionArgsResponseBody implements ResponseBody {
+  ProvideActionArgsResponseBody({
+    @required this.provided,
+  });
 
   /// The provided action arguments.
   Map<String, ProvidedValue> provided;
 
+  factory ProvideActionArgsResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null
+          ? ProvideActionArgsResponseBody(
+              provided: (json['provided'] as Map)?.map(
+                  (argName, argValueJson) =>
+                      MapEntry(argName, ProvidedValue.fromJson(argValueJson))))
+          : null;
+}
+
+/// A provide action arguments response.
+class ProvideActionArgsResponse
+    extends BodySpongeResponse<ProvideActionArgsResponseBody> {
+  ProvideActionArgsResponse(ProvideActionArgsResponseBody body) : super(body);
+
   factory ProvideActionArgsResponse.fromJson(Map<String, dynamic> json) =>
       SpongeResponse.setupFromJson(
-          ProvideActionArgsResponse((json['provided'] as Map)?.map(
-              (argName, argValueJson) =>
-                  MapEntry(argName, ProvidedValue.fromJson(argValueJson)))),
+          ProvideActionArgsResponse(
+              ProvideActionArgsResponseBody.fromJson(json['body'])),
           json);
 }
 
-/// A get event types response.
-class GetEventTypesResponse extends SpongeResponse {
-  GetEventTypesResponse(this.eventTypes);
+/// A get event types response body.
+class GetEventTypesResponseBody implements ResponseBody {
+  GetEventTypesResponseBody({
+    @required this.eventTypes,
+  });
 
   /// The available event types.
   Map<String, RecordType> eventTypes;
 
+  factory GetEventTypesResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null
+          ? GetEventTypesResponseBody(
+              eventTypes: (json['eventTypes'] as Map)?.map((name, typeJson) =>
+                  MapEntry(name, DataType.fromJson(typeJson) as RecordType)))
+          : null;
+}
+
+/// A get event types response.
+class GetEventTypesResponse
+    extends BodySpongeResponse<GetEventTypesResponseBody> {
+  GetEventTypesResponse(GetEventTypesResponseBody body) : super(body);
+
   factory GetEventTypesResponse.fromJson(Map<String, dynamic> json) =>
       SpongeResponse.setupFromJson(
-          GetEventTypesResponse((json['eventTypes'] as Map)?.map(
-              (name, typeJson) =>
-                  MapEntry(name, DataType.fromJson(typeJson) as RecordType))),
+          GetEventTypesResponse(
+              GetEventTypesResponseBody.fromJson(json['body'])),
           json);
 }

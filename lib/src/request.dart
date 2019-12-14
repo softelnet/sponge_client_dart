@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 
@@ -46,8 +47,13 @@ class RequestHeader {
   }
 }
 
+/// A request body.
+abstract class RequestBody {
+  Map<String, dynamic> toJson();
+}
+
 /// A base request.
-class SpongeRequest {
+abstract class SpongeRequest {
   SpongeRequest({
     this.header,
   }) {
@@ -64,17 +70,30 @@ class SpongeRequest {
   }
 }
 
-/// An action execution related request.
-abstract class ActionExecutionRequest {
+/// A request with a body.
+abstract class BodySpongeRequest<T extends RequestBody> extends SpongeRequest {
+  BodySpongeRequest(this.body);
+
+  /// The request body.
+  T body;
+
+  @override
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'body': body?.toJson(),
+    });
+}
+
+/// An action execution related request body.
+abstract class ActionExecutionRequestBody {
   String get name;
   ProcessorQualifiedVersion qualifiedVersion;
 }
 
-/// An action call request.
-class ActionCallRequest extends SpongeRequest
-    implements ActionExecutionRequest {
-  ActionCallRequest(
-    this.name, {
+/// An action call request body.
+class ActionCallRequestBody implements RequestBody, ActionExecutionRequestBody {
+  ActionCallRequestBody({
+    @required this.name,
     this.args,
     this.qualifiedVersion,
   });
@@ -89,19 +108,24 @@ class ActionCallRequest extends SpongeRequest
   ProcessorQualifiedVersion qualifiedVersion;
 
   @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll({
-      'name': name,
-      'args': args,
-      'qualifiedVersion': qualifiedVersion,
-    });
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'args': args,
+        'qualifiedVersion': qualifiedVersion,
+      };
 }
 
-/// A get actions request.
-class GetActionsRequest extends SpongeRequest {
-  GetActionsRequest({
+/// An action call request.
+class ActionCallRequest extends BodySpongeRequest<ActionCallRequestBody> {
+  ActionCallRequest(ActionCallRequestBody body) : super(body);
+}
+
+/// A get actions request body.
+class GetActionsRequestBody implements RequestBody {
+  GetActionsRequestBody({
     this.name,
     this.metadataRequired,
+    this.registeredTypes,
   });
 
   /// The action name or the regular expression
@@ -115,12 +139,16 @@ class GetActionsRequest extends SpongeRequest {
   bool registeredTypes;
 
   @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll({
-      'name': name,
-      'metadataRequired': metadataRequired,
-      'registeredTypes': registeredTypes,
-    });
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'metadataRequired': metadataRequired,
+        'registeredTypes': registeredTypes,
+      };
+}
+
+/// A get actions request.
+class GetActionsRequest extends BodySpongeRequest<GetActionsRequestBody> {
+  GetActionsRequest(GetActionsRequestBody body) : super(body);
 }
 
 /// A get knowledge bases request.
@@ -146,10 +174,10 @@ class LogoutRequest extends SpongeRequest {}
 /// A reload request.
 class ReloadRequest extends SpongeRequest {}
 
-/// A send event request.
-class SendEventRequest extends SpongeRequest {
-  SendEventRequest(
-    this.name, {
+/// A send event request body.
+class SendEventRequestBody implements RequestBody {
+  SendEventRequestBody({
+    @required this.name,
     this.attributes,
     this.label,
     this.description,
@@ -168,20 +196,24 @@ class SendEventRequest extends SpongeRequest {
   final String description;
 
   @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll({
-      'name': name,
-      'attributes': attributes,
-      'label': label,
-      'description': description,
-    });
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'attributes': attributes,
+        'label': label,
+        'description': description,
+      };
 }
 
-/// A provide action arguments request.
-class ProvideActionArgsRequest extends SpongeRequest
-    implements ActionExecutionRequest {
-  ProvideActionArgsRequest(
-    this.name, {
+/// A send event request.
+class SendEventRequest extends BodySpongeRequest<SendEventRequestBody> {
+  SendEventRequest(SendEventRequestBody body) : super(body);
+}
+
+/// A provide action arguments request body.
+class ProvideActionArgsRequestBody
+    implements RequestBody, ActionExecutionRequestBody {
+  ProvideActionArgsRequestBody({
+    @required this.name,
     this.provide,
     this.submit,
     this.current,
@@ -212,31 +244,43 @@ class ProvideActionArgsRequest extends SpongeRequest
   Map<String, Map<String, Object>> features;
 
   @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll({
-      'name': name,
-      'provide': provide,
-      'submit': submit,
-      'current': current,
-      'dynamicTypes': dynamicTypes != null
-          ? Map.fromIterable(dynamicTypes.entries,
-              key: (entry) => entry.key, value: (entry) => entry.value.toJson())
-          : null,
-      'qualifiedVersion': qualifiedVersion,
-      'features': features,
-    });
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'provide': provide,
+        'submit': submit,
+        'current': current,
+        'dynamicTypes': dynamicTypes != null
+            ? Map.fromIterable(dynamicTypes.entries,
+                key: (entry) => entry.key,
+                value: (entry) => entry.value.toJson())
+            : null,
+        'qualifiedVersion': qualifiedVersion,
+        'features': features,
+      };
 }
 
-/// A get event types request.
-class GetEventTypesRequest extends SpongeRequest {
-  GetEventTypesRequest(this.name);
+/// A provide action arguments request.
+class ProvideActionArgsRequest
+    extends BodySpongeRequest<ProvideActionArgsRequestBody> {
+  ProvideActionArgsRequest(ProvideActionArgsRequestBody body) : super(body);
+}
+
+/// A get event types request body.
+class GetEventTypesRequestBody implements RequestBody {
+  GetEventTypesRequestBody({
+    @required this.name,
+  });
 
   /// The event name or the regular expression.
   final String name;
 
   @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll({
-      'name': name,
-    });
+  Map<String, dynamic> toJson() => {
+        'name': name,
+      };
+}
+
+/// A get event types request.
+class GetEventTypesRequest extends BodySpongeRequest<GetEventTypesRequestBody> {
+  GetEventTypesRequest(GetEventTypesRequestBody body) : super(body);
 }

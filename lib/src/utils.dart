@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:io';
+
+import 'package:http/http.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
@@ -27,6 +30,26 @@ class SpongeUtils {
 
   /// Returns `true` if the HTTP [code] is success.
   static bool isHttpSuccess(int code) => 200 <= code && code <= 299;
+
+  /// Returns `true` if the HTTP response content type is `application/json`.
+  static bool isJson(Response httpResponse) {
+    if (httpResponse == null) {
+      return false;
+    }
+
+    var contentType = httpResponse.headers.entries
+        .firstWhere(
+            (entry) =>
+                entry.key?.toLowerCase() == HttpHeaders.contentTypeHeader,
+            orElse: () => null)
+        ?.value;
+
+    if (contentType == null) {
+      return false;
+    }
+
+    return contentType.startsWith('application/json');
+  }
 
   /// Returns `true` if the Sponge server version [serverVersion] is compatible with the client.
   static bool isServerVersionCompatible(String serverVersion) =>

@@ -64,3 +64,12 @@ class InvalidUsernamePasswordException extends SpongeClientException {
     String detailedErrorMessage,
   ]) : super(errorCode, errorMessage, detailedErrorMessage);
 }
+
+/// A Sponge client exception for inactive action.
+class InactiveActionException extends SpongeClientException {
+  const InactiveActionException([
+    String errorCode,
+    String errorMessage,
+    String detailedErrorMessage,
+  ]) : super(errorCode, errorMessage, detailedErrorMessage);
+}

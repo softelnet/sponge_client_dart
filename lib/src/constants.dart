@@ -29,6 +29,7 @@ abstract class SpongeClientConstants {
   static const String OPERATION_ACTIONS = 'actions';
   static const String OPERATION_CALL = 'call';
   static const String OPERATION_SEND = 'send';
+  static const String OPERATION_IS_ACTION_ACTIVE = 'isActionActive';
   static const String OPERATION_PROVIDE_ACTION_ARGS = 'provideActionArgs';
   static const String OPERATION_EVENT_TYPES = 'eventTypes';
 
@@ -39,6 +40,7 @@ abstract class SpongeClientConstants {
   static const String ERROR_CODE_INVALID_KB_VERSION = 'INVALID_KB_VERSION';
   static const String ERROR_CODE_INVALID_USERNAME_PASSWORD =
       'INVALID_USERNAME_PASSWORD';
+  static const String ERROR_CODE_INACTIVE_ACTION = 'INACTIVE_ACTION';
 
   static const String ATTRIBUTE_PATH_SEPARATOR = '.';
 

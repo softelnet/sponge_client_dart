@@ -147,6 +147,9 @@ class SpongeRestClient {
           case SpongeClientConstants.ERROR_CODE_INVALID_USERNAME_PASSWORD:
             throw InvalidUsernamePasswordException(
                 errorCode, errorMessage, detailedErrorMessage);
+          case SpongeClientConstants.ERROR_CODE_INACTIVE_ACTION:
+            throw InactiveActionException(
+                errorCode, errorMessage, detailedErrorMessage);
           default:
             throw SpongeClientException(
                 errorCode, errorMessage, detailedErrorMessage);
@@ -415,6 +418,10 @@ class SpongeRestClient {
     return response;
   }
 
+  Future<DataType> _marshalDataType(DataType type) async {
+    return await _typeConverter.marshal(TypeType(), type);
+  }
+
   Future<DataType> _unmarshalDataType(DataType type) async {
     return await _typeConverter.unmarshal(TypeType(), type);
   }
@@ -540,25 +547,25 @@ class SpongeRestClient {
           .body
           .result;
 
-  void _setupActionExecutionRequest(
-      ActionMeta actionMeta, ActionExecutionRequestBody requestBody) {
+  void _setupActionExecutionInfo(
+      ActionMeta actionMeta, ActionExecutionInfo info) {
     // Conditionally set the verification of the processor qualified version on the server side.
     if (_configuration.verifyProcessorVersion &&
         actionMeta != null &&
-        requestBody != null &&
-        requestBody.qualifiedVersion == null) {
-      requestBody.qualifiedVersion = actionMeta.qualifiedVersion;
+        info != null &&
+        info.qualifiedVersion == null) {
+      info.qualifiedVersion = actionMeta.qualifiedVersion;
     }
 
     Validate.isTrue(
-        actionMeta == null || actionMeta.name == requestBody.name,
+        actionMeta == null || actionMeta.name == info.name,
         'Action name ${actionMeta?.name} in the metadata doesn\'t match '
-        'the action name ${requestBody?.name} in the request');
+        'the action name ${info?.name} in the request');
   }
 
   Future<ActionCallResponse> _doCallByRequest(ActionMeta actionMeta,
       ActionCallRequest request, SpongeRequestContext context) async {
-    _setupActionExecutionRequest(actionMeta, request.body);
+    _setupActionExecutionInfo(actionMeta, request.body);
 
     validateCallArgs(actionMeta, request.body.args);
 
@@ -659,12 +666,48 @@ class SpongeRestClient {
         await _typeConverter.unmarshal(actionMeta.result, response.body.result);
   }
 
+  /// Sends the `isActionActive` request to the server.
+  Future<IsActionActiveResponse> isActionActiveByRequest(
+      IsActionActiveRequest request,
+      {SpongeRequestContext context}) async {
+    if (request.body.entries != null) {
+      for (var entry in request.body.entries) {
+        var actionMeta = await getActionMeta(entry.name);
+        _setupActionExecutionInfo(actionMeta, entry);
+
+        if (entry.contextType != null) {
+          entry.contextType = await _marshalDataType(entry.contextType);
+        }
+
+        if (entry.contextValue != null && entry.contextType != null) {
+          entry.contextValue = await typeConverter.marshal(
+              entry.contextType, entry.contextValue);
+        }
+
+        if (entry.args != null) {
+          entry.args = await _marshalActionCallArgs(actionMeta, entry.args);
+        }
+      }
+    }
+
+    return await execute(SpongeClientConstants.OPERATION_IS_ACTION_ACTIVE,
+        request, (json) => IsActionActiveResponse.fromJson(json), context);
+  }
+
+  /// Fetches activity statuses for actions specified in the entries.
+  Future<List<bool>> isActionActive(List<IsActionActiveEntry> entries) async {
+    return (await isActionActiveByRequest(
+            IsActionActiveRequest(IsActionActiveRequestBody(entries: entries))))
+        .body
+        .active;
+  }
+
   /// Sends the `provideActionArgs` request to the server. Fetches the provided action arguments from the server.
   Future<ProvideActionArgsResponse> provideActionArgsByRequest(
       ProvideActionArgsRequest request,
       {SpongeRequestContext context}) async {
     ActionMeta actionMeta = await getActionMeta(request.body.name);
-    _setupActionExecutionRequest(actionMeta, request.body);
+    _setupActionExecutionInfo(actionMeta, request.body);
 
     request.body.current = await _marshalAuxiliaryActionArgsCurrent(
         actionMeta, request.body.current, request.body.dynamicTypes);

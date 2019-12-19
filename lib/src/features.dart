@@ -71,13 +71,13 @@ class Features {
   static const CONTEXT_ACTIONS = 'contextActions';
 
   // Type features for ListType in action forms.
-  static const ACTION_ARG_LIST_CREATE_ACTION = 'createAction';
-  static const ACTION_ARG_LIST_READ_ACTION = 'readAction';
-  static const ACTION_ARG_LIST_UPDATE_ACTION = 'updateAction';
-  static const ACTION_ARG_LIST_DELETE_ACTION = 'deleteAction';
-  static const ACTION_ARG_LIST_ACTIVATE_ACTION = 'activateAction';
+  static const SUB_ACTION_CREATE_ACTION = 'createAction';
+  static const SUB_ACTION_READ_ACTION = 'readAction';
+  static const SUB_ACTION_UPDATE_ACTION = 'updateAction';
+  static const SUB_ACTION_DELETE_ACTION = 'deleteAction';
+  static const SUB_ACTION_ACTIVATE_ACTION = 'activateAction';
 
-  static const ACTION_ARG_LIST_ACTIVATE_ACTION_VALUE_SUBMIT = 'submit';
+  static const TYPE_LIST_ACTIVATE_ACTION_VALUE_SUBMIT = 'submit';
 
   static const BINARY_WIDTH = 'width';
   static const BINARY_HEIGHT = 'height';

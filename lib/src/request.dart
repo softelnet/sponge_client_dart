@@ -84,14 +84,14 @@ abstract class BodySpongeRequest<T extends RequestBody> extends SpongeRequest {
     });
 }
 
-/// An action execution related request body.
-abstract class ActionExecutionRequestBody {
+/// An action execution related info.
+abstract class ActionExecutionInfo {
   String get name;
   ProcessorQualifiedVersion qualifiedVersion;
 }
 
 /// An action call request body.
-class ActionCallRequestBody implements RequestBody, ActionExecutionRequestBody {
+class ActionCallRequestBody implements RequestBody, ActionExecutionInfo {
   ActionCallRequestBody({
     @required this.name,
     this.args,
@@ -209,9 +209,65 @@ class SendEventRequest extends BodySpongeRequest<SendEventRequestBody> {
   SendEventRequest(SendEventRequestBody body) : super(body);
 }
 
+/// An action active request entry.
+class IsActionActiveEntry implements ActionExecutionInfo {
+  IsActionActiveEntry({
+    @required this.name,
+    this.contextValue,
+    this.contextType,
+    this.args,
+    this.features,
+    this.qualifiedVersion,
+  });
+
+  /// The action name.
+  String name;
+
+  /// The context value.
+  dynamic contextValue;
+
+  /// The context type.
+  DataType contextType;
+
+  /// The action arguments in the context.
+  List args;
+
+  /// The features.
+  Map<String, Object> features;
+
+  /// The action qualified version.
+  ProcessorQualifiedVersion qualifiedVersion;
+
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'contextValue': contextValue,
+        'contextType': contextType,
+        'args': args,
+        'features': features,
+        'qualifiedVersion': qualifiedVersion,
+      };
+}
+
+/// An action active request body.
+class IsActionActiveRequestBody implements RequestBody {
+  IsActionActiveRequestBody({@required this.entries});
+
+  final List<IsActionActiveEntry> entries;
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'entries': entries?.map((entry) => entry?.toJson())?.toList(),
+      };
+}
+
+/// An action active request.
+class IsActionActiveRequest
+    extends BodySpongeRequest<IsActionActiveRequestBody> {
+  IsActionActiveRequest(IsActionActiveRequestBody body) : super(body);
+}
+
 /// A provide action arguments request body.
-class ProvideActionArgsRequestBody
-    implements RequestBody, ActionExecutionRequestBody {
+class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
   ProvideActionArgsRequestBody({
     @required this.name,
     this.provide,

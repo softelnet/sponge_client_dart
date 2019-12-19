@@ -7,6 +7,7 @@
 * Added support for context action result substitution.
 * Added high level classes (e.g. `ActionData`, `PageableList`) in the `data` package. Currently marked as experimental.
 * Added support for a companion type in an object type.
+* Added support for the `isActionActive` REST operation.
 * Removed support for features in an action arguments provision result itself (`ProvidedValue`). Such features can be provided in an `AnnotatedValue`.
 * Removed experimental support for pageable value set and element value set.
 

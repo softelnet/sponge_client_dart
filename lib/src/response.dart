@@ -293,6 +293,33 @@ class SendEventResponse extends BodySpongeResponse<SendEventResponseBody> {
           json);
 }
 
+/// An action active response body.
+class IsActionActiveResponseBody implements ResponseBody {
+  IsActionActiveResponseBody({@required List<bool> active})
+      : this.active = active ?? [];
+
+  ///The actions activity statuses.
+  final List<bool> active;
+
+  factory IsActionActiveResponseBody.fromJson(Map<String, dynamic> json) =>
+      json != null
+          ? IsActionActiveResponseBody(
+              active: (json['active'] as List)?.cast<bool>())
+          : null;
+}
+
+/// An action active response.
+class IsActionActiveResponse
+    extends BodySpongeResponse<IsActionActiveResponseBody> {
+  IsActionActiveResponse(IsActionActiveResponseBody body) : super(body);
+
+  factory IsActionActiveResponse.fromJson(Map<String, dynamic> json) =>
+      SpongeResponse.setupFromJson(
+          IsActionActiveResponse(
+              IsActionActiveResponseBody.fromJson(json['body'])),
+          json);
+}
+
 /// A provide action arguments response body.
 class ProvideActionArgsResponseBody implements ResponseBody {
   ProvideActionArgsResponseBody({

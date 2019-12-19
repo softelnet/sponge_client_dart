@@ -857,6 +857,23 @@ void main() {
 
       expect(provided.value, equals('VALUE'));
     });
+
+    test('testIsActionActive', () async {
+      var client = await getClient();
+      ActionMeta actionMeta =
+          await client.getActionMeta('IsActionActiveAction');
+
+      List<bool> active = await client.isActionActive(
+          [IsActionActiveEntry(name: actionMeta.name, contextValue: 'ACTIVE')]);
+      expect(active.length, equals(1));
+      expect(active[0], isTrue);
+
+      active = await client.isActionActive(
+          [IsActionActiveEntry(name: actionMeta.name, contextValue: null)]);
+      expect(active.length, equals(1));
+      expect(active[0], isFalse);
+    });
+
     test('testTraverseActionArguments', () async {
       var client = await getClient();
       ActionMeta meta = await client.getActionMeta('NestedRecordAsArgAction');

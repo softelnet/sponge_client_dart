@@ -1,4 +1,4 @@
-## 1.13.1 (not released yet)
+## 1.14.0 (2019-12-20)
 * API change: A payload in a request and a response has been moved to `body`.
 * API change: Renamed `label` to `valueLabel` and `description` to `valueDescription` in `AnnotatedValue`.
 * API change: Removed `SpongeRestClient.submitActionArgs`. Use `provideActionArgs` directly.

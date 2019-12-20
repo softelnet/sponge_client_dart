@@ -101,12 +101,12 @@ class SpongeRestClient {
     var header = request.header;
 
     if (_configuration.useRequestId) {
-      int newRequestId = ++_currentRequestId;
+      var newRequestId = ++_currentRequestId;
       header.id = '$newRequestId';
     }
 
     // Must be isolate-safe.
-    String authToken = _currentAuthToken;
+    var authToken = _currentAuthToken;
     if (authToken != null) {
       header.authToken ??= authToken;
     } else {
@@ -168,8 +168,8 @@ class SpongeRestClient {
     @required String requestUsername,
     @required String requestPassword,
     @required String requestAuthToken,
-    @required Future<T> onExecute(),
-    @required void onClearAuthToken(),
+    @required Future<T> Function() onExecute,
+    @required void Function() onClearAuthToken,
   }) async {
     try {
       if (_configuration.autoUseAuthToken &&
@@ -251,7 +251,7 @@ class SpongeRestClient {
 
   Future<SpongeResponse> _doExecute(String operation, SpongeRequest request,
       ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
-    String requestBody = json.encode(request.toJson());
+    var requestBody = json.encode(request.toJson());
 
     _logger.finer(() =>
         'REST API $operation request: ${SpongeUtils.obfuscatePassword(requestBody)}');

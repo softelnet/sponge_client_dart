@@ -29,7 +29,7 @@ import 'package:sponge_client_dart/src/type_value.dart';
 /// A type converter.
 abstract class TypeConverter {
   static final Logger _logger = Logger('TypeConverter');
-  final Map<DataTypeKind, UnitTypeConverter> _registry = Map();
+  final Map<DataTypeKind, UnitTypeConverter> _registry = {};
 
   /// Marshals the [value] as [type].
   Future<dynamic> marshal<T, D extends DataType>(D type, T value) async {
@@ -40,18 +40,16 @@ abstract class TypeConverter {
     checkNotNull(type, message: 'The type must not be null');
 
     if (type.annotated && value is AnnotatedValue) {
-      AnnotatedValue annotatedValue = value;
-
       return AnnotatedValue(
-        annotatedValue.value != null
+        value.value != null
             ? await _getUnitConverterByType(type)
-                .marshal(this, type, annotatedValue.value)
+                .marshal(this, type, value.value)
             : null,
-        valueLabel: annotatedValue.valueLabel,
-        valueDescription: annotatedValue.valueDescription,
-        features: annotatedValue.features,
-        typeLabel: annotatedValue.typeLabel,
-        typeDescription: annotatedValue.typeDescription,
+        valueLabel: value.valueLabel,
+        valueDescription: value.valueDescription,
+        features: value.features,
+        typeLabel: value.typeLabel,
+        typeDescription: value.typeDescription,
       );
     }
 
@@ -201,7 +199,7 @@ class DateTimeTypeUnitConverter
   @override
   Future<dynamic> unmarshal(
       TypeConverter converter, DateTimeType type, dynamic value) async {
-    String stringValue = value as String;
+    var stringValue = value as String;
     switch (type.dateTimeKind) {
       case DateTimeKind.DATE_TIME:
         return type.format != null
@@ -221,7 +219,7 @@ class DateTimeTypeUnitConverter
         return DateTime.parse(stringValue);
     }
 
-    DynamicValue result = DynamicValue.fromJson(value);
+    var result = DynamicValue.fromJson(value);
     result.value = await converter.unmarshal(result.type, result.value);
     return result;
   }
@@ -245,7 +243,7 @@ class DynamicTypeUnitConverter
   @override
   Future<DynamicValue> unmarshal(
       TypeConverter converter, DynamicType type, dynamic value) async {
-    DynamicValue result = DynamicValue.fromJson(value);
+    var result = DynamicValue.fromJson(value);
     result.value = await converter.unmarshal(result.type, result.value);
     return result;
   }

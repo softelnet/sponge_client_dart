@@ -40,7 +40,7 @@ enum DataTypeKind {
 }
 
 DataType _typeFromJson(Map<String, dynamic> json) {
-  DataTypeKind kind = DataType.fromJsonDataTypeKind(json['kind']);
+  var kind = DataType.fromJsonDataTypeKind(json['kind']);
   switch (kind) {
     case DataTypeKind.ANY:
       return AnyType.fromJson(json);
@@ -92,7 +92,7 @@ class DataType<T> {
     Map<String, Object> features,
     this.optional = false,
     this.provided,
-  }) : this.features = features ?? Map();
+  }) : features = features ?? {};
 
   /// The feature name for the format.
   static const String FEATURE_FORMAT = 'format';
@@ -158,7 +158,7 @@ class DataType<T> {
   }
 
   static DataTypeKind fromJsonDataTypeKind(String jsonDataTypeKind) {
-    DataTypeKind kind = DataTypeKind.values.firstWhere(
+    var kind = DataTypeKind.values.firstWhere(
         (k) => _getDataTypeKindValue(k) == jsonDataTypeKind,
         orElse: () => null);
     return Validate.notNull(kind, 'Unsupported type kind $jsonDataTypeKind');
@@ -196,7 +196,7 @@ class QualifiedDataType<T> {
   bool isRoot;
 
   QualifiedDataType<C> createChild<C>(DataType<C> childType) {
-    String parentPath = path != null
+    var parentPath = path != null
         ? path + SpongeClientConstants.ATTRIBUTE_PATH_SEPARATOR
         : (isRoot ? '' : null);
 

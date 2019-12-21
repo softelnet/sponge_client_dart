@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:io';
-
 import 'package:http/http.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
@@ -38,9 +36,7 @@ class SpongeUtils {
     }
 
     var contentType = httpResponse.headers.entries
-        .firstWhere(
-            (entry) =>
-                entry.key?.toLowerCase() == HttpHeaders.contentTypeHeader,
+        .firstWhere((entry) => entry.key?.toLowerCase() == 'content-type',
             orElse: () => null)
         ?.value;
 

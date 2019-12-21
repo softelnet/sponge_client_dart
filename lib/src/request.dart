@@ -57,7 +57,7 @@ abstract class SpongeRequest {
   SpongeRequest({
     this.header,
   }) {
-    this.header ??= RequestHeader();
+    header ??= RequestHeader();
   }
 
   /// The request header (optional).
@@ -99,12 +99,14 @@ class ActionCallRequestBody implements RequestBody, ActionExecutionInfo {
   });
 
   /// The action name.
+  @override
   final String name;
 
   /// The action arguments (optional).
   List args;
 
   /// The action expected qualified version (optional).
+  @override
   ProcessorQualifiedVersion qualifiedVersion;
 
   @override
@@ -221,6 +223,7 @@ class IsActionActiveEntry implements ActionExecutionInfo {
   });
 
   /// The action name.
+  @override
   String name;
 
   /// The context value.
@@ -236,6 +239,7 @@ class IsActionActiveEntry implements ActionExecutionInfo {
   Map<String, Object> features;
 
   /// The action qualified version.
+  @override
   ProcessorQualifiedVersion qualifiedVersion;
 
   Map<String, dynamic> toJson() => {
@@ -279,6 +283,7 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
   });
 
   /// The action name.
+  @override
   final String name;
 
   /// The names of action arguments to provide.
@@ -294,6 +299,7 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
   Map<String, DataType> dynamicTypes;
 
   /// The action expected qualified version (optional).
+  @override
   ProcessorQualifiedVersion qualifiedVersion;
 
   /// The features for arguments (optional).
@@ -306,9 +312,10 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
         'submit': submit,
         'current': current,
         'dynamicTypes': dynamicTypes != null
-            ? Map.fromIterable(dynamicTypes.entries,
-                key: (entry) => entry.key,
-                value: (entry) => entry.value.toJson())
+            ? {
+                for (var entry in dynamicTypes.entries)
+                  entry.key: entry.value.toJson()
+              }
             : null,
         'qualifiedVersion': qualifiedVersion,
         'features': features,

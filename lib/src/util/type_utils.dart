@@ -154,7 +154,7 @@ class DataTypeUtils {
   }
 
   static bool hasAllNotNullValuesSet(DataType type, dynamic value) {
-    bool result = true;
+    var result = true;
 
     // TODO Traversing all data type tree is not necessary.
     traverseValue(QualifiedDataType(null, type), value, (_qType, _value) {
@@ -167,7 +167,7 @@ class DataTypeUtils {
   }
 
   static bool hasSubType(DataType type, DataTypeKind subTypeKind) {
-    bool result = false;
+    var result = false;
 
     // Traverses record and collection sub-types.
     traverseDataType(QualifiedDataType(null, type), (QualifiedDataType qType) {
@@ -182,7 +182,7 @@ class DataTypeUtils {
   /// Traverses the data type.
   static void traverseDataType(
     QualifiedDataType qType,
-    void onType(QualifiedDataType _), {
+    void Function(QualifiedDataType _) onType, {
     bool namedOnly = true,
     bool traverseCollections = false,
     dynamic value,
@@ -256,7 +256,7 @@ class DataTypeUtils {
   }
 
   static dynamic traverseValue<T>(QualifiedDataType qType, dynamic value,
-      dynamic onValue(QualifiedDataType _qType, dynamic _value)) {
+      dynamic Function(QualifiedDataType _qType, dynamic _value) onValue) {
     // OnValue may change the value.
     value = onValue(qType, value);
 
@@ -299,7 +299,7 @@ class DataTypeUtils {
   }
 
   static P getFeatureOrProperty<P>(
-      DataType type, dynamic value, String propertyName, P orElse()) {
+      DataType type, dynamic value, String propertyName, P Function() orElse) {
     P property;
     if (value is AnnotatedValue) {
       property = value.features[propertyName];
@@ -333,12 +333,12 @@ class DataTypeUtils {
       return Uint8List.fromList(value);
     } else if (value is List) {
       var result = value.toList();
-      for (int i = 0; i < result.length; i++) {
+      for (var i = 0; i < result.length; i++) {
         result[i] = cloneValue(result[i]);
       }
       return result;
     } else if (value is Map<String, dynamic>) {
-      Map<String, dynamic> result = {};
+      var result = <String, dynamic>{};
       for (var entry in value.entries) {
         result[entry.key] = cloneValue(entry.value);
       }
@@ -371,7 +371,7 @@ class DataTypeUtils {
           : false;
     } else if (a is List) {
       if (b is List && a.length == b.length) {
-        for (int i = 0; i < a.length; i++) {
+        for (var i = 0; i < a.length; i++) {
           if (!equalsValue(a[i], b[i])) {
             return false;
           }
@@ -407,7 +407,7 @@ class DataTypeUtils {
       value is AnnotatedValue ? value.value == null : value == null;
 
   static List<DataType> getTypes(DataType type, {dynamic value}) {
-    List<DataType> types = [];
+    var types = <DataType>[];
     DataTypeUtils.traverseDataType(
         QualifiedDataType(null, type), (qType) => types.add(qType.type),
         namedOnly: false, traverseCollections: true, value: value);
@@ -417,7 +417,7 @@ class DataTypeUtils {
 
   static List<QualifiedDataType> getQualifiedTypes(DataType type,
       {dynamic value}) {
-    List<QualifiedDataType> qTypes = [];
+    var qTypes = <QualifiedDataType>[];
     DataTypeUtils.traverseDataType(
         QualifiedDataType(null, type), (qType) => qTypes.add(qType),
         namedOnly: false, traverseCollections: true, value: value);

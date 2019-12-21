@@ -259,7 +259,7 @@ class ListTypeUnitConverter extends UnitTypeConverter<List, ListType> {
   @override
   Future<dynamic> marshal(
       TypeConverter converter, ListType type, List value) async {
-    List result = [];
+    var result = [];
     for (var element in value) {
       result.add(await converter.marshal(type.elementType, element));
     }
@@ -269,7 +269,7 @@ class ListTypeUnitConverter extends UnitTypeConverter<List, ListType> {
   @override
   Future<List> unmarshal(
       TypeConverter converter, ListType type, dynamic value) async {
-    List result = [];
+    var result = [];
     for (var element in (value as List)) {
       result.add(await converter.unmarshal(type.elementType, element));
     }
@@ -283,7 +283,7 @@ class MapTypeUnitConverter extends UnitTypeConverter<Map, MapType> {
   @override
   Future<dynamic> marshal(
       TypeConverter converter, MapType type, Map value) async {
-    Map result = {};
+    var result = {};
     for (var entry in value.entries) {
       result[await converter.marshal(type.keyType, entry.key)] =
           await converter.marshal(type.valueType, entry.value);
@@ -294,7 +294,7 @@ class MapTypeUnitConverter extends UnitTypeConverter<Map, MapType> {
   @override
   Future<Map> unmarshal(
       TypeConverter converter, MapType type, dynamic value) async {
-    Map result = {};
+    var result = {};
     for (var entry in (value as Map).entries) {
       result[await converter.unmarshal(type.keyType, entry.key)] =
           await converter.unmarshal(type.valueType, entry.value);
@@ -307,7 +307,7 @@ class NumberTypeUnitConverter extends UnitTypeConverter<num, NumberType> {
   NumberTypeUnitConverter() : super(DataTypeKind.NUMBER);
 }
 
-typedef Future<dynamic> ObjectTypeUnitConverterMapper(
+typedef ObjectTypeUnitConverterMapper = Future<dynamic> Function(
     TypeConverter converter, dynamic value);
 
 /// Doesn't support reflection.
@@ -317,8 +317,8 @@ class ObjectTypeUnitConverter extends UnitTypeConverter<dynamic, ObjectType> {
 
   bool useTransparentIfNotFound;
 
-  final Map<String, ObjectTypeUnitConverterMapper> marshalers = Map();
-  final Map<String, ObjectTypeUnitConverterMapper> unmarshalers = Map();
+  final Map<String, ObjectTypeUnitConverterMapper> marshalers = {};
+  final Map<String, ObjectTypeUnitConverterMapper> unmarshalers = {};
 
   @override
   Future<dynamic> marshal(
@@ -378,7 +378,7 @@ class RecordTypeUnitConverter
       Map<String, dynamic> value) async {
     var fieldMap = _createFieldMap(type);
 
-    Map<String, dynamic> result = {};
+    var result = <String, dynamic>{};
     for (var entry in value.entries) {
       result[entry.key] = await converter.marshal(
           _getFieldType(fieldMap, type, entry.key), entry.value);
@@ -390,7 +390,7 @@ class RecordTypeUnitConverter
   Future<Map<String, dynamic>> unmarshal(
       TypeConverter converter, RecordType type, dynamic value) async {
     var fieldMap = _createFieldMap(type);
-    Map<String, dynamic> result = {};
+    var result = <String, dynamic>{};
     for (var entry in (value as Map).entries) {
       result[entry.key] = await converter.unmarshal(
           _getFieldType(fieldMap, type, entry.key), entry.value);
@@ -406,8 +406,7 @@ class RecordTypeUnitConverter
   }
 
   Map<String, DataType> _createFieldMap(RecordType type) =>
-      Map.fromIterable(type.fields,
-          key: (field) => field.name, value: (field) => field);
+      {for (var field in type.fields) field.name: field};
 }
 
 class StreamTypeUnitConverter extends UnitTypeConverter<String, StreamType> {
@@ -437,7 +436,7 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
   @override
   Future<DataType> unmarshal(
       TypeConverter converter, TypeType type, dynamic value) async {
-    DataType result = value is DataType ? value : DataType.fromJson(value);
+    var result = value is DataType ? value : DataType.fromJson(value);
 
     // Recursively unmarshal default values.
     for (var t in DataTypeUtils.getTypes(result)) {

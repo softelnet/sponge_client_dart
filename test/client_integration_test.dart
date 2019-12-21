@@ -46,10 +46,10 @@ import 'test_utils.dart';
 void main() {
   configLogger();
 
-  getClient() async => SpongeRestClient(
+  Future<SpongeRestClient> getClient() async => SpongeRestClient(
       SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1'));
 
-  getGuestRestClient() async => await getClient()
+  Future<SpongeRestClient> getGuestRestClient() async => await getClient()
     ..configuration.username = 'joe'
     ..configuration.password = 'password';
 
@@ -84,7 +84,7 @@ void main() {
     });
     test('testFeatures', () async {
       var client = await getClient();
-      Map<String, dynamic> features = await client.getFeatures();
+      var features = await client.getFeatures();
       expect(features.length, equals(1));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
           isTrue);
@@ -93,32 +93,32 @@ void main() {
   group('REST API Client actions', () {
     test('testActions', () async {
       var client = await getClient();
-      List<ActionMeta> actions = await client.getActions();
+      var actions = await client.getActions();
       expect(actions.length, equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testActionsArgRequiredTrue', () async {
       var client = await getClient();
-      List<ActionMeta> actions =
+      var actions =
           await client.getActions(metadataRequired: true);
       expect(actions.length,
           equals(TestConstants.ANONYMOUS_ACTIONS_WITH_METADATA_COUNT));
     });
     test('testActionsArgRequiredFalse', () async {
       var client = await getClient();
-      List<ActionMeta> actions =
+      var actions =
           await client.getActions(metadataRequired: false);
       expect(actions.length, equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testActionsNameRegExp', () async {
       var client = await getClient();
-      String name = '.*Case';
-      List<ActionMeta> actions = await client.getActions(name: name);
+      var name = '.*Case';
+      var actions = await client.getActions(name: name);
       expect(actions.length, equals(2));
     });
     test('testActionsNameExact', () async {
       var client = await getClient();
-      String name = 'UpperCase';
-      List<ActionMeta> actions = await client.getActions(name: name);
+      var name = 'UpperCase';
+      var actions = await client.getActions(name: name);
       expect(actions.length, equals(1));
       expect(actions[0].name, equals(name));
     });
@@ -126,7 +126,7 @@ void main() {
   group('REST API Client getActionMeta', () {
     test('testGetActionMeta', () async {
       var client = await getClient();
-      ActionMeta actionMeta = await client.getActionMeta('UpperCase');
+      var actionMeta = await client.getActionMeta('UpperCase');
       expect(actionMeta.name, equals('UpperCase'));
       expect(actionMeta.category.name, equals('category1'));
       expect(actionMeta.category.label, equals('Category 1'));
@@ -165,7 +165,7 @@ void main() {
     });
     test('testCallBinaryArgAndResult', () async {
       var client = await getClient();
-      Uint8List image = Uint8List.fromList(
+      var image = Uint8List.fromList(
           await File('test/resources/image.png').readAsBytes());
       Uint8List resultImage = await client.call('EchoImage', [image]);
       expect(image, equals(resultImage));
@@ -231,7 +231,7 @@ void main() {
     });
     test('testCallDynamicType', () async {
       var client = await getClient();
-      ActionMeta actionMeta = await client.getActionMeta('DynamicResultAction');
+      var actionMeta = await client.getActionMeta('DynamicResultAction');
       var resultType = actionMeta.result;
       expect(resultType.kind, equals(DataTypeKind.DYNAMIC));
 
@@ -247,7 +247,7 @@ void main() {
     });
     test('testCallTypeType', () async {
       var client = await getClient();
-      ActionMeta actionMeta = await client.getActionMeta('TypeResultAction');
+      var actionMeta = await client.getActionMeta('TypeResultAction');
       var resultType = actionMeta.result;
       expect(resultType.kind, equals(DataTypeKind.TYPE));
 
@@ -293,7 +293,7 @@ void main() {
     });
     test('testCallDateTimeType', () async {
       var client = await getClient();
-      ActionMeta actionMeta = await client.getActionMeta('DateTimeAction');
+      var actionMeta = await client.getActionMeta('DateTimeAction');
 
       expect((actionMeta.args[0] as DateTimeType).dateTimeKind,
           equals(DateTimeKind.DATE_TIME));
@@ -306,12 +306,12 @@ void main() {
       expect((actionMeta.args[4] as DateTimeType).dateTimeKind,
           equals(DateTimeKind.INSTANT));
 
-      DateTime dateTime = DateTime.now();
+      var dateTime = DateTime.now();
       await initializeTimeZone();
-      TZDateTime dateTimeZone = TZDateTime.now(getLocation('America/Detroit'));
-      DateTime date = DateTime.parse('2019-02-06');
-      DateTime time = DateFormat(actionMeta.args[3].format).parse('15:15:00');
-      DateTime instant = DateTime.now().toUtc();
+      var dateTimeZone = TZDateTime.now(getLocation('America/Detroit'));
+      var date = DateTime.parse('2019-02-06');
+      var time = DateFormat(actionMeta.args[3].format).parse('15:15:00');
+      var instant = DateTime.now().toUtc();
 
       List<dynamic> dates = await client
           .call(actionMeta.name, [dateTime, dateTimeZone, date, time, instant]);
@@ -333,7 +333,7 @@ void main() {
 
     test('testCallRecordType', () async {
       var client = await getClient();
-      ActionMeta actionMeta =
+      var actionMeta =
           await client.getActionMeta('RecordAsResultAction');
       TestUtils.assertBookRecordType(actionMeta.result as RecordType);
 
@@ -379,7 +379,7 @@ void main() {
       }
 
       var client = await getClient();
-      ActionMeta actionMeta =
+      var actionMeta =
           await client.getActionMeta('ObjectTypeWithCompanionTypeAction');
 
       expect(actionMeta.args.length, equals(1));
@@ -401,7 +401,7 @@ void main() {
         registeredTypes: true,
       ));
 
-      Map<String, DataType> types =
+      var types =
           (await client.getActionsByRequest(request)).body.types;
       expect(types.length, equals(1));
       TestUtils.assertPersonRecordType(types['Person'] as RecordType);
@@ -418,7 +418,7 @@ void main() {
         registeredTypes: true,
       ));
 
-      Map<String, DataType> types =
+      var types =
           (await client.getActionsByRequest(request)).body.types;
       expect(types.length, equals(2));
 
@@ -433,7 +433,7 @@ void main() {
 
     test('testNestedRecordAsArgAction', () async {
       var client = await getClient();
-      ActionMeta actionMeta =
+      var actionMeta =
           await client.getActionMeta('NestedRecordAsArgAction');
       expect(actionMeta.args.length, equals(1));
       var argType = actionMeta.args[0] as RecordType;
@@ -480,7 +480,7 @@ void main() {
       var client = await getClient();
       var actionName = 'SetActuator';
 
-      List<DataType> argTypes = (await client.getActionMeta(actionName)).args;
+      var argTypes = (await client.getActionMeta(actionName)).args;
 
       expect(argTypes[0].provided.value, isTrue);
       expect(argTypes[0].provided.hasValueSet, isTrue);
@@ -500,7 +500,7 @@ void main() {
       // Reset the test state.
       await client.call(actionName, ['A', false, null, 1]);
 
-      Map<String, ProvidedValue> providedArgs = await client.provideActionArgs(
+      var providedArgs = await client.provideActionArgs(
           actionName,
           provide: ['actuator1', 'actuator2', 'actuator3']);
       expect(providedArgs.length, equals(3));
@@ -543,7 +543,7 @@ void main() {
       var client = await getClient();
       var actionName = 'SetActuatorNotLimitedValueSet';
 
-      List<DataType> argTypes = (await client.getActionMeta(actionName)).args;
+      var argTypes = (await client.getActionMeta(actionName)).args;
 
       expect(argTypes[0].provided, isNotNull);
       expect(argTypes[0].provided.value, isNotNull);
@@ -552,12 +552,12 @@ void main() {
     });
     test('testProvideActionArgsDepends', () async {
       var client = await getClient();
-      String actionName = 'SetActuatorDepends';
+      var actionName = 'SetActuatorDepends';
 
       // Reset the test state.
       await client.call(actionName, ['A', false, 1, 1, 'X']);
 
-      List<DataType> argTypes = (await client.getActionMeta(actionName)).args;
+      var argTypes = (await client.getActionMeta(actionName)).args;
 
       expect(argTypes[0].provided.value, isTrue);
       expect(argTypes[0].provided.valueSet.limited, isTrue);
@@ -574,7 +574,7 @@ void main() {
       expect(argTypes[4].provided.dependencies?.length, equals(1));
       expect(argTypes[4].provided.dependencies, equals(['actuator1']));
 
-      Map<String, ProvidedValue> providedArgs =
+      var providedArgs =
           await client.provideActionArgs(actionName, provide: ['actuator1']);
       expect(providedArgs.length, equals(1));
       expect(providedArgs['actuator1'], isNotNull);
@@ -643,8 +643,8 @@ void main() {
     });
     test('testProvideActionArgByAction', () async {
       var client = await getClient();
-      ActionMeta actionMeta = await client.getActionMeta('ProvideByAction');
-      List values = (await client
+      var actionMeta = await client.getActionMeta('ProvideByAction');
+      var values = (await client
               .provideActionArgs(actionMeta.name, provide: ['value']))['value']
           .valueSet;
       expect(
@@ -687,7 +687,7 @@ void main() {
       // Reset the test state.
       await client.call(actionName, ['A', false]);
 
-      List<DataType> argTypes = (await client.getActionMeta(actionName)).args;
+      var argTypes = (await client.getActionMeta(actionName)).args;
       expect(argTypes[0].provided.value, isTrue);
       expect(argTypes[0].provided.hasValueSet, isTrue);
       expect(argTypes[0].provided.valueSet.limited, isTrue);
@@ -746,7 +746,7 @@ void main() {
     test('testProvideActionArgsPagingValue', () async {
       var client = await getClient();
       var actionName = 'ViewFruitsPaging';
-      int valueLimit = 5;
+      var valueLimit = 5;
 
       var providedFruits =
           (await client.provideActionArgs(actionName, provide: [
@@ -813,7 +813,7 @@ void main() {
 
     test('testActionsAnnotatedWithDefaultValue', () async {
       var client = await getClient();
-      ActionMeta actionMeta =
+      var actionMeta =
           await client.getActionMeta('AnnotatedWithDefaultValue');
 
       expect(actionMeta.args[0].annotated, isTrue);
@@ -827,7 +827,7 @@ void main() {
     });
     test('testActionsProvidedWithCurrentAndLazyUpdate', () async {
       var client = await getClient();
-      ActionMeta actionMeta =
+      var actionMeta =
           await client.getActionMeta('ProvidedWithCurrentAndLazyUpdate');
 
       expect(actionMeta.args[0].annotated, isTrue);
@@ -837,7 +837,7 @@ void main() {
 
       var currentValue = 'NEW VALUE';
 
-      ProvidedValue provided = (await client.provideActionArgs(actionMeta.name,
+      var provided = (await client.provideActionArgs(actionMeta.name,
           provide: ['arg'],
           current: {'arg': AnnotatedValue(currentValue)}))['arg'];
 
@@ -845,14 +845,14 @@ void main() {
     });
     test('testActionsProvidedWithOptional', () async {
       var client = await getClient();
-      ActionMeta actionMeta =
+      var actionMeta =
           await client.getActionMeta('ProvidedWithOptional');
 
       expect(actionMeta.args[0].provided.current, isFalse);
       expect(actionMeta.args[0].provided.lazyUpdate, isFalse);
       expect(actionMeta.args[0].provided.mode, equals(ProvidedMode.OPTIONAL));
 
-      ProvidedValue provided =
+      var provided =
           (await client.provideActionArgs(actionMeta.name))['arg'];
 
       expect(provided.value, equals('VALUE'));
@@ -860,10 +860,10 @@ void main() {
 
     test('testIsActionActive', () async {
       var client = await getClient();
-      ActionMeta actionMeta =
+      var actionMeta =
           await client.getActionMeta('IsActionActiveAction');
 
-      List<bool> active = await client.isActionActive(
+      var active = await client.isActionActive(
           [IsActionActiveEntry(name: actionMeta.name, contextValue: 'ACTIVE')]);
       expect(active.length, equals(1));
       expect(active[0], isTrue);
@@ -876,7 +876,7 @@ void main() {
 
     test('testTraverseActionArguments', () async {
       var client = await getClient();
-      ActionMeta meta = await client.getActionMeta('NestedRecordAsArgAction');
+      var meta = await client.getActionMeta('NestedRecordAsArgAction');
 
       var bookType = meta.args[0] as RecordType;
       var authorType = bookType.fields[1] as RecordType;
@@ -893,7 +893,7 @@ void main() {
           isTrue);
       expect(identical(meta.getArg('book.title'), bookType.fields[2]), isTrue);
 
-      List<QualifiedDataType> namedQTypes = [];
+      var namedQTypes = <QualifiedDataType>[];
       SpongeUtils.traverseActionArguments(
           meta, (qType) => namedQTypes.add(qType),
           namedOnly: true);
@@ -956,11 +956,11 @@ void main() {
   group('REST API Client action meta cache', () {
     test('testActionCacheOn', () async {
       var client = await getClient();
-      String actionName = 'UpperCase';
+      var actionName = 'UpperCase';
       expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
           isNull);
 
-      ActionMeta actionMeta = await client.getActionMeta(actionName);
+      var actionMeta = await client.getActionMeta(actionName);
       expect(actionMeta, isNotNull);
       expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
           isNotNull);
@@ -979,8 +979,8 @@ void main() {
       var client = (await getClient())
         ..configuration.useActionMetaCache = false;
 
-      String actionName = 'UpperCase';
-      ActionMeta actionMeta = await client.getActionMeta(actionName);
+      var actionName = 'UpperCase';
+      var actionMeta = await client.getActionMeta(actionName);
       expect(actionMeta, isNotNull);
       expect(await client.getActionMeta(actionName), isNotNull);
       expect(identical(actionMeta, await client.getActionMeta(actionName)),
@@ -990,7 +990,7 @@ void main() {
     });
     test('testActionCacheOnGetActions', () async {
       var client = await getClient();
-      String actionName = 'UpperCase';
+      var actionName = 'UpperCase';
       expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
           isNull);
 
@@ -1010,7 +1010,7 @@ void main() {
     });
     test('testFetchActionMeta', () async {
       var client = await getClient();
-      String actionName = 'UpperCase';
+      var actionName = 'UpperCase';
       expect(await client.getActionMeta(actionName, allowFetchMetadata: false),
           isNull);
       expect(await client.getActionMeta(actionName), isNotNull);
@@ -1021,12 +1021,12 @@ void main() {
   group('REST API Client event type cache', () {
     test('testEventTypeCacheOn', () async {
       var client = await getClient();
-      String eventTypeName = 'notification';
+      var eventTypeName = 'notification';
       expect(
           await client.getEventType(eventTypeName, allowFetchEventType: false),
           isNull);
 
-      RecordType eventType = await client.getEventType(eventTypeName);
+      var eventType = await client.getEventType(eventTypeName);
       expect(eventType, isNotNull);
       expect(
           await client.getEventType(eventTypeName, allowFetchEventType: false),
@@ -1046,8 +1046,8 @@ void main() {
     test('testEventTypeCacheOff', () async {
       var client = (await getClient())..configuration.useEventTypeCache = false;
 
-      String eventTypeName = 'notification';
-      RecordType eventType = await client.getEventType(eventTypeName);
+      var eventTypeName = 'notification';
+      var eventType = await client.getEventType(eventTypeName);
       expect(eventType, isNotNull);
       expect(await client.getEventType(eventTypeName), isNotNull);
       expect(identical(eventType, await client.getEventType(eventTypeName)),
@@ -1057,7 +1057,7 @@ void main() {
     });
     test('testEventTypeCacheOnGetEventTypes', () async {
       var client = await getClient();
-      String eventTypeName = 'notification';
+      var eventTypeName = 'notification';
       expect(
           await client.getEventType(eventTypeName, allowFetchEventType: false),
           isNull);
@@ -1081,7 +1081,7 @@ void main() {
     });
     test('testFetchEventType', () async {
       var client = await getClient();
-      String eventTypeName = 'notification';
+      var eventTypeName = 'notification';
       expect(
           await client.getEventType(eventTypeName, allowFetchEventType: false),
           isNull);
@@ -1196,7 +1196,7 @@ void main() {
         ..typeConverter.register(TestUtils.createObjectTypeUnitConverter(true));
 
       var compoundObject = TestUtils.createTestCompoundComplexObject();
-      Map<String, CompoundComplexObject> map = {'first': compoundObject};
+      var map = <String, CompoundComplexObject>{'first': compoundObject};
 
       var returnValue = await client.call('ComplexObjectHierarchyAction', [
         'String',
@@ -1305,7 +1305,7 @@ void main() {
     test('testHttpErrorInJsonParser', () async {
       var client = await getClient();
       var requestBody = '{"error_property":""}';
-      Response httpResponse = await post('${client.configuration.url}/actions',
+      var httpResponse = await post('${client.configuration.url}/actions',
           headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
           body: requestBody);
 
@@ -1329,8 +1329,8 @@ void main() {
     test('testGlobalListeners', () async {
       var client = await getClient();
 
-      List<String> requestStringList = [];
-      List<String> responseStringList = [];
+      var requestStringList = <String>[];
+      var responseStringList = <String>[];
 
       client
         ..addOnRequestSerializedListener(
@@ -1340,7 +1340,7 @@ void main() {
                 responseStringList.add(responseString));
 
       await client.getVersion();
-      String version = await client.getVersion();
+      var version = await client.getVersion();
       await client.getVersion();
 
       expect(SpongeUtils.isServerVersionCompatible(version), isTrue);
@@ -1363,7 +1363,7 @@ void main() {
 
       await client.getVersion();
 
-      SpongeRequestContext context = SpongeRequestContext()
+      var context = SpongeRequestContext()
         ..onRequestSerializedListener =
             ((request, requestString) => actualRequestString = requestString)
         ..onResponseDeserializedListener =

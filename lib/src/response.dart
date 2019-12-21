@@ -72,7 +72,7 @@ abstract class SpongeResponse {
   SpongeResponse({
     this.header,
   }) {
-    this.header ??= ResponseHeader();
+    header ??= ResponseHeader();
   }
 
   /// The request header (optional).
@@ -213,7 +213,7 @@ class GetVersionResponse extends BodySpongeResponse<GetVersionResponseBody> {
 class GetFeaturesResponseBody implements ResponseBody {
   GetFeaturesResponseBody({
     @required Map<String, dynamic> features,
-  }) : this.features = features ?? {};
+  }) : features = features ?? {};
 
   /// The Sponge version.
   Map<String, dynamic> features;
@@ -296,7 +296,7 @@ class SendEventResponse extends BodySpongeResponse<SendEventResponseBody> {
 /// An action active response body.
 class IsActionActiveResponseBody implements ResponseBody {
   IsActionActiveResponseBody({@required List<bool> active})
-      : this.active = active ?? [];
+      : active = active ?? [];
 
   ///The actions activity statuses.
   final List<bool> active;

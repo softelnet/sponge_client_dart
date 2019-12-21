@@ -65,8 +65,8 @@ class SpongeUtils {
   /// Parses a Java compatible timezoned date/time format as `TZDateTime` or `DateTime` if the location is not present
   /// in the `tzDateTimeString`.
   static DateTime parseIsoDateTimeZone(String tzDateTimeString) {
-    int locationIndex = tzDateTimeString.indexOf('[');
-    String location = locationIndex > -1
+    var locationIndex = tzDateTimeString.indexOf('[');
+    var location = locationIndex > -1
         ? tzDateTimeString.substring(
             locationIndex + 1, tzDateTimeString.indexOf(']'))
         : null;
@@ -87,7 +87,7 @@ class SpongeUtils {
 
   /// Traverses the action argument types.
   static void traverseActionArguments(
-      ActionMeta actionMeta, void onType(QualifiedDataType _),
+      ActionMeta actionMeta, void Function(QualifiedDataType _) onType,
       {bool namedOnly = true}) {
     actionMeta.args?.forEach((argType) => DataTypeUtils.traverseDataType(
         QualifiedDataType(argType.name, argType), onType,

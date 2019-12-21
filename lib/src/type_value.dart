@@ -29,7 +29,7 @@ class AnnotatedValue with EquatableMixin implements DecoratedValue {
     Map<String, Object> features,
     this.typeLabel,
     this.typeDescription,
-  }) : this.features = features ?? {};
+  }) : features = features ?? {};
 
   static const Set<String> FIELDS = {
     'value',

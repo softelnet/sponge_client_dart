@@ -24,7 +24,7 @@ void main() async {
   print('Sponge version: $version.');
 
   // Get actions metadata.
-  List<ActionMeta> actionsMeta = await client.getActions();
+  var actionsMeta = await client.getActions();
   print('Available action count: ${actionsMeta.length}.');
 
   // Call the action with arguments.

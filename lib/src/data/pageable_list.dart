@@ -39,11 +39,12 @@ class PageableList<E> extends ListBase<E> {
 
   int get count => _count;
 
+  @override
   set length(int value) => throw UnsupportedError(
       'Setting length of a pageable list is not supported');
 
   @override
-  operator [](int index) {
+  E operator [](int index) {
     return _internal[index];
   }
 

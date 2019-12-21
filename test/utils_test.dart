@@ -53,14 +53,14 @@ void main() {
     });
     test('formatIsoDateTimeZone', () async {
       await initializeTimeZone();
-      TZDateTime dateTimeZone = TZDateTime.from(
+      var dateTimeZone = TZDateTime.from(
           DateTime.parse('2019-02-07T15:16:17'), getLocation('Europe/Paris'));
       expect(SpongeUtils.formatIsoDateTimeZone(dateTimeZone),
           equals('2019-02-07T15:16:17.000+01:00[Europe/Paris]'));
     });
     test('parseIsoDateTimeZone', () async {
       await initializeTimeZone();
-      TZDateTime dateTimeZone = TZDateTime.from(
+      var dateTimeZone = TZDateTime.from(
           DateTime.parse('2019-02-07T15:16:17'), getLocation('Europe/Paris'));
       expect(
           SpongeUtils.parseIsoDateTimeZone(
@@ -76,8 +76,7 @@ void main() {
           .map((declaration) => MirrorSystem.getName(declaration.simpleName))
           .toSet();
 
-      Map<String, dynamic> exampleMap = Map.fromIterable(fieldNames,
-          key: (name) => name, value: (name) => null);
+      var exampleMap = {for (var name in fieldNames) name: null};
 
       expect(SpongeUtils.isAnnotatedValueMap(exampleMap), isTrue);
       expect(SpongeUtils.isAnnotatedValueMap({'value': null}), isFalse);

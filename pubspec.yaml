@@ -6,7 +6,7 @@ author: The Sponge Team <sponge_team@softelnet.com>
 homepage: https://github.com/softelnet/sponge_client_dart
 
 environment:
-  sdk: '>=2.2.0 <3.0.0'
+  sdk: '>=2.3.0 <3.0.0'
 
 dependencies:
   meta: ^1.1.7
@@ -15,7 +15,7 @@ dependencies:
   quiver: ^2.0.5
   timezone: ^0.5.5
   intl: ^0.16.0
-  equatable: ^0.6.1
+  equatable: ^1.0.1
   collection: ^1.14.11
   logging: ^0.11.3+2
 

@@ -48,7 +48,7 @@ class SubActionSpec {
           'Too many arguments');
 
       // Fills missing target arguments but only leading.
-      int i = 0;
+      var i = 0;
       for (var substitution in argSubstitutions) {
         if (substitution.target != null) {
           break;
@@ -100,7 +100,7 @@ class SubActionSpec {
     var resultSubstitution = match.groupCount > 1 ? match.group(1) : null;
     var actionFragment = match.groupCount > 1 ? match.group(2) : match.group(1);
 
-    SubActionSpec spec = _parseActionFragment(actionFragment, type);
+    var spec = _parseActionFragment(actionFragment, type);
 
     return SubActionSpec._(spec.actionName, type,
         argSubstitutions: spec.argSubstitutions,
@@ -117,7 +117,7 @@ class SubActionSpec {
     var actionName = match.group(1);
 
     List<SubActionArgSpec> argSubstitutions;
-    String argsSpecsString = match.group(2)?.trim();
+    var argsSpecsString = match.group(2)?.trim();
     if (argsSpecsString == null) {
       argSubstitutions = null;
     } else if (argsSpecsString.isEmpty) {
@@ -139,7 +139,7 @@ class SubActionSpec {
         var second = argSplit.length > 1 ? argSplit[1].trim() : null;
 
         var targetArg = second != null ? first : null;
-        var sourceArg = second != null ? second : first;
+        var sourceArg = second ?? first;
 
         Validate.isTrue(
             (targetArg == null ||

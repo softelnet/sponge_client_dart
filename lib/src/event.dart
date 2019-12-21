@@ -28,7 +28,7 @@ class RemoteEvent {
     this.label,
     this.description,
     Map<String, dynamic> attributes,
-  }) : this.attributes = attributes ?? {};
+  }) : attributes = attributes ?? {};
 
   String id;
   String name;

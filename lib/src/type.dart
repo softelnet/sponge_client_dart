@@ -234,6 +234,7 @@ class BinaryType extends DataType<Uint8List> {
   factory BinaryType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(BinaryType(json['mimeType']), json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'mimeType': mimeType,
@@ -280,13 +281,14 @@ class DateTimeType extends DataType<Uint8List> {
       DataType.fromJsonBase(
           DateTimeType(_fromJsonDateTimeKind(json['dateTimeKind'])), json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'dateTimeKind': _getDateTimeKindValue(dateTimeKind),
     });
 
   static DateTimeKind _fromJsonDateTimeKind(String jsonDateTimeKind) {
-    DateTimeKind dateTimeKind = DateTimeKind.values.firstWhere(
+    var dateTimeKind = DateTimeKind.values.firstWhere(
         (k) => _getDateTimeKindValue(k) == jsonDateTimeKind,
         orElse: () => null);
     return Validate.notNull(
@@ -348,6 +350,7 @@ class IntegerType extends DataType<int> {
           ),
           json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'minValue': minValue,
@@ -359,11 +362,7 @@ class IntegerType extends DataType<int> {
 
 /// A list type. This type requires an `elementType` parameter, which is is a type of list elements.
 class ListType extends CollectionType<List> {
-  ListType(
-    this.elementType, {
-    bool unique,
-  })  : this.unique = unique ?? false,
-        super(DataTypeKind.LIST);
+  ListType(this.elementType, {this.unique = false}) : super(DataTypeKind.LIST);
 
   /// The list element type.
   final DataType elementType;
@@ -377,6 +376,7 @@ class ListType extends CollectionType<List> {
       ),
       json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'elementType': elementType.toJson(),
@@ -399,6 +399,7 @@ class MapType extends CollectionType<Map> {
           DataType.fromJson(json['valueType'])),
       json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'keyType': keyType.toJson(),
@@ -449,6 +450,7 @@ class NumberType extends DataType<num> {
           ),
           json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'minValue': minValue,
@@ -479,6 +481,7 @@ class ObjectType extends DataType<dynamic> {
           ),
           json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'className': className,
@@ -494,8 +497,7 @@ class RecordType extends DataType<Map<String, dynamic>> {
     this.baseType,
     this.inheritationApplied = false,
   }) : super(DataTypeKind.RECORD) {
-    _fieldsMap = Map.fromIterable(this.fields,
-        key: (field) => field.name, value: (field) => field);
+    _fieldsMap = {for (var field in fields) field.name: field};
   }
 
   /// The field types.
@@ -520,6 +522,7 @@ class RecordType extends DataType<Map<String, dynamic>> {
           ),
           json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'fields': fields?.map((field) => field.toJson())?.toList(),
@@ -536,6 +539,7 @@ class StreamType extends DataType<dynamic> {
   factory StreamType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(StreamType(), json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson();
 }
 
@@ -566,6 +570,7 @@ class StringType extends DataType<String> {
           ),
           json);
 
+  @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
       'minLength': minLength,

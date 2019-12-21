@@ -107,11 +107,11 @@ class Features {
   }
 
   static T getOptional<T>(
-          Map<String, Object> features, String name, T orElse()) =>
+          Map<String, Object> features, String name, T Function() orElse) =>
       features.containsKey(name) ? features[name] : orElse();
 
   static bool getBool(
-      Map<String, Object> features, String name, bool orElse()) {
+      Map<String, Object> features, String name, bool Function() orElse) {
     if (!features.containsKey(name)) {
       return orElse();
     }

@@ -121,7 +121,7 @@ class ProvidedMeta {
       };
 
   static ProvidedMode fromJsonProvidedMode(String jsonProvidedMode) {
-    ProvidedMode mode = ProvidedMode.values.firstWhere(
+    var mode = ProvidedMode.values.firstWhere(
         (k) => _getProvidedModeValue(k) == jsonProvidedMode,
         orElse: () => null);
     return Validate.notNull(
@@ -167,7 +167,7 @@ class CategoryMeta {
     this.label,
     this.description,
     Map<String, Object> features,
-  }) : this.features = features ?? Map();
+  }) : features = features ?? {};
 
   /// The category name.
   String name;
@@ -206,7 +206,7 @@ class ActionMeta {
     this.result,
     this.callable = true,
     this.qualifiedVersion,
-  }) : this.features = features ?? Map();
+  }) : features = features ?? {};
 
   /// The action name.
   final String name;
@@ -240,7 +240,7 @@ class ActionMeta {
 
   /// Could be `null` if the action has no argument metadata.
   RecordType get argsAsRecordType =>
-      args != null ? (RecordType(args)..name = this.name) : null;
+      args != null ? (RecordType(args)..name = name) : null;
 
   factory ActionMeta.fromJson(Map<String, dynamic> json) {
     return json != null

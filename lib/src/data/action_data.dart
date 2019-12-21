@@ -132,10 +132,10 @@ class ActionData {
       ActionCallResultInfo overrideResultInfo,
       bool overrideCalling,
       Map<String, PageableList> overridePageableLists}) {
-    this.args = overrideArgs ?? source.args;
-    this.resultInfo = overrideResultInfo ?? source.resultInfo;
-    this.calling = overrideCalling ?? source.calling;
-    this._pageableLists = overridePageableLists ?? source._pageableLists;
+    args = overrideArgs ?? source.args;
+    resultInfo = overrideResultInfo ?? source.resultInfo;
+    calling = overrideCalling ?? source.calling;
+    _pageableLists = overridePageableLists ?? source._pageableLists;
   }
 
   static List<Object> createInitialArgs(ActionMeta action) => List.generate(
@@ -144,21 +144,22 @@ class ActionData {
   /// Supports sub-arguments.
   Map<String, Object> getArgMap(Iterable<String> argNames,
           {Map<String, Object> predefined}) =>
-      Map.fromIterable(argNames,
-          key: (name) => name,
-          value: (name) => (predefined?.containsKey(name) ?? false)
+      {
+        for (var name in argNames)
+          name: (predefined?.containsKey(name) ?? false)
               ? predefined[name]
-              : getArgValueByName(name));
+              : getArgValueByName(name)
+      };
 
   Map<String, DataType> getDynamicTypeNestedTypes(Iterable<String> argNames) {
     var selectedArgNames = argNames.where((name) =>
         DataTypeUtils.isTypePathNestedInDynamic(argsAsRecordType, name));
-    return Map.fromIterable(
-        DataTypeUtils.getQualifiedTypes(argsAsRecordType, value: argsAsRecord)
-            .where((qType) => selectedArgNames
-                .contains(qType.path)) /*any((name) => name == qType.path))*/,
-        key: (qType) => qType.path,
-        value: (qType) => qType.type);
+    return {
+      for (var qType in DataTypeUtils.getQualifiedTypes(argsAsRecordType,
+              value: argsAsRecord)
+          .where((qType) => selectedArgNames.contains(qType.path)))
+        qType.path: qType.type
+    };
   }
 
   PageableList getPageableList(String argName) => _pageableLists[argName];
@@ -166,7 +167,7 @@ class ActionData {
   DataType getArgType(String argName) =>
       actionMeta.getArg(argName, argsAsRecord: argsAsRecord);
 
-  void traverseArguments(void onType(QualifiedDataType _),
+  void traverseArguments(void Function(QualifiedDataType _) onType,
       {bool namedOnly = true}) {
     DataTypeUtils.traverseDataType(
         QualifiedDataType(null, argsAsRecordType), onType,
@@ -193,10 +194,11 @@ class ActionData {
 
 class _ActionArgsMap extends MapBase<String, dynamic> {
   _ActionArgsMap(this.actionData)
-      : _argIndexMap = Map.fromIterable(
-            List<int>.generate(actionData.actionMeta.args.length, (int i) => i),
-            key: (i) => actionData.actionMeta.args[i].name,
-            value: (i) => i);
+      : _argIndexMap = {
+          for (var i in List<int>.generate(
+              actionData.actionMeta.args.length, (int i) => i))
+            actionData.actionMeta.args[i].name: i
+        };
 
   final ActionData actionData;
   final Map<String, int> _argIndexMap;
@@ -205,7 +207,7 @@ class _ActionArgsMap extends MapBase<String, dynamic> {
       Validate.notNull(_argIndexMap[key], 'Argument $key not found');
 
   @override
-  operator [](Object key) => actionData.args[_getArgIndex(key)];
+  dynamic operator [](Object key) => actionData.args[_getArgIndex(key)];
 
   @override
   void operator []=(key, value) => actionData.args[_getArgIndex(key)] = value;
@@ -220,7 +222,7 @@ class _ActionArgsMap extends MapBase<String, dynamic> {
       actionData.actionMeta.args.map((argType) => argType.name).toList();
 
   @override
-  remove(Object key) {
+  dynamic remove(Object key) {
     throw Exception('Remove is not allowed');
   }
 }

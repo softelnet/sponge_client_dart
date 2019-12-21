@@ -258,14 +258,14 @@ class SpongeRestClient {
 
     _fireOnRequestSerializedListener(request, context, requestBody);
 
-    Response httpResponse = await post(_getUrl(operation),
+    var httpResponse = await post(_getUrl(operation),
         headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
         body: requestBody);
 
     _logger.finer(() =>
         'REST API $operation response: ${SpongeUtils.obfuscatePassword(httpResponse.body)})');
 
-    bool isResponseRelevant =
+    var isResponseRelevant =
         SpongeUtils.isHttpSuccess(httpResponse.statusCode) ||
             httpResponse.statusCode == SpongeClientConstants.HTTP_CODE_ERROR &&
                 SpongeUtils.isJson(httpResponse);
@@ -276,7 +276,7 @@ class SpongeRestClient {
     Validate.isTrue(isResponseRelevant,
         'HTTP error (status code ${httpResponse.statusCode})');
 
-    String responseBody = httpResponse.body;
+    var responseBody = httpResponse.body;
     SpongeResponse response;
     try {
       response = fromJson(json.decode(responseBody));
@@ -339,11 +339,8 @@ class SpongeRestClient {
   Future<LogoutResponse> logoutByRequest(LogoutRequest request,
       {SpongeRequestContext context}) async {
     return await _lock.synchronized(() async {
-      LogoutResponse response = await execute(
-          SpongeClientConstants.OPERATION_LOGOUT,
-          request,
-          (json) => LogoutResponse.fromJson(json),
-          context);
+      var response = await execute(SpongeClientConstants.OPERATION_LOGOUT,
+          request, (json) => LogoutResponse.fromJson(json), context);
       _currentAuthToken = null;
 
       return response;
@@ -385,11 +382,8 @@ class SpongeRestClient {
 
   Future<GetActionsResponse> _doGetActionsByRequest(GetActionsRequest request,
       bool populateCache, SpongeRequestContext context) async {
-    GetActionsResponse response = await execute(
-        SpongeClientConstants.OPERATION_ACTIONS,
-        request,
-        (json) => GetActionsResponse.fromJson(json),
-        context);
+    var response = await execute(SpongeClientConstants.OPERATION_ACTIONS,
+        request, (json) => GetActionsResponse.fromJson(json), context);
 
     if (response.body.actions != null) {
       // Unmarshal defaultValues in action meta.
@@ -431,7 +425,7 @@ class SpongeRestClient {
       return;
     }
 
-    for (int i = 0; i < actionMeta.args.length; i++) {
+    for (var i = 0; i < actionMeta.args.length; i++) {
       actionMeta.args[i] = await _unmarshalDataType(actionMeta.args[i]);
     }
 
@@ -447,7 +441,7 @@ class SpongeRestClient {
     }
 
     for (var entry in argValues.entries) {
-      ProvidedValue argValue = entry.value;
+      var argValue = entry.value;
       var argName = entry.key;
       var argType = dynamicTypes != null && dynamicTypes.containsKey(argName)
           ? dynamicTypes[argName]
@@ -495,7 +489,7 @@ class SpongeRestClient {
       {bool allowFetchMetadata = true, SpongeRequestContext context}) async {
     allowFetchMetadata = allowFetchMetadata ?? true;
     if (_configuration.useActionMetaCache && _actionMetaCache != null) {
-      ActionMeta actionMeta = await _actionMetaCache.get(actionName);
+      var actionMeta = await _actionMetaCache.get(actionName);
       // Populate the cache if not found.
       return actionMeta ??
           (allowFetchMetadata
@@ -572,11 +566,8 @@ class SpongeRestClient {
     request.body.args =
         await _marshalActionCallArgs(actionMeta, request.body.args);
 
-    ActionCallResponse response = await execute(
-        SpongeClientConstants.OPERATION_CALL,
-        request,
-        (json) => ActionCallResponse.fromJson(json),
-        context);
+    var response = await execute(SpongeClientConstants.OPERATION_CALL, request,
+        (json) => ActionCallResponse.fromJson(json), context);
 
     await _unmarshalActionCallResult(actionMeta, response);
 
@@ -590,10 +581,10 @@ class SpongeRestClient {
       return;
     }
 
-    int expectedAllArgCount = actionMeta.args.length;
-    int expectedNonOptionalArgCount =
+    var expectedAllArgCount = actionMeta.args.length;
+    var expectedNonOptionalArgCount =
         actionMeta.args.where((argType) => !argType.optional).length;
-    int actualArgCount = args?.length ?? 0;
+    var actualArgCount = args?.length ?? 0;
 
     if (expectedNonOptionalArgCount == expectedAllArgCount) {
       Validate.isTrue(expectedAllArgCount == actualArgCount,
@@ -607,7 +598,7 @@ class SpongeRestClient {
     }
 
     // Validate non-nullable arguments.
-    for (int i = 0; i < actionMeta.args.length; i++) {
+    for (var i = 0; i < actionMeta.args.length; i++) {
       var argType = actionMeta.args[i];
       Validate.isTrue(argType.optional || argType.nullable || args[i] != null,
           'The ${argType.label ?? argType.name} action argument is not set');
@@ -620,8 +611,8 @@ class SpongeRestClient {
       return args;
     }
 
-    List result = [];
-    for (int i = 0; i < args.length; i++) {
+    var result = [];
+    for (var i = 0; i < args.length; i++) {
       result.add(await _typeConverter.marshal(actionMeta.args[i], args[i]));
     }
 
@@ -636,7 +627,7 @@ class SpongeRestClient {
       return null;
     }
 
-    Map<String, Object> marshalled = {};
+    var marshalled = <String, Object>{};
 
     if (actionMeta?.args == null) {
       // Not marshalled.
@@ -706,13 +697,13 @@ class SpongeRestClient {
   Future<ProvideActionArgsResponse> provideActionArgsByRequest(
       ProvideActionArgsRequest request,
       {SpongeRequestContext context}) async {
-    ActionMeta actionMeta = await getActionMeta(request.body.name);
+    var actionMeta = await getActionMeta(request.body.name);
     _setupActionExecutionInfo(actionMeta, request.body);
 
     request.body.current = await _marshalAuxiliaryActionArgsCurrent(
         actionMeta, request.body.current, request.body.dynamicTypes);
 
-    ProvideActionArgsResponse response = await execute(
+    var response = await execute(
         SpongeClientConstants.OPERATION_PROVIDE_ACTION_ARGS,
         request,
         (json) => ProvideActionArgsResponse.fromJson(json),
@@ -753,11 +744,8 @@ class SpongeRestClient {
       GetEventTypesRequest request,
       bool populateCache,
       SpongeRequestContext context) async {
-    GetEventTypesResponse response = await execute(
-        SpongeClientConstants.OPERATION_EVENT_TYPES,
-        request,
-        (json) => GetEventTypesResponse.fromJson(json),
-        context);
+    var response = await execute(SpongeClientConstants.OPERATION_EVENT_TYPES,
+        request, (json) => GetEventTypesResponse.fromJson(json), context);
 
     if (response?.body?.eventTypes != null) {
       for (var key in response.body.eventTypes.keys) {
@@ -800,7 +788,7 @@ class SpongeRestClient {
       {bool allowFetchEventType = true, SpongeRequestContext context}) async {
     allowFetchEventType = allowFetchEventType ?? true;
     if (_configuration.useEventTypeCache && _eventTypeCache != null) {
-      RecordType eventType = await _eventTypeCache.get(eventTypeName);
+      var eventType = await _eventTypeCache.get(eventTypeName);
       // Populate the cache if not found.
       return eventType ??
           (allowFetchEventType
@@ -867,7 +855,7 @@ class SpongeRestClient {
     if (!useCache) {
       return null;
     } else {
-      int cacheMaxSize = maxSize ?? -1;
+      var cacheMaxSize = maxSize ?? -1;
       return cacheMaxSize > -1
           ? MapCache.lru(maximumSize: cacheMaxSize)
           : MapCache();
@@ -905,5 +893,5 @@ class SpongeRestClient {
   }
 }
 
-typedef R ResponseFromJsonCallback<R extends SpongeResponse>(
+typedef ResponseFromJsonCallback<R extends SpongeResponse> = R Function(
     Map<String, dynamic> json);

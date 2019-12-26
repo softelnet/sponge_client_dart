@@ -186,6 +186,7 @@ class DataTypeUtils {
     bool namedOnly = true,
     bool traverseCollections = false,
     dynamic value,
+    bool traverseRoot = true,
   }) {
     if (namedOnly && qType.type.name == null) {
       return;
@@ -193,7 +194,9 @@ class DataTypeUtils {
 
     value = unwrapAnnotatedValue(value);
 
-    onType(qType);
+    if (traverseRoot) {
+      onType(qType);
+    }
 
     switch (qType.type.kind) {
       case DataTypeKind.DYNAMIC:
@@ -202,52 +205,70 @@ class DataTypeUtils {
               'Unable to resolve a dynamic type from a dynamic value');
 
           traverseDataType(
-              QualifiedDataType(qType.path, (value as DynamicValue).type),
-              onType,
-              namedOnly: namedOnly,
-              traverseCollections: traverseCollections,
-              value: (value as DynamicValue)?.value);
+            QualifiedDataType(qType.path, (value as DynamicValue).type),
+            onType,
+            namedOnly: namedOnly,
+            traverseCollections: traverseCollections,
+            value: (value as DynamicValue)?.value,
+            traverseRoot: true,
+          );
         }
         break;
       case DataTypeKind.RECORD:
         (qType.type as RecordType).fields?.forEach((field) {
-          traverseDataType(qType.createChild(field), onType,
-              namedOnly: namedOnly,
-              traverseCollections: traverseCollections,
-              value: value != null ? value[field.name] : null);
+          traverseDataType(
+            qType.createChild(field),
+            onType,
+            namedOnly: namedOnly,
+            traverseCollections: traverseCollections,
+            value: value != null ? value[field.name] : null,
+            traverseRoot: true,
+          );
         });
         break;
       case DataTypeKind.LIST:
         if (traverseCollections) {
           traverseDataType(
-              qType.createChild((qType.type as ListType).elementType), onType,
-              namedOnly: namedOnly,
-              traverseCollections: traverseCollections,
-              value: null);
+            qType.createChild((qType.type as ListType).elementType),
+            onType,
+            namedOnly: namedOnly,
+            traverseCollections: traverseCollections,
+            value: null,
+            traverseRoot: true,
+          );
         }
         break;
       case DataTypeKind.MAP:
         if (traverseCollections) {
           traverseDataType(
-              qType.createChild((qType.type as MapType).keyType), onType,
-              namedOnly: namedOnly,
-              traverseCollections: traverseCollections,
-              value: null);
+            qType.createChild((qType.type as MapType).keyType),
+            onType,
+            namedOnly: namedOnly,
+            traverseCollections: traverseCollections,
+            value: null,
+            traverseRoot: true,
+          );
           traverseDataType(
-              qType.createChild((qType.type as MapType).valueType), onType,
-              namedOnly: namedOnly,
-              traverseCollections: traverseCollections,
-              value: null);
+            qType.createChild((qType.type as MapType).valueType),
+            onType,
+            namedOnly: namedOnly,
+            traverseCollections: traverseCollections,
+            value: null,
+            traverseRoot: true,
+          );
         }
         break;
       case DataTypeKind.OBJECT:
         var objectType = qType.type as ObjectType;
         if (objectType.companionType != null) {
-          traverseDataType(qType.createChild(objectType.companionType), onType,
-              namedOnly: namedOnly,
-              traverseCollections: traverseCollections,
-              // Do not propagate the companion type value.
-              value: null);
+          traverseDataType(
+            qType.createChild(objectType.companionType), onType,
+            namedOnly: namedOnly,
+            traverseCollections: traverseCollections,
+            // Do not propagate the companion type value.
+            value: null,
+            traverseRoot: true,
+          );
         }
         break;
       default:

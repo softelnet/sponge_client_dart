@@ -170,8 +170,12 @@ class ActionData {
   void traverseArguments(void Function(QualifiedDataType _) onType,
       {bool namedOnly = true}) {
     DataTypeUtils.traverseDataType(
-        QualifiedDataType(null, argsAsRecordType), onType,
-        namedOnly: namedOnly, value: argsAsRecord);
+      QualifiedDataType(null, argsAsRecordType),
+      onType,
+      namedOnly: namedOnly,
+      value: argsAsRecord,
+      traverseRoot: false,
+    );
   }
 
   bool isArgPageableList(String argName) =>

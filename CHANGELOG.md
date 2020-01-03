@@ -1,4 +1,5 @@
 ## 1.14.0+1 (2019-12-21)
+* Added indicatedIndex to PageableList.
 * Code cleanup.
 * Dependencies upgrade.
   

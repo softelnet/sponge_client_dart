@@ -26,6 +26,8 @@ class Features {
   static const WIDGET = 'widget';
   static const GROUP = 'group';
 
+  static const KEY = 'key';
+
   static const RESPONSIVE = 'responsive';
 
   static const ACTION_CONFIRMATION = 'confirmation';
@@ -94,6 +96,7 @@ class Features {
   static const PROVIDE_VALUE_OFFSET = 'offset';
   static const PROVIDE_VALUE_LIMIT = 'limit';
   static const PROVIDE_VALUE_COUNT = 'count';
+  static const PROVIDE_VALUE_INDICATED_INDEX = 'indicatedIndex';
 
   static String getCharacteristic(Map<String, Object> features) {
     var characteristic = features[TYPE_CHARACTERISTIC];

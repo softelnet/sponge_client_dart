@@ -31,6 +31,7 @@ class PageableList<E> extends ListBase<E> {
   int _lastOffset;
   int _limit;
   int _count;
+  int _indicatedIndex;
 
   @override
   int get length => _internal.length;
@@ -38,6 +39,8 @@ class PageableList<E> extends ListBase<E> {
   int get limit => _limit;
 
   int get count => _count;
+
+  int get indicatedIndex => _indicatedIndex;
 
   @override
   set length(int value) => throw UnsupportedError(
@@ -59,6 +62,7 @@ class PageableList<E> extends ListBase<E> {
     int lastOffset = page.features[Features.PROVIDE_VALUE_OFFSET];
     int limit = page.features[Features.PROVIDE_VALUE_LIMIT];
     int count = page.features[Features.PROVIDE_VALUE_COUNT];
+    int indicatedIndex = page.features[Features.PROVIDE_VALUE_INDICATED_INDEX];
 
     if (lastOffset < length) {
       Validate.isTrue(lastOffset == null || lastOffset == 0,
@@ -73,6 +77,7 @@ class PageableList<E> extends ListBase<E> {
 
     _limit = limit;
     _count = count;
+    _indicatedIndex = indicatedIndex;
   }
 
   bool get hasMorePages => _count != null ? (length < _count) : true;

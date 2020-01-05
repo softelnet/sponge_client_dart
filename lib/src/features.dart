@@ -49,6 +49,7 @@ class Features {
   static const TYPE_INTENT_VALUE_SUBSCRIBE = 'subscribe';
 
   static const ACTION_INTENT_VALUE_RELOAD = 'reload';
+  static const ACTION_INTENT_VALUE_RESET = 'reset';
 
   static const ACTION_REFRESH_EVENTS = 'refreshEvents';
 

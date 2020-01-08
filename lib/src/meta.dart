@@ -205,6 +205,7 @@ class ActionMeta {
     this.args,
     this.result,
     this.callable = true,
+    this.activatable = false,
     this.qualifiedVersion,
   }) : features = features ?? {};
 
@@ -235,6 +236,9 @@ class ActionMeta {
   /// The callable flag.
   final bool callable;
 
+  /// The activatable flag.
+  final bool activatable;
+
   /// The action qualified version.
   ProcessorQualifiedVersion qualifiedVersion;
 
@@ -256,6 +260,7 @@ class ActionMeta {
                 ?.toList(),
             result: DataType.fromJson(json['result']),
             callable: json['callable'],
+            activatable: json['activatable'],
             qualifiedVersion:
                 ProcessorQualifiedVersion.fromJson(json['qualifiedVersion']),
           )

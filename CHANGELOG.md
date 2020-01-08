@@ -1,3 +1,6 @@
+## 1.14.0+2 (not released yet)
+* Added an `activatable` flag to an action.
+
 ## 1.14.0+1 (2019-12-21)
 * Added indicatedIndex to PageableList.
 * Code cleanup.

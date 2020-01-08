@@ -98,15 +98,13 @@ void main() {
     });
     test('testActionsArgRequiredTrue', () async {
       var client = await getClient();
-      var actions =
-          await client.getActions(metadataRequired: true);
+      var actions = await client.getActions(metadataRequired: true);
       expect(actions.length,
           equals(TestConstants.ANONYMOUS_ACTIONS_WITH_METADATA_COUNT));
     });
     test('testActionsArgRequiredFalse', () async {
       var client = await getClient();
-      var actions =
-          await client.getActions(metadataRequired: false);
+      var actions = await client.getActions(metadataRequired: false);
       expect(actions.length, equals(TestConstants.ANONYMOUS_ACTIONS_COUNT));
     });
     test('testActionsNameRegExp', () async {
@@ -333,8 +331,7 @@ void main() {
 
     test('testCallRecordType', () async {
       var client = await getClient();
-      var actionMeta =
-          await client.getActionMeta('RecordAsResultAction');
+      var actionMeta = await client.getActionMeta('RecordAsResultAction');
       TestUtils.assertBookRecordType(actionMeta.result as RecordType);
 
       Map<String, Object> book1 = await client.call(actionMeta.name, [1]);
@@ -401,8 +398,7 @@ void main() {
         registeredTypes: true,
       ));
 
-      var types =
-          (await client.getActionsByRequest(request)).body.types;
+      var types = (await client.getActionsByRequest(request)).body.types;
       expect(types.length, equals(1));
       TestUtils.assertPersonRecordType(types['Person'] as RecordType);
 
@@ -418,8 +414,7 @@ void main() {
         registeredTypes: true,
       ));
 
-      var types =
-          (await client.getActionsByRequest(request)).body.types;
+      var types = (await client.getActionsByRequest(request)).body.types;
       expect(types.length, equals(2));
 
       TestUtils.assertPersonRecordType(types['Person'] as RecordType);
@@ -433,8 +428,7 @@ void main() {
 
     test('testNestedRecordAsArgAction', () async {
       var client = await getClient();
-      var actionMeta =
-          await client.getActionMeta('NestedRecordAsArgAction');
+      var actionMeta = await client.getActionMeta('NestedRecordAsArgAction');
       expect(actionMeta.args.length, equals(1));
       var argType = actionMeta.args[0] as RecordType;
       expect(argType.kind, equals(DataTypeKind.RECORD));
@@ -500,8 +494,7 @@ void main() {
       // Reset the test state.
       await client.call(actionName, ['A', false, null, 1]);
 
-      var providedArgs = await client.provideActionArgs(
-          actionName,
+      var providedArgs = await client.provideActionArgs(actionName,
           provide: ['actuator1', 'actuator2', 'actuator3']);
       expect(providedArgs.length, equals(3));
       expect(providedArgs['actuator1'], isNotNull);
@@ -813,8 +806,7 @@ void main() {
 
     test('testActionsAnnotatedWithDefaultValue', () async {
       var client = await getClient();
-      var actionMeta =
-          await client.getActionMeta('AnnotatedWithDefaultValue');
+      var actionMeta = await client.getActionMeta('AnnotatedWithDefaultValue');
 
       expect(actionMeta.args[0].annotated, isTrue);
       expect((actionMeta.args[0].defaultValue as AnnotatedValue).value,
@@ -845,23 +837,21 @@ void main() {
     });
     test('testActionsProvidedWithOptional', () async {
       var client = await getClient();
-      var actionMeta =
-          await client.getActionMeta('ProvidedWithOptional');
+      var actionMeta = await client.getActionMeta('ProvidedWithOptional');
 
       expect(actionMeta.args[0].provided.current, isFalse);
       expect(actionMeta.args[0].provided.lazyUpdate, isFalse);
       expect(actionMeta.args[0].provided.mode, equals(ProvidedMode.OPTIONAL));
 
-      var provided =
-          (await client.provideActionArgs(actionMeta.name))['arg'];
+      var provided = (await client.provideActionArgs(actionMeta.name))['arg'];
 
       expect(provided.value, equals('VALUE'));
     });
 
     test('testIsActionActive', () async {
       var client = await getClient();
-      var actionMeta =
-          await client.getActionMeta('IsActionActiveAction');
+      var actionMeta = await client.getActionMeta('IsActionActiveAction');
+      expect(actionMeta.activatable, isTrue);
 
       var active = await client.isActionActive(
           [IsActionActiveEntry(name: actionMeta.name, contextValue: 'ACTIVE')]);

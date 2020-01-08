@@ -686,7 +686,24 @@ class SpongeRestClient {
   }
 
   /// Fetches activity statuses for actions specified in the entries.
+  /// If none of the actions is activatable (based on the cached metadata), returns positive activity statuses
+  /// without connecting the server.
   Future<List<bool>> isActionActive(List<IsActionActiveEntry> entries) async {
+    var areActivatableActions = false;
+    for (var entry in entries) {
+      if ((await getActionMeta(entry.name, allowFetchMetadata: false))
+              ?.activatable ??
+          true) {
+        areActivatableActions = true;
+        break;
+      }
+    }
+
+    // No need to connect to the server.
+    if (!areActivatableActions) {
+      return List.filled(entries.length, true);
+    }
+
     return (await isActionActiveByRequest(
             IsActionActiveRequest(IsActionActiveRequestBody(entries: entries))))
         .body

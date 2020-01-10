@@ -204,10 +204,12 @@ class ActionMeta {
     Map<String, Object> features,
     this.args,
     this.result,
-    this.callable = true,
-    this.activatable = false,
+    bool callable,
+    bool activatable,
     this.qualifiedVersion,
-  }) : features = features ?? {};
+  })  : callable = callable ?? true,
+        activatable = activatable ?? false,
+        features = features ?? {};
 
   /// The action name.
   final String name;

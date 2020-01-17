@@ -50,4 +50,6 @@ abstract class SpongeClientConstants {
       'org.openksavi.sponge.restapi.model.RemoteEvent';
 
   static const int HTTP_CODE_ERROR = 500;
+
+  static const String SERVICE_DISCOVERY_TYPE = '_sponge._tcp';
 }

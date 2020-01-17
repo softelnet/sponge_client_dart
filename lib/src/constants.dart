@@ -52,4 +52,8 @@ abstract class SpongeClientConstants {
   static const int HTTP_CODE_ERROR = 500;
 
   static const String SERVICE_DISCOVERY_TYPE = '_sponge._tcp';
+
+  static const String SERVICE_DISCOVERY_PROPERTY_UUID = 'uuid';
+  static const String SERVICE_DISCOVERY_PROPERTY_NAME = 'name';
+  static const String SERVICE_DISCOVERY_PROPERTY_URL = 'url';
 }

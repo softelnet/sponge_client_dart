@@ -336,7 +336,7 @@ class DataTypeUtils {
           type.provided.elementValueSet);
 
   static bool isProvidedWrite(DataType type) =>
-      type.provided != null && type.provided.submittable;
+      type.provided != null && type.provided.submittable != null;
 
   static bool isValueNotSet(dynamic value) =>
       value == null || value is AnnotatedValue && value.value == null;

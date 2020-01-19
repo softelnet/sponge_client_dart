@@ -19,7 +19,7 @@ import 'package:sponge_client_dart/src/util/validate.dart';
 
 /// A value set metadata.
 class ValueSetMeta {
-  ValueSetMeta({this.limited = true});
+  ValueSetMeta({bool limited}) : limited = limited ?? true;
 
   /// The flag specifying if the value set is limited only to the provided values. Defaults to `true`.
   final bool limited;
@@ -29,6 +29,23 @@ class ValueSetMeta {
 
   Map<String, dynamic> toJson() => {
         'limited': limited,
+      };
+}
+
+/// A submittable object metadata.
+class SubmittableMeta {
+  SubmittableMeta({List<String> influences}) : influences = influences ?? [];
+
+  /// The list of object names that this submitted object influences (i.e. can change their values when submitted).
+  final List<String> influences;
+
+  factory SubmittableMeta.fromJson(Map<String, dynamic> json) => json != null
+      ? SubmittableMeta(
+          influences: (json['influences'] as List)?.cast<String>()?.toList())
+      : null;
+
+  Map<String, dynamic> toJson() => {
+        'influences': influences,
       };
 }
 
@@ -48,7 +65,7 @@ class ProvidedMeta {
     this.readOnly = false,
     this.overwrite = false,
     this.elementValueSet = false,
-    this.submittable = false,
+    this.submittable,
     this.lazyUpdate = false,
     this.current = false,
     this.mode = ProvidedMode.EXPLICIT,
@@ -72,8 +89,8 @@ class ProvidedMeta {
   /// The flag specifying if the list element value set is provided. Applicable only for list types. Defaults to `false`.
   final bool elementValueSet;
 
-  /// The flag specifying if the value can be submitted by a client.
-  final bool submittable;
+  /// The metadata specifying if the value can be submitted by a client.
+  final SubmittableMeta submittable;
 
   /// The flag specifying if the provided value should be updated lazily in a client code when a dependency changes (experimental).
   final bool lazyUpdate;
@@ -99,7 +116,7 @@ class ProvidedMeta {
             readOnly: json['readOnly'] ?? false,
             overwrite: json['overwrite'] ?? false,
             elementValueSet: json['elementValueSet'] ?? false,
-            submittable: json['submittable'] ?? false,
+            submittable: SubmittableMeta.fromJson(json['submittable']),
             lazyUpdate: json['lazyUpdate'] ?? false,
             current: json['current'] ?? false,
             mode: fromJsonProvidedMode(json['mode']),
@@ -114,7 +131,7 @@ class ProvidedMeta {
         'readOnly': readOnly,
         'overwrite': overwrite,
         'elementValueSet': elementValueSet,
-        'submittable': submittable,
+        'submittable': submittable?.toJson(),
         'lazyUpdate': lazyUpdate,
         'current': current,
         'mode': _getProvidedModeValue(mode),

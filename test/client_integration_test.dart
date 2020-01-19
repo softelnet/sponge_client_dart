@@ -686,12 +686,14 @@ void main() {
       expect(argTypes[0].provided.valueSet.limited, isTrue);
       expect(argTypes[0].provided.dependencies?.length, equals(0));
       expect(argTypes[0].provided.readOnly, isFalse);
-      expect(argTypes[0].provided.submittable, isTrue);
+      expect(argTypes[0].provided.submittable, isNotNull);
+      expect(
+          argTypes[0].provided.submittable.influences, equals(['actuator2']));
       expect(argTypes[1].provided.value, isTrue);
       expect(argTypes[1].provided.hasValueSet, isFalse);
       expect(argTypes[1].provided.dependencies?.length, equals(0));
       expect(argTypes[1].provided.readOnly, isFalse);
-      expect(argTypes[1].provided.submittable, isFalse);
+      expect(argTypes[1].provided.submittable, isNull);
 
       Map<String, ProvidedValue> providedArgs;
 

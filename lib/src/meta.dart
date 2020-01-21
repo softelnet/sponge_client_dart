@@ -107,21 +107,27 @@ class ProvidedMeta {
   bool get hasValueSet => valueSet != null;
 
   factory ProvidedMeta.fromJson(Map<String, dynamic> json) {
-    return json != null
-        ? ProvidedMeta(
-            value: json['value'],
-            valueSet: ValueSetMeta.fromJson(json['valueSet']),
-            dependencies:
-                (json['dependencies'] as List)?.cast<String>()?.toList(),
-            readOnly: json['readOnly'] ?? false,
-            overwrite: json['overwrite'] ?? false,
-            elementValueSet: json['elementValueSet'] ?? false,
-            submittable: SubmittableMeta.fromJson(json['submittable']),
-            lazyUpdate: json['lazyUpdate'] ?? false,
-            current: json['current'] ?? false,
-            mode: fromJsonProvidedMode(json['mode']),
-          )
-        : null;
+    if (json == null) {
+      return null;
+    }
+
+    var submittableJson = json['submittable'];
+
+    return ProvidedMeta(
+      value: json['value'],
+      valueSet: ValueSetMeta.fromJson(json['valueSet']),
+      dependencies: (json['dependencies'] as List)?.cast<String>()?.toList(),
+      readOnly: json['readOnly'] ?? false,
+      overwrite: json['overwrite'] ?? false,
+      elementValueSet: json['elementValueSet'] ?? false,
+      // TODO Backward compatibility for submittable as bool. Remove after Sponge upgrade.
+      submittable: submittableJson is bool
+          ? (submittableJson ? SubmittableMeta() : null)
+          : SubmittableMeta.fromJson(submittableJson),
+      lazyUpdate: json['lazyUpdate'] ?? false,
+      current: json['current'] ?? false,
+      mode: fromJsonProvidedMode(json['mode']),
+    );
   }
 
   Map<String, dynamic> toJson() => {

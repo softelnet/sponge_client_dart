@@ -1,6 +1,7 @@
 ## 1.14.0+2 (not released yet)
 * API change: Changed `submittable` type from `bool` to `SubmittableMeta` in the `ProvidedMeta`.
 * Added an `activatable` flag to an action.
+* Added `features` to the request header.
 
 ## 1.14.0+1 (2019-12-21)
 * Added indicatedIndex to PageableList.

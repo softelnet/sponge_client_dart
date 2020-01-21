@@ -118,6 +118,10 @@ class SpongeRestClient {
       }
     }
 
+    if (_configuration.features != null && header.features == null) {
+      header.features = _configuration.features;
+    }
+
     return request;
   }
 

@@ -99,6 +99,9 @@ class Features {
   static const PROVIDE_VALUE_COUNT = 'count';
   static const PROVIDE_VALUE_INDICATED_INDEX = 'indicatedIndex';
 
+  static const String REQUEST_CHANNEL = 'channel';
+  static const String REQUEST_LANGUAGE = 'language';
+
   static String getCharacteristic(Map<String, Object> features) {
     var characteristic = features[TYPE_CHARACTERISTIC];
 

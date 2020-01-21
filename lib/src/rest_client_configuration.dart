@@ -27,6 +27,7 @@ class SpongeRestClientConfiguration {
     this.useEventTypeCache = true,
     this.eventTypeCacheMaxSize = -1,
     this.throwExceptionOnErrorResponse = true,
+    this.features,
   });
 
   /// The service URL (reqired).
@@ -70,6 +71,9 @@ class SpongeRestClientConfiguration {
   /// Defaults to `true`.
   /// Setting this value to `false` makes sense only when using the client API methods `*ByRequest()`.
   bool throwExceptionOnErrorResponse;
+
+  /// The request header features.
+  Map<String, Object> features;
 
   /// Returns true if the connection URL is HTTPS.
   bool get secure => url != null && url.toLowerCase().startsWith('https');

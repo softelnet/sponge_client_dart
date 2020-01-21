@@ -23,6 +23,7 @@ class RequestHeader {
     this.username,
     this.password,
     this.authToken,
+    this.features,
   });
 
   /// The request id (optional).
@@ -37,12 +38,16 @@ class RequestHeader {
   /// The authentication token (optional).
   String authToken;
 
+  /// The request features (optional).
+  Map<String, Object> features;
+
   Map<String, dynamic> toJson() {
     return {
       'id': id,
       'username': username,
       'password': password,
       'authToken': authToken,
+      'features': features,
     };
   }
 }

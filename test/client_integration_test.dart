@@ -1341,7 +1341,7 @@ void main() {
       expect(
           normalizeJson(requestStringList[0]),
           equals(
-              '{"header":{"id":null,"username":null,"password":null,"authToken":null}}'));
+              '{"header":{"id":null,"username":null,"password":null,"authToken":null,"features":null}}'));
       expect(
           normalizeJson(responseStringList[0]),
           matches(
@@ -1373,7 +1373,7 @@ void main() {
       expect(
           normalizeJson(actualRequestString),
           equals(
-              '{"header":{"id":null,"username":null,"password":null,"authToken":null}}'));
+              '{"header":{"id":null,"username":null,"password":null,"authToken":null,"features":null}}'));
       expect(
           normalizeJson(actualResponseString),
           matches(

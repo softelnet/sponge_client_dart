@@ -111,8 +111,6 @@ class ProvidedMeta {
       return null;
     }
 
-    var submittableJson = json['submittable'];
-
     return ProvidedMeta(
       value: json['value'],
       valueSet: ValueSetMeta.fromJson(json['valueSet']),
@@ -120,10 +118,7 @@ class ProvidedMeta {
       readOnly: json['readOnly'] ?? false,
       overwrite: json['overwrite'] ?? false,
       elementValueSet: json['elementValueSet'] ?? false,
-      // TODO Backward compatibility for submittable as bool. Remove after Sponge upgrade.
-      submittable: submittableJson is bool
-          ? (submittableJson ? SubmittableMeta() : null)
-          : SubmittableMeta.fromJson(submittableJson),
+      submittable: SubmittableMeta.fromJson(json['submittable']),
       lazyUpdate: json['lazyUpdate'] ?? false,
       current: json['current'] ?? false,
       mode: fromJsonProvidedMode(json['mode']),

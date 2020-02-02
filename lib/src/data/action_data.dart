@@ -194,6 +194,12 @@ class ActionData {
           type.provided.mode == ProvidedMode.OPTIONAL)
       .map((type) => type.name)
       .toList();
+
+  bool get hasCacheableArgs =>
+      actionMeta.features[Features.CACHEABLE_ARGS] ?? true;
+
+  bool get hasCacheableContextArgs => hasCacheableArgs &&
+      (actionMeta.features[Features.CACHEABLE_CONTEXT_ARGS] ?? false);
 }
 
 class _ActionArgsMap extends MapBase<String, dynamic> {

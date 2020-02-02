@@ -73,6 +73,9 @@ class Features {
 
   static const CONTEXT_ACTIONS = 'contextActions';
 
+  static const CACHEABLE_ARGS = 'cacheableArgs';
+  static const CACHEABLE_CONTEXT_ARGS = 'cacheableContextArgs';
+
   // Type features for ListType in action forms.
   static const SUB_ACTION_CREATE_ACTION = 'createAction';
   static const SUB_ACTION_READ_ACTION = 'readAction';

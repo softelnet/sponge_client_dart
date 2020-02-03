@@ -19,7 +19,6 @@ abstract class SpongeClientConstants {
   static const int API_VERSION = 1;
   static const String CONTENT_TYPE_JSON = 'application/json;charset=utf-8';
   static const int DEFAULT_PORT = 1836;
-  static const String DEFAULT_PATH = 'sponge.json/v$API_VERSION';
 
   static const String OPERATION_VERSION = 'version';
   static const String OPERATION_FEATURES = 'features';

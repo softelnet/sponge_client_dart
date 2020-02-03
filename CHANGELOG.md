@@ -2,6 +2,7 @@
 * API change: Changed `submittable` type from `bool` to `SubmittableMeta` in the `ProvidedMeta`.
 * Added an `activatable` flag to an action.
 * Added `features` to the request header.
+* The default REST API path is now empty. The previous value was `sponge.json/v1`.
 
 ## 1.14.0+1 (2019-12-21)
 * Added indicatedIndex to PageableList.

@@ -17,7 +17,7 @@ import 'package:sponge_client_dart/sponge_client_dart.dart';
 void main() async {
   // Create a new client for an anonymous user.
   var client = SpongeRestClient(
-      SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1'));
+      SpongeRestClientConfiguration('http://localhost:8888'));
 
   // Get the Sponge server version.
   var version = await client.getVersion();
@@ -38,7 +38,7 @@ void main() async {
 
   // Create a new client for a named user.
   client = SpongeRestClient(
-    SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1')
+    SpongeRestClientConfiguration('http://localhost:8888')
       ..username = 'john'
       ..password = 'password',
   );

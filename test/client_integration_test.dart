@@ -47,7 +47,7 @@ void main() {
   configLogger();
 
   Future<SpongeRestClient> getClient() async => SpongeRestClient(
-      SpongeRestClientConfiguration('http://localhost:8888/sponge.json/v1'));
+      SpongeRestClientConfiguration('http://localhost:8888'));
 
   Future<SpongeRestClient> getGuestRestClient() async => await getClient()
     ..configuration.username = 'joe'

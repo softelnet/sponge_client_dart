@@ -22,6 +22,9 @@ class Features {
   static const REFRESHABLE = 'refreshable';
 
   static const ICON = 'icon';
+  static const ICON_COLOR = 'iconColor';
+  static const ICON_WIDTH = 'iconWidth';
+  static const ICON_HEIGHT = 'iconHeight';
 
   static const WIDGET = 'widget';
   static const GROUP = 'group';
@@ -101,6 +104,9 @@ class Features {
   static const PROVIDE_VALUE_LIMIT = 'limit';
   static const PROVIDE_VALUE_COUNT = 'count';
   static const PROVIDE_VALUE_INDICATED_INDEX = 'indicatedIndex';
+
+  static const GEO_MAP = 'geoMap';
+  static const GEO_POSITION = 'geoPosition';
 
   static const String REQUEST_CHANNEL = 'channel';
   static const String REQUEST_LANGUAGE = 'language';

@@ -22,6 +22,7 @@ export 'src/exception.dart';
 export 'src/features.dart';
 export 'src/listener.dart';
 export 'src/meta.dart';
+export 'src/model/geo_model.dart';
 export 'src/request.dart';
 export 'src/response.dart';
 export 'src/rest_client.dart';

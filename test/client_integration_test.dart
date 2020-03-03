@@ -46,8 +46,8 @@ import 'test_utils.dart';
 void main() {
   configLogger();
 
-  Future<SpongeRestClient> getClient() async => SpongeRestClient(
-      SpongeRestClientConfiguration('http://localhost:8888'));
+  Future<SpongeRestClient> getClient() async =>
+      SpongeRestClient(SpongeRestClientConfiguration('http://localhost:8888'));
 
   Future<SpongeRestClient> getGuestRestClient() async => await getClient()
     ..configuration.username = 'joe'
@@ -85,7 +85,9 @@ void main() {
     test('testFeatures', () async {
       var client = await getClient();
       var features = await client.getFeatures();
-      expect(features.length, equals(1));
+      expect(features.length, equals(2));
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_VERSION],
+          equals(await client.getVersion()));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
           isTrue);
     });

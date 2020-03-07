@@ -37,16 +37,22 @@ class GeoLayer {
   GeoLayer({
     @required this.urlTemplate,
     Map<String, String> options,
-  }) : options = options ?? {};
+    Map<String, Object> features,
+  })  : options = options ?? {},
+        features = features ?? {};
 
   String urlTemplate;
   Map<String, String> options;
+
+  /// The geo layer features as a map of names to values.
+  final Map<String, Object> features;
 
   factory GeoLayer.fromJson(Map<String, dynamic> json) => json != null
       ? GeoLayer(
           urlTemplate: json['urlTemplate'],
           options: (json['options'] as Map)
               ?.map((name, valueJson) => MapEntry(name, valueJson?.toString())),
+          features: Map.of(json['features'] as Map ?? {}),
         )
       : null;
   // TODO toJson
@@ -60,7 +66,9 @@ class GeoMap {
     @required this.maxZoom,
     @required this.crs,
     List<GeoLayer> layers,
-  }) : layers = layers ?? [];
+    Map<String, Object> features,
+  })  : layers = layers ?? [],
+        features = features ?? {};
 
   GeoPosition center;
   double zoom;
@@ -72,6 +80,9 @@ class GeoMap {
 
   List<GeoLayer> layers;
 
+  /// The geo map features as a map of names to values.
+  final Map<String, Object> features;
+
   factory GeoMap.fromJson(Map<String, dynamic> json) => json != null
       ? GeoMap(
           center: GeoPosition.fromJson(json['center']),
@@ -82,6 +93,7 @@ class GeoMap {
           layers: (json['layers'] as List)
               ?.map((layer) => GeoLayer.fromJson(layer))
               ?.toList(),
+          features: Map.of(json['features'] as Map ?? {}),
         )
       : null;
   // TODO toJson

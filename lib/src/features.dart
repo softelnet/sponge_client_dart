@@ -107,6 +107,7 @@ class Features {
 
   static const GEO_MAP = 'geoMap';
   static const GEO_POSITION = 'geoPosition';
+  static const GEO_ATTRIBUTION = 'attribution';
 
   static const String REQUEST_CHANNEL = 'channel';
   static const String REQUEST_LANGUAGE = 'language';

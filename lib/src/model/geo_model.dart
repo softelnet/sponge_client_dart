@@ -36,12 +36,15 @@ class GeoPosition {
 class GeoLayer {
   GeoLayer({
     @required this.urlTemplate,
+    List<String> subdomains,
     Map<String, String> options,
     Map<String, Object> features,
-  })  : options = options ?? {},
+  })  : subdomains = subdomains ?? [],
+        options = options ?? {},
         features = features ?? {};
 
   String urlTemplate;
+  List<String> subdomains;
   Map<String, String> options;
 
   /// The geo layer features as a map of names to values.
@@ -50,6 +53,7 @@ class GeoLayer {
   factory GeoLayer.fromJson(Map<String, dynamic> json) => json != null
       ? GeoLayer(
           urlTemplate: json['urlTemplate'],
+          subdomains: List.from(json['subdomains'] ?? []),
           options: (json['options'] as Map)
               ?.map((name, valueJson) => MapEntry(name, valueJson?.toString())),
           features: Map.of(json['features'] as Map ?? {}),

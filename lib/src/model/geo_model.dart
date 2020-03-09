@@ -30,7 +30,10 @@ class GeoPosition {
         )
       : null;
 
-  // TODO toJson
+  Map<String, dynamic> toJson() => {
+        'latitude': latitude,
+        'longitude': longitude,
+      };
 }
 
 class GeoLayer {
@@ -68,7 +71,6 @@ class GeoLayer {
           features: Map.of(json['features'] as Map ?? {}),
         )
       : null;
-  // TODO toJson
 }
 
 class GeoMap {
@@ -109,5 +111,4 @@ class GeoMap {
           features: Map.of(json['features'] as Map ?? {}),
         )
       : null;
-  // TODO toJson
 }

@@ -36,6 +36,9 @@ class GeoPosition {
 class GeoLayer {
   GeoLayer({
     @required this.urlTemplate,
+    this.name,
+    this.label,
+    this.description,
     List<String> subdomains,
     Map<String, String> options,
     Map<String, Object> features,
@@ -44,6 +47,9 @@ class GeoLayer {
         features = features ?? {};
 
   String urlTemplate;
+  String name;
+  String label;
+  String description;
   List<String> subdomains;
   Map<String, String> options;
 
@@ -53,6 +59,9 @@ class GeoLayer {
   factory GeoLayer.fromJson(Map<String, dynamic> json) => json != null
       ? GeoLayer(
           urlTemplate: json['urlTemplate'],
+          name: json['name'],
+          label: json['label'],
+          description: json['description'],
           subdomains: List.from(json['subdomains'] ?? []),
           options: (json['options'] as Map)
               ?.map((name, valueJson) => MapEntry(name, valueJson?.toString())),

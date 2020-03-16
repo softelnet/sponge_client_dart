@@ -13,6 +13,7 @@
 // limitations under the License.
 
 import 'package:meta/meta.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 
 class GeoPosition {
   GeoPosition({
@@ -36,41 +37,113 @@ class GeoPosition {
       };
 }
 
-class GeoLayer {
-  GeoLayer({
-    @required this.urlTemplate,
+enum GeoLayerType { TILE, MARKER }
+
+abstract class GeoLayer {
+  GeoLayer(
+    this.type, {
     this.name,
     this.label,
     this.description,
+    Map<String, Object> features,
+  }) : features = features ?? {};
+
+  final GeoLayerType type;
+  String name;
+  String label;
+  String description;
+
+  /// The geo layer features as a map of names to values.
+  final Map<String, Object> features;
+
+  @protected
+  static GeoLayer fromJsonBase(GeoLayer layer, Map<String, dynamic> json) {
+    layer.name = json['name'];
+    layer.label = json['label'];
+    layer.description = json['description'];
+    (json['features'] as Map)
+        ?.forEach((name, value) => layer.features[name] = value);
+    return layer;
+  }
+
+  static GeoLayer _geoLayerFromJson(Map<String, dynamic> json) {
+    var type = GeoLayer.fromJsonGeoLayerType(json['type']);
+    switch (type) {
+      case GeoLayerType.TILE:
+        return GeoTileLayer.fromJson(json);
+      case GeoLayerType.MARKER:
+        return GeoMarkerLayer.fromJson(json);
+    }
+
+    throw Exception('Unsupported geo layer type $type');
+  }
+
+  factory GeoLayer.fromJson(Map<String, dynamic> json) =>
+      json != null ? _geoLayerFromJson(json) : null;
+
+  static GeoLayerType fromJsonGeoLayerType(String jsonGeoLayerType) {
+    var type = GeoLayerType.values.firstWhere(
+        (t) => _getGeoLayerTypeValue(t) == jsonGeoLayerType,
+        orElse: () => null);
+    return Validate.notNull(
+        type, 'Unsupported geo layer type $jsonGeoLayerType');
+  }
+
+  static String _getGeoLayerTypeValue(GeoLayerType type) =>
+      type.toString().split('.')[1];
+}
+
+class GeoTileLayer extends GeoLayer {
+  GeoTileLayer({
+    @required this.urlTemplate,
+    String name,
+    String label,
+    String description,
     List<String> subdomains,
     Map<String, String> options,
     Map<String, Object> features,
   })  : subdomains = subdomains ?? [],
         options = options ?? {},
-        features = features ?? {};
+        super(
+          GeoLayerType.TILE,
+          name: name,
+          label: label,
+          description: description,
+          features: features,
+        );
 
   String urlTemplate;
-  String name;
-  String label;
-  String description;
   List<String> subdomains;
   Map<String, String> options;
 
-  /// The geo layer features as a map of names to values.
-  final Map<String, Object> features;
-
-  factory GeoLayer.fromJson(Map<String, dynamic> json) => json != null
-      ? GeoLayer(
-          urlTemplate: json['urlTemplate'],
-          name: json['name'],
-          label: json['label'],
-          description: json['description'],
-          subdomains: List.from(json['subdomains'] ?? []),
-          options: (json['options'] as Map)
-              ?.map((name, valueJson) => MapEntry(name, valueJson?.toString())),
-          features: Map.of(json['features'] as Map ?? {}),
-        )
+  factory GeoTileLayer.fromJson(Map<String, dynamic> json) => json != null
+      ? GeoLayer.fromJsonBase(
+          GeoTileLayer(
+            urlTemplate: json['urlTemplate'],
+            subdomains: List.from(json['subdomains'] ?? []),
+            options: (json['options'] as Map)?.map(
+                (name, valueJson) => MapEntry(name, valueJson?.toString())),
+          ),
+          json)
       : null;
+}
+
+class GeoMarkerLayer extends GeoLayer {
+  GeoMarkerLayer({
+    String name,
+    String label,
+    String description,
+    Map<String, Object> features,
+  }) : super(
+          GeoLayerType.MARKER,
+          name: name,
+          label: label,
+          description: description,
+          features: features,
+        );
+
+  factory GeoMarkerLayer.fromJson(Map<String, dynamic> json) =>
+      json != null ? GeoLayer.fromJsonBase(GeoMarkerLayer(), json) : null;
 }
 
 class GeoMap {

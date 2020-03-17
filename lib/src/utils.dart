@@ -86,7 +86,7 @@ class SpongeUtils {
       ActionMeta actionMeta, void Function(QualifiedDataType _) onType,
       {bool namedOnly = true}) {
     actionMeta.args?.forEach((argType) => DataTypeUtils.traverseDataType(
-        QualifiedDataType(argType.name, argType), onType,
+        QualifiedDataType(argType, path: argType.name), onType,
         namedOnly: namedOnly));
   }
 }

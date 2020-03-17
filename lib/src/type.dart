@@ -184,13 +184,17 @@ class DataType<T> {
 
 /// A qualified data type.
 class QualifiedDataType<T> {
-  QualifiedDataType(this.path, this.type, {this.isRoot = true});
-
-  /// The qualified name path. Can be `null` for the root type or a path that has at least one element unnamed.
-  final String path;
+  QualifiedDataType(
+    this.type, {
+    this.path,
+    this.isRoot = true,
+  });
 
   /// The type.
   final DataType<T> type;
+
+  /// The qualified name path. Can be `null` for the root type or a path that has at least one element unnamed.
+  final String path;
 
   /// The flag that informs if this qualified type is a root.
   bool isRoot;
@@ -201,11 +205,12 @@ class QualifiedDataType<T> {
         : (isRoot ? '' : null);
 
     return QualifiedDataType(
-        parentPath != null && childType.name != null
-            ? parentPath + childType.name
-            : null,
-        childType,
-        isRoot: false);
+      childType,
+      path: parentPath != null && childType.name != null
+          ? parentPath + childType.name
+          : null,
+      isRoot: false,
+    );
   }
 }
 

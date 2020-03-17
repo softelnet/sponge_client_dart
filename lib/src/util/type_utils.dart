@@ -157,7 +157,7 @@ class DataTypeUtils {
     var result = true;
 
     // TODO Traversing all data type tree is not necessary.
-    traverseValue(QualifiedDataType(null, type), value, (_qType, _value) {
+    traverseValue(QualifiedDataType(type), value, (_qType, _value) {
       if (!_qType.type.nullable && _value == null) {
         result = false;
       }
@@ -170,7 +170,7 @@ class DataTypeUtils {
     var result = false;
 
     // Traverses record and collection sub-types.
-    traverseDataType(QualifiedDataType(null, type), (QualifiedDataType qType) {
+    traverseDataType(QualifiedDataType(type), (QualifiedDataType qType) {
       if (qType.type.kind == subTypeKind) {
         result = true;
       }
@@ -205,7 +205,7 @@ class DataTypeUtils {
               'Unable to resolve a dynamic type from a dynamic value');
 
           traverseDataType(
-            QualifiedDataType(qType.path, (value as DynamicValue).type),
+            QualifiedDataType((value as DynamicValue).type, path: qType.path),
             onType,
             namedOnly: namedOnly,
             traverseCollections: traverseCollections,
@@ -430,7 +430,7 @@ class DataTypeUtils {
   static List<DataType> getTypes(DataType type, {dynamic value}) {
     var types = <DataType>[];
     DataTypeUtils.traverseDataType(
-        QualifiedDataType(null, type), (qType) => types.add(qType.type),
+        QualifiedDataType(type), (qType) => types.add(qType.type),
         namedOnly: false, traverseCollections: true, value: value);
 
     return types;
@@ -440,7 +440,7 @@ class DataTypeUtils {
       {dynamic value}) {
     var qTypes = <QualifiedDataType>[];
     DataTypeUtils.traverseDataType(
-        QualifiedDataType(null, type), (qType) => qTypes.add(qType),
+        QualifiedDataType(type), (qType) => qTypes.add(qType),
         namedOnly: false, traverseCollections: true, value: value);
 
     return qTypes;
@@ -454,5 +454,18 @@ class DataTypeUtils {
     return paths.length > 1
         ? paths.any((p) => getSubType(rootType, p, null) is DynamicType)
         : false;
+  }
+
+  static Map<String, Object> mergeFeatures(DataType type, dynamic value) {
+    var features = <String, Object>{};
+
+    // Applying features from a data type.
+    features.addAll(type.features ?? {});
+
+    // Applying features from an annotated value.
+    features.addAll(
+        type.annotated && value is AnnotatedValue ? value.features : {});
+
+    return features;
   }
 }

@@ -170,7 +170,7 @@ class ActionData {
   void traverseArguments(void Function(QualifiedDataType _) onType,
       {bool namedOnly = true}) {
     DataTypeUtils.traverseDataType(
-      QualifiedDataType(null, argsAsRecordType),
+      QualifiedDataType(argsAsRecordType),
       onType,
       namedOnly: namedOnly,
       value: argsAsRecord,

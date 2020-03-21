@@ -16,7 +16,7 @@ import 'dart:collection';
 
 import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/data/pageable_list.dart';
-import 'package:sponge_client_dart/src/features.dart';
+import 'package:sponge_client_dart/src/features/features.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';

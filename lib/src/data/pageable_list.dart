@@ -15,7 +15,7 @@
 import 'dart:collection';
 
 import 'package:meta/meta.dart';
-import 'package:sponge_client_dart/src/features.dart';
+import 'package:sponge_client_dart/src/features/features.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 

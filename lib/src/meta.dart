@@ -197,7 +197,7 @@ class CategoryMeta {
   String description;
 
   /// The category features.
-  final Map<String, Object> features;
+  Map<String, Object> features;
 
   factory CategoryMeta.fromJson(Map<String, dynamic> json) {
     return json != null
@@ -245,7 +245,7 @@ class ActionMeta {
   final CategoryMeta category;
 
   /// The action features.
-  final Map<String, Object> features;
+  Map<String, Object> features;
 
   /// The action argument types (optional).
   final List<DataType> args;

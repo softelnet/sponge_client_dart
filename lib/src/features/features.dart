@@ -12,6 +12,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'package:sponge_client_dart/src/model/geo_model.dart';
+import 'package:sponge_client_dart/src/model/ui_model.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 
 class Features {
@@ -22,9 +24,6 @@ class Features {
   static const REFRESHABLE = 'refreshable';
 
   static const ICON = 'icon';
-  static const ICON_COLOR = 'iconColor';
-  static const ICON_WIDTH = 'iconWidth';
-  static const ICON_HEIGHT = 'iconHeight';
 
   static const WIDGET = 'widget';
   static const GROUP = 'group';
@@ -158,6 +157,15 @@ class Features {
 
     return [];
   }
+
+  static IconInfo getIcon(Map<String, Object> features) =>
+      features[ICON] as IconInfo;
+
+  static GeoMap getGeoMap(Map<String, Object> features) =>
+      features[GEO_MAP] as GeoMap;
+
+  static GeoPosition getGeoPosition(Map<String, Object> features) =>
+      features[GEO_POSITION] as GeoPosition;
 }
 
 class Formats {

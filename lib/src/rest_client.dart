@@ -20,6 +20,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/cache.dart';
 import 'package:sponge_client_dart/src/context.dart';
+import 'package:sponge_client_dart/src/features/feature_converter.dart';
 import 'package:sponge_client_dart/src/rest_client_configuration.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/exception.dart';
@@ -42,9 +43,13 @@ class SpongeRestClient {
   SpongeRestClient(
     this._configuration, {
     TypeConverter typeConverter,
-  }) : _typeConverter = typeConverter ?? DefaultTypeConverter() {
+    FeatureConverter featureConverter,
+  })  : _typeConverter = typeConverter ?? DefaultTypeConverter(),
+        _featureConverter = featureConverter ?? DefaultFeatureConverter() {
     _actionMetaCache = _createActionMetaCache();
     _eventTypeCache = _createEventTypeCache();
+
+    _typeConverter.featureConverter ??= _featureConverter;
   }
 
   static final Logger _logger = Logger('SpongeRestClient');
@@ -64,10 +69,14 @@ class SpongeRestClient {
   MapCache<String, ActionMeta> _actionMetaCache;
   MapCache<String, RecordType> _eventTypeCache;
   Map<String, dynamic> _featuresCache;
+
   final TypeConverter _typeConverter;
+  final FeatureConverter _featureConverter;
 
   /// The type converter.
   TypeConverter get typeConverter => _typeConverter;
+
+  FeatureConverter get featureConverter => _featureConverter;
 
   final Lock _lock = Lock(reentrant: true);
 
@@ -434,6 +443,13 @@ class SpongeRestClient {
     }
 
     actionMeta.result = await _unmarshalDataType(actionMeta.result);
+
+    actionMeta.features =
+        await FeaturesUtils.unmarshal(featureConverter, actionMeta.features);
+    if (actionMeta.category != null) {
+      actionMeta.category.features = await FeaturesUtils.unmarshal(
+          featureConverter, actionMeta.category.features);
+    }
   }
 
   Future<void> _unmarshalProvidedActionArgValues(

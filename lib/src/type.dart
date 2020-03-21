@@ -88,7 +88,7 @@ class DataType<T> {
   bool nullable;
 
   /// The data type features as a map of names to values.
-  final Map<String, Object> features;
+  Map<String, Object> features;
 
   /// The flag specifying if this type is optional. Defaults to `false`.
   bool optional;

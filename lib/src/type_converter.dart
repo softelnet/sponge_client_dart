@@ -16,6 +16,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:quiver/check.dart';
+import 'package:sponge_client_dart/src/features/feature_converter.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:sponge_client_dart/src/utils.dart';
@@ -30,6 +31,8 @@ import 'package:sponge_client_dart/src/type_value.dart';
 abstract class TypeConverter {
   static final Logger _logger = Logger('TypeConverter');
   final Map<DataTypeKind, UnitTypeConverter> _registry = {};
+
+  FeatureConverter featureConverter;
 
   /// Marshals the [value] as [type].
   Future<dynamic> marshal<T, D extends DataType>(D type, T value) async {
@@ -47,7 +50,7 @@ abstract class TypeConverter {
             : null,
         valueLabel: value.valueLabel,
         valueDescription: value.valueDescription,
-        features: value.features,
+        features: await FeaturesUtils.marshal(featureConverter, value.features),
         typeLabel: value.typeLabel,
         typeDescription: value.typeDescription,
       );
@@ -72,6 +75,9 @@ abstract class TypeConverter {
             .unmarshal(this, type, annotatedValue.value);
       }
 
+      annotatedValue.features = await FeaturesUtils.unmarshal(
+          featureConverter, annotatedValue.features);
+
       return annotatedValue;
     }
 
@@ -81,7 +87,7 @@ abstract class TypeConverter {
   /// Registers the unit type converter.
   void register(UnitTypeConverter unitConverter) {
     _logger.finest(
-        'Registering ${unitConverter.typeKind} converter: $unitConverter');
+        'Registering ${unitConverter.typeKind} type converter: $unitConverter');
     _registry[unitConverter.typeKind] = unitConverter;
   }
 
@@ -237,6 +243,7 @@ class DynamicTypeUnitConverter
   @override
   Future<dynamic> marshal(TypeConverter converter, DynamicType type,
           DynamicValue value) async =>
+      // TODO Marshal the data type in the DynamicValue as well.
       DynamicValue(await converter.marshal(value.type, value.value), value.type)
           .toJson();
 
@@ -244,6 +251,9 @@ class DynamicTypeUnitConverter
   Future<DynamicValue> unmarshal(
       TypeConverter converter, DynamicType type, dynamic value) async {
     var result = DynamicValue.fromJson(value);
+
+    // TODO Unmarshal the data type in the DynamicValue as well.
+
     result.value = await converter.unmarshal(result.type, result.value);
     return result;
   }
@@ -426,9 +436,9 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
       TypeConverter converter, TypeType type, DataType value) async {
     // Recursively marshal default values.
     // TODO The value should be cloned.
-    for (var t in DataTypeUtils.getTypes(value)) {
-      t.defaultValue = await converter.marshal(t, t.defaultValue);
-    }
+    // for (var t in DataTypeUtils.getTypes(value)) {
+    //   t.defaultValue = await converter.marshal(t, t.defaultValue);
+    // }
 
     return value;
   }
@@ -438,9 +448,12 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
       TypeConverter converter, TypeType type, dynamic value) async {
     var result = value is DataType ? value : DataType.fromJson(value);
 
-    // Recursively unmarshal default values.
+    // Recursively unmarshal default values and features.
     for (var t in DataTypeUtils.getTypes(result)) {
       t.defaultValue = await converter.unmarshal(t, t.defaultValue);
+
+      t.features =
+          await FeaturesUtils.unmarshal(converter.featureConverter, t.features);
     }
 
     return result;

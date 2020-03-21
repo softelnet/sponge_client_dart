@@ -54,7 +54,7 @@ abstract class GeoLayer {
   String description;
 
   /// The geo layer features as a map of names to values.
-  final Map<String, Object> features;
+ Map<String, Object> features;
 
   @protected
   static GeoLayer fromJsonBase(GeoLayer layer, Map<String, dynamic> json) {
@@ -169,7 +169,7 @@ class GeoMap {
   List<GeoLayer> layers;
 
   /// The geo map features as a map of names to values.
-  final Map<String, Object> features;
+ Map<String, Object> features;
 
   factory GeoMap.fromJson(Map<String, dynamic> json) => json != null
       ? GeoMap(

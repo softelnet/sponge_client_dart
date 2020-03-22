@@ -698,6 +698,9 @@ class SpongeRestClient {
         if (entry.args != null) {
           entry.args = await _marshalActionCallArgs(actionMeta, entry.args);
         }
+
+        entry.features =
+            await FeaturesUtils.marshal(featureConverter, entry.features);
       }
     }
 
@@ -724,6 +727,9 @@ class SpongeRestClient {
       return List.filled(entries.length, true);
     }
 
+    // Clone all entries in order to modify their copies later.
+    entries = entries.map((entry) => entry?.clone()).toList();
+
     return (await isActionActiveByRequest(
             IsActionActiveRequest(IsActionActiveRequestBody(entries: entries))))
         .body
@@ -740,6 +746,10 @@ class SpongeRestClient {
     request.body.current = await _marshalAuxiliaryActionArgsCurrent(
         actionMeta, request.body.current, request.body.dynamicTypes);
 
+    // Clone the features and marshal all features.
+    request.body.features =
+        await _marshalProvideArgsFeaturesMap(request.body.features);
+
     var response = await execute(
         SpongeClientConstants.OPERATION_PROVIDE_ACTION_ARGS,
         request,
@@ -752,6 +762,21 @@ class SpongeRestClient {
     }
 
     return response;
+  }
+
+  Future<Map<String, Map<String, Object>>> _marshalProvideArgsFeaturesMap(
+      Map<String, Map<String, Object>> featuresMap) async {
+    if (featuresMap == null) {
+      return null;
+    }
+
+    var result = <String, Map<String, Object>>{};
+    for (var argName in featuresMap.keys) {
+      result[argName] =
+          await FeaturesUtils.unmarshal(featureConverter, featuresMap[argName]);
+    }
+
+    return result;
   }
 
   /// Submits action arguments to the server and/or fetches action arguments from the server.

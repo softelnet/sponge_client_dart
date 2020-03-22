@@ -117,7 +117,7 @@ class ActionData {
     }
   }
 
-  ActionData copy({ActionData prototype}) =>
+  ActionData clone({ActionData prototype}) =>
       (prototype ?? ActionData(actionMeta))
         ..args = DataTypeUtils.cloneValue(args)
         .._pageableLists = _pageableLists

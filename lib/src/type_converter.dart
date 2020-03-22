@@ -243,8 +243,9 @@ class DynamicTypeUnitConverter
   @override
   Future<dynamic> marshal(TypeConverter converter, DynamicType type,
           DynamicValue value) async =>
-      // TODO Marshal the data type in the DynamicValue as well.
-      DynamicValue(await converter.marshal(value.type, value.value), value.type)
+      // Marshal the data type in the DynamicValue as well.
+      DynamicValue(await converter.marshal(value.type, value.value),
+              await converter.marshal(TypeType(), value.type))
           .toJson();
 
   @override
@@ -252,9 +253,11 @@ class DynamicTypeUnitConverter
       TypeConverter converter, DynamicType type, dynamic value) async {
     var result = DynamicValue.fromJson(value);
 
-    // TODO Unmarshal the data type in the DynamicValue as well.
-
     result.value = await converter.unmarshal(result.type, result.value);
+
+    // Unmarshal the data type in the DynamicValue as well.
+    result.type = await converter.unmarshal(TypeType(), result.type);
+
     return result;
   }
 }
@@ -434,13 +437,18 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
   @override
   Future<dynamic> marshal(
       TypeConverter converter, TypeType type, DataType value) async {
-    // Recursively marshal default values.
-    // TODO The value should be cloned.
-    // for (var t in DataTypeUtils.getTypes(value)) {
-    //   t.defaultValue = await converter.marshal(t, t.defaultValue);
-    // }
+    // It's very important to clone the instance because the copy will be modified.
+    var result = value.clone();
 
-    return value;
+    // Recursively marshal default values and features.
+    for (var t in DataTypeUtils.getTypes(result)) {
+      t.defaultValue = await converter.marshal(t, t.defaultValue);
+
+      t.features =
+          await FeaturesUtils.marshal(converter.featureConverter, t.features);
+    }
+
+    return result;
   }
 
   @override

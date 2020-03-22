@@ -255,6 +255,15 @@ class IsActionActiveEntry implements ActionExecutionInfo {
         'features': features,
         'qualifiedVersion': qualifiedVersion,
       };
+
+  IsActionActiveEntry clone() => IsActionActiveEntry(
+        name: name,
+        contextValue: contextValue,
+        contextType: contextType,
+        args: args?.toList(),
+        features: features != null ? Map.of(features) : null,
+        qualifiedVersion: qualifiedVersion,
+      );
 }
 
 /// An action active request body.

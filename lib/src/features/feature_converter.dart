@@ -87,8 +87,8 @@ abstract class FeatureConverter {
 
   /// Registers the unit feature converter.
   void register(UnitFeatureConverter unitConverter) {
-    _logger
-        .finest('Registering ${unitConverter.name} feature converter: $unitConverter');
+    _logger.finest(
+        'Registering ${unitConverter.name} feature converter: $unitConverter');
     _registry[unitConverter.name] = unitConverter;
   }
 
@@ -171,15 +171,12 @@ class GeoMapFeatureUnitConverter extends UnitFeatureConverter {
   Future<dynamic> unmarshal(FeatureConverter converter, dynamic value) async {
     var geoMap = GeoMap.fromJson(value);
 
-    if (geoMap != null) {
-      geoMap.features =
-          await FeaturesUtils.unmarshal(converter, geoMap.features);
+    geoMap.features = await FeaturesUtils.unmarshal(converter, geoMap.features);
 
-      if (geoMap.layers != null) {
-        for (var layer in geoMap.layers) {
-          layer.features =
-              await FeaturesUtils.unmarshal(converter, layer.features);
-        }
+    if (geoMap.layers != null) {
+      for (var layer in geoMap.layers) {
+        layer.features =
+            await FeaturesUtils.unmarshal(converter, layer.features);
       }
     }
 

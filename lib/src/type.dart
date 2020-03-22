@@ -18,6 +18,7 @@ import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
+import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 
 /// A data type kind.
@@ -40,7 +41,7 @@ enum DataTypeKind {
 }
 
 /// A data type. Used for example in action arguments metadata.
-class DataType<T> {
+abstract class DataType<T> {
   DataType(
     this.kind, {
     this.registeredType,
@@ -60,7 +61,7 @@ class DataType<T> {
   static const String FEATURE_FORMAT = 'format';
 
   /// The data type kind.
-  final DataTypeKind kind;
+  DataTypeKind kind;
 
   /// The optional corresponding registered data type name.
   String registeredType;
@@ -180,6 +181,24 @@ class DataType<T> {
         'optional': optional,
         'provided': provided?.toJson(),
       };
+
+  @protected
+  void update(DataType type) {
+    kind = type.kind;
+    registeredType = type.registeredType;
+    name = type.name;
+    label = type.label;
+    description = type.description;
+    annotated = type.annotated;
+    format = type.format;
+    defaultValue = DataTypeUtils.cloneValue(type.defaultValue);
+    nullable = type.nullable;
+    features = type.features != null ? Map.of(type.features) : null;
+    optional = type.optional;
+    provided = type.provided;
+  }
+
+  DataType clone();
 }
 
 /// A qualified data type.
@@ -224,6 +243,9 @@ class AnyType extends DataType<dynamic> {
 
   factory AnyType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(AnyType(), json);
+
+  @override
+  AnyType clone() => AnyType()..update(this);
 }
 
 /// A binary (byte array) type. Provides an optional property `mimeType`.
@@ -244,6 +266,9 @@ class BinaryType extends DataType<Uint8List> {
     ..addAll({
       'mimeType': mimeType,
     });
+
+  @override
+  BinaryType clone() => BinaryType(mimeType)..update(this);
 }
 
 /// A boolean type.
@@ -252,6 +277,9 @@ class BooleanType extends DataType<bool> {
 
   factory BooleanType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(BooleanType(), json);
+
+  @override
+  BooleanType clone() => BooleanType()..update(this);
 }
 
 /// A date/time kind.
@@ -302,6 +330,9 @@ class DateTimeType extends DataType<Uint8List> {
 
   static String _getDateTimeKindValue(DateTimeKind dateTimeKind) =>
       dateTimeKind.toString().split('.')[1];
+
+  @override
+  DateTimeType clone() => DateTimeType(dateTimeKind)..update(this);
 }
 
 /// An dynamic type representing dynamically typed values. A value of this type has to be an instance of `DynamicValue`.
@@ -310,6 +341,9 @@ class DynamicType extends DataType<DynamicValue> {
 
   factory DynamicType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(DynamicType(), json);
+
+  @override
+  DynamicType clone() => DynamicType()..update(this);
 }
 
 /// An integer type (commonly used integer type or long).
@@ -363,6 +397,14 @@ class IntegerType extends DataType<int> {
       'exclusiveMin': exclusiveMin,
       'exclusiveMax': exclusiveMax,
     });
+
+  @override
+  IntegerType clone() => IntegerType(
+        minValue: minValue,
+        maxValue: maxValue,
+        exclusiveMin: exclusiveMin,
+        exclusiveMax: exclusiveMax,
+      )..update(this);
 }
 
 /// A list type. This type requires an `elementType` parameter, which is is a type of list elements.
@@ -387,6 +429,12 @@ class ListType extends CollectionType<List> {
       'elementType': elementType.toJson(),
       'unique': unique,
     });
+
+  @override
+  ListType clone() => ListType(
+        elementType?.clone(),
+        unique: unique,
+      )..update(this);
 }
 
 /// A map type. This type requires two parameters: a type of keys and a type of values in the map.
@@ -410,6 +458,12 @@ class MapType extends CollectionType<Map> {
       'keyType': keyType.toJson(),
       'valueType': valueType.toJson(),
     });
+
+  @override
+  MapType clone() => MapType(
+        keyType?.clone(),
+        valueType?.clone(),
+      )..update(this);
 }
 
 /// A number type, that include both integer and floating-point numbers.
@@ -463,6 +517,14 @@ class NumberType extends DataType<num> {
       'exclusiveMin': exclusiveMin,
       'exclusiveMax': exclusiveMax,
     });
+
+  @override
+  NumberType clone() => NumberType(
+        minValue: minValue,
+        maxValue: maxValue,
+        exclusiveMin: exclusiveMin,
+        exclusiveMax: exclusiveMax,
+      )..update(this);
 }
 
 /// An object. This type requires a class name (typically a Java class name) as a constructor parameter.
@@ -492,27 +554,23 @@ class ObjectType extends DataType<dynamic> {
       'className': className,
       'companionType': companionType?.toJson(),
     });
+
+  @override
+  ObjectType clone() => ObjectType(
+        className,
+        companionType: companionType?.clone(),
+      )..update(this);
 }
 
 /// A record type. This type requires a list of record field types. A value of this type has to be an instance of Map<String, dynamic> with
 /// elements corresponding to the field names and values.
 class RecordType extends DataType<Map<String, dynamic>> {
-  RecordType(
-    this.fields, {
-    this.baseType,
-    this.inheritationApplied = false,
-  }) : super(DataTypeKind.RECORD) {
+  RecordType(this.fields) : super(DataTypeKind.RECORD) {
     _fieldsMap = {for (var field in fields) field.name: field};
   }
 
   /// The field types.
   final List<DataType> fields;
-
-  /// The base record type.
-  final RecordType baseType;
-
-  /// The flag that tells if inheritance has been applied to this type.
-  final bool inheritationApplied;
 
   Map<String, DataType> _fieldsMap;
 
@@ -522,19 +580,22 @@ class RecordType extends DataType<Map<String, dynamic>> {
             (json['fields'] as List)
                 ?.map((arg) => DataType.fromJson(arg))
                 ?.toList(),
-            baseType: DataType.fromJson(json['baseType']),
-            inheritationApplied: json['inheritationApplied'],
           ),
           json);
 
   @override
   Map<String, dynamic> toJson() => super.toJson()
     ..addAll({
-      'fields': fields?.map((field) => field.toJson())?.toList(),
+      'fields': fields?.map((field) => field?.toJson())?.toList(),
     });
 
   DataType getFieldType(String fieldName) =>
       Validate.notNull(_fieldsMap[fieldName], 'Field $fieldName not found');
+
+  @override
+  RecordType clone() => RecordType(
+        fields?.map((field) => field?.clone())?.toList(),
+      )..update(this);
 }
 
 /// A stream type.
@@ -546,6 +607,9 @@ class StreamType extends DataType<dynamic> {
 
   @override
   Map<String, dynamic> toJson() => super.toJson();
+
+  @override
+  StreamType clone() => StreamType()..update(this);
 }
 
 /// A string type.
@@ -581,6 +645,12 @@ class StringType extends DataType<String> {
       'minLength': minLength,
       'maxLength': maxLength,
     });
+
+  @override
+  StringType clone() => StringType(
+        minLength: minLength,
+        maxLength: maxLength,
+      )..update(this);
 }
 
 /// A type representing a data type. A value of this type has to be an instance of `DataType`.
@@ -589,6 +659,9 @@ class TypeType extends DataType<DataType> {
 
   factory TypeType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(TypeType(), json);
+
+  @override
+  TypeType clone() => TypeType()..update(this);
 }
 
 /// A void type that may be used to specify that an action returns no meaningful result.
@@ -597,4 +670,7 @@ class VoidType extends DataType<void> {
 
   factory VoidType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(VoidType(), json);
+
+  @override
+  VoidType clone() => VoidType()..update(this);
 }

@@ -159,13 +159,13 @@ class Features {
   }
 
   static IconInfo getIcon(Map<String, Object> features) =>
-      features[ICON] as IconInfo;
+      features != null ? features[ICON] as IconInfo : null;
 
   static GeoMap getGeoMap(Map<String, Object> features) =>
-      features[GEO_MAP] as GeoMap;
+      features != null ? features[GEO_MAP] as GeoMap : null;
 
   static GeoPosition getGeoPosition(Map<String, Object> features) =>
-      features[GEO_POSITION] as GeoPosition;
+      features != null ? features[GEO_POSITION] as GeoPosition : null;
 }
 
 class Formats {

@@ -2,7 +2,11 @@
 * API change: Changed `submittable` type from `bool` to `SubmittableMeta` in the `ProvidedMeta`.
 * Added an `activatable` flag to an action.
 * Added `features` to the request header.
+* Added support for typed features and feature converters.
+* Added support for event features.
+* Added support for geographical map features.
 * The default REST API path is now empty. The previous value was `sponge.json/v1`.
+* Dependencies upgrade.
 
 ## 1.14.0+1 (2019-12-21)
 * Added indicatedIndex to PageableList.

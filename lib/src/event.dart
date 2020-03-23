@@ -15,6 +15,7 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
+import 'package:sponge_client_dart/src/features/feature_converter.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_converter.dart';
 
@@ -28,7 +29,9 @@ class RemoteEvent {
     this.label,
     this.description,
     Map<String, dynamic> attributes,
-  }) : attributes = attributes ?? {};
+    Map<String, Object> features,
+  })  : attributes = attributes ?? {},
+        features = features ?? {};
 
   String id;
   String name;
@@ -37,6 +40,7 @@ class RemoteEvent {
   String label;
   String description;
   Map<String, dynamic> attributes;
+  Map<String, Object> features;
 
   Future<Map<String, dynamic>> convertToJson(
       RecordType eventType, TypeConverter converter) async {
@@ -50,6 +54,8 @@ class RemoteEvent {
       'attributes': attributes != null
           ? await converter.marshal(eventType, attributes)
           : {},
+      'features':
+          await FeaturesUtils.marshal(converter.featureConverter, features),
     };
   }
 }

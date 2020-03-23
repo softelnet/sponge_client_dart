@@ -188,6 +188,7 @@ class SendEventRequestBody implements RequestBody {
     this.attributes,
     this.label,
     this.description,
+    this.features,
   });
 
   /// The event name.
@@ -202,12 +203,16 @@ class SendEventRequestBody implements RequestBody {
   /// The event description.
   final String description;
 
+  /// The event features (optional).
+  final Map<String, Object> features;
+
   @override
   Map<String, dynamic> toJson() => {
         'name': name,
         'attributes': attributes,
         'label': label,
         'description': description,
+        'features': features,
       };
 }
 

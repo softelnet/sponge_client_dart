@@ -25,6 +25,9 @@ class Features {
 
   static const ICON = 'icon';
 
+  static const COLOR = 'color';
+  static const OPACITY = 'opacity';
+
   static const WIDGET = 'widget';
   static const GROUP = 'group';
 
@@ -107,7 +110,8 @@ class Features {
   static const GEO_MAP = 'geoMap';
   static const GEO_POSITION = 'geoPosition';
   static const GEO_ATTRIBUTION = 'attribution';
-  static const GEO_LATER_NAME = 'geoLayerName';
+  static const GEO_TMS = 'tms';
+  static const GEO_LAYER_NAME = 'geoLayerName';
 
   static const String REQUEST_CHANNEL = 'channel';
   static const String REQUEST_LANGUAGE = 'language';
@@ -128,7 +132,10 @@ class Features {
       features.containsKey(name) ? features[name] : orElse();
 
   static bool getBool(
-      Map<String, Object> features, String name, bool Function() orElse) {
+    Map<String, Object> features,
+    String name, {
+    bool Function() orElse,
+  }) {
     if (!features.containsKey(name)) {
       return orElse();
     }
@@ -138,6 +145,18 @@ class Features {
     Validate.isTrue(value is bool, 'Feature $name should be a boolean');
 
     return value;
+  }
+
+  static double getDouble(
+    Map<String, Object> features,
+    String name, {
+    double Function() orElse,
+  }) {
+    if (!features.containsKey(name)) {
+      return orElse();
+    }
+
+    return (features[name] as num)?.toDouble();
   }
 
   static dynamic findFeature(

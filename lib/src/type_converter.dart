@@ -45,7 +45,7 @@ abstract class TypeConverter {
     if (type.annotated && value is AnnotatedValue) {
       return AnnotatedValue(
         value.value != null
-            ? await _getUnitConverterByType(type)
+            ? await getInternalUnitConverterByType(type)
                 .marshal(this, type, value.value)
             : null,
         valueLabel: value.valueLabel,
@@ -56,7 +56,7 @@ abstract class TypeConverter {
       );
     }
 
-    return await _getUnitConverterByType(type).marshal(this, type, value);
+    return await getInternalUnitConverterByType(type).marshal(this, type, value);
   }
 
   /// Unmarshals the [value] as [type].
@@ -71,7 +71,7 @@ abstract class TypeConverter {
     if (type.annotated && SpongeUtils.isAnnotatedValueMap(value)) {
       var annotatedValue = AnnotatedValue.fromJson(value);
       if (annotatedValue.value != null) {
-        annotatedValue.value = await _getUnitConverterByType(type)
+        annotatedValue.value = await getInternalUnitConverterByType(type)
             .unmarshal(this, type, annotatedValue.value);
       }
 
@@ -81,7 +81,7 @@ abstract class TypeConverter {
       return annotatedValue;
     }
 
-    return await _getUnitConverterByType(type).unmarshal(this, type, value);
+    return await getInternalUnitConverterByType(type).unmarshal(this, type, value);
   }
 
   /// Registers the unit type converter.
@@ -99,11 +99,11 @@ abstract class TypeConverter {
   UnitTypeConverter unregister(DataTypeKind typeKind) =>
       _registry.remove(typeKind);
 
-  UnitTypeConverter<T, D> _getUnitConverterByType<T, D extends DataType>(
+  UnitTypeConverter<T, D> getInternalUnitConverterByType<T, D extends DataType>(
           D type) =>
-      _getUnitConverter(type.kind);
+      getInternalUnitConverter(type.kind);
 
-  UnitTypeConverter<T, D> _getUnitConverter<T, D extends DataType>(
+  UnitTypeConverter<T, D> getInternalUnitConverter<T, D extends DataType>(
           DataTypeKind typeKind) =>
       Validate.notNull(_registry[typeKind], 'Unsupported type $typeKind');
 }

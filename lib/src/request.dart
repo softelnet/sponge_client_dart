@@ -195,16 +195,16 @@ class SendEventRequestBody implements RequestBody {
   final String name;
 
   /// The event attributes (optional).
-  final Map<String, Object> attributes;
+  Map<String, Object> attributes;
 
   /// The event label.
-  final String label;
+  String label;
 
   /// The event description.
-  final String description;
+  String description;
 
   /// The event features (optional).
-  final Map<String, Object> features;
+  Map<String, Object> features;
 
   @override
   Map<String, dynamic> toJson() => {

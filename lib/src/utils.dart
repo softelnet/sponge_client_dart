@@ -12,12 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:async';
+
 import 'package:http/http.dart';
+import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/constants.dart';
+import 'package:sponge_client_dart/src/event.dart';
+import 'package:sponge_client_dart/src/features/feature_converter.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/type_converter.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:timezone/timezone.dart';
 
 /// A set of utility methods.
@@ -88,5 +95,66 @@ class SpongeUtils {
     actionMeta.args?.forEach((argType) => DataTypeUtils.traverseDataType(
         QualifiedDataType(argType, path: argType.name), onType,
         namedOnly: namedOnly));
+  }
+
+  static Future<RemoteEvent> marshalRemoteEventFields(
+    RemoteEvent event,
+    TypeConverter converter, {
+    @required FutureOr<RecordType> Function(String argName) eventTypeSupplier,
+  }) async {
+    if (event == null) {
+      return null;
+    }
+
+    event = event.clone();
+
+    var eventType = await eventTypeSupplier?.call(event.name);
+    if (eventType != null) {
+      event.attributes = await converter.marshal(eventType, event.attributes);
+    }
+
+    event.features =
+        await FeaturesUtils.marshal(converter.featureConverter, event.features);
+
+    return event;
+  }
+
+  static Future<Map<String, dynamic>> marshalRemoteEvent(
+    RemoteEvent event,
+    TypeConverter converter, {
+    @required FutureOr<RecordType> Function(String argName) eventTypeSupplier,
+  }) async {
+    event = await marshalRemoteEventFields(
+      event,
+      converter,
+      eventTypeSupplier: eventTypeSupplier,
+    );
+
+    return await event.convertToJson(
+        Validate.notNull(await eventTypeSupplier?.call(event.name),
+            'Event type ${event.name} not found'),
+        converter);
+  }
+
+  static Future<RemoteEvent> unmarshalRemoteEvent(
+    Map<String, dynamic> jsonEvent,
+    TypeConverter converter,
+    FutureOr<RecordType> Function(String argName) eventTypeSupplier,
+  ) async {
+    if (jsonEvent == null) {
+      return null;
+    }
+
+    var event = RemoteEvent.fromJson(jsonEvent);
+
+    var eventType = await eventTypeSupplier?.call(event.name);
+    if (eventType != null) {
+      event.attributes = await converter.unmarshal(eventType, event.attributes);
+    }
+
+    event.features = await FeaturesUtils.unmarshal(
+        converter.featureConverter, event.features);
+
+    return event;
   }
 }

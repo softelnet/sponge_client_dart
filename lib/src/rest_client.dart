@@ -20,6 +20,7 @@ import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/cache.dart';
 import 'package:sponge_client_dart/src/context.dart';
+import 'package:sponge_client_dart/src/event.dart';
 import 'package:sponge_client_dart/src/features/feature_converter.dart';
 import 'package:sponge_client_dart/src/rest_client_configuration.dart';
 import 'package:sponge_client_dart/src/constants.dart';
@@ -50,6 +51,8 @@ class SpongeRestClient {
     _eventTypeCache = _createEventTypeCache();
 
     _typeConverter.featureConverter ??= _featureConverter;
+
+    _initObjectTypeMarshalers(_typeConverter);
   }
 
   static final Logger _logger = Logger('SpongeRestClient');
@@ -877,9 +880,26 @@ class SpongeRestClient {
 
   /// Sends the `send` request to the server and returns the response.
   Future<SendEventResponse> sendByRequest(SendEventRequest request,
-          {SpongeRequestContext context}) async =>
-      await execute(SpongeClientConstants.OPERATION_SEND, request,
-          (json) => SendEventResponse.fromJson(json), context);
+      {SpongeRequestContext context}) async {
+    var body = request.body;
+
+    // Use a temporary RemoteEvent to marshal attributes and features.
+    var event = await SpongeUtils.marshalRemoteEventFields(
+        RemoteEvent(
+          name: body.name,
+          attributes: body.attributes,
+          features: body.features,
+        ),
+        typeConverter,
+        eventTypeSupplier: (eventName) => getEventType(eventName));
+
+    // Set marshalled fields.
+    body.attributes = event.attributes;
+    body.features = event.features;
+
+    return await execute(SpongeClientConstants.OPERATION_SEND, request,
+        (json) => SendEventResponse.fromJson(json), context);
+  }
 
   /// Sends the event named [eventName] with optional [attributes], [label], [description] and [features] to the server.
   Future<String> send(
@@ -956,6 +976,41 @@ class SpongeRestClient {
       _currentAuthToken = null;
     });
   }
+
+  void _initObjectTypeMarshalers(TypeConverter typeConverter) {
+    ObjectTypeUnitConverter objectConverter =
+        typeConverter.getInternalUnitConverter(DataTypeKind.OBJECT);
+
+    if (objectConverter == null) {
+      return;
+    }
+
+    // Add RemoteEvent marshaler and unmarshaler.
+    objectConverter.addMarshaler(
+        SpongeClientConstants.REMOTE_EVENT_OBJECT_TYPE_CLASS_NAME,
+        _createRemoteEventMarshaler());
+    objectConverter.addUnmarshaler(
+        SpongeClientConstants.REMOTE_EVENT_OBJECT_TYPE_CLASS_NAME,
+        _createRemoteEventUnmarshaler());
+  }
+
+  ObjectTypeUnitConverterMapper _createRemoteEventMarshaler() =>
+      (TypeConverter converter, Object value) async {
+        return await SpongeUtils.marshalRemoteEvent(
+          value as RemoteEvent,
+          converter,
+          eventTypeSupplier: (eventName) => getEventType(eventName),
+        );
+      };
+
+  ObjectTypeUnitConverterMapper _createRemoteEventUnmarshaler() =>
+      (TypeConverter converter, Object value) async {
+        return await SpongeUtils.unmarshalRemoteEvent(
+          value,
+          converter,
+          (eventName) => getEventType(eventName),
+        );
+      };
 }
 
 typedef ResponseFromJsonCallback<R extends SpongeResponse> = R Function(

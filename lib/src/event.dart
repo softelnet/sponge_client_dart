@@ -22,10 +22,10 @@ import 'package:sponge_client_dart/src/type_converter.dart';
 /// A Sponge Remote API event.
 class RemoteEvent {
   RemoteEvent({
-    @required this.id,
+    this.id,
     @required this.name,
-    @required this.time,
-    @required this.priority,
+    this.time,
+    this.priority,
     this.label,
     this.description,
     Map<String, dynamic> attributes,
@@ -41,6 +41,21 @@ class RemoteEvent {
   String description;
   Map<String, dynamic> attributes;
   Map<String, Object> features;
+
+  factory RemoteEvent.fromJson(Map<String, dynamic> json) {
+    return json != null
+        ? RemoteEvent(
+            id: json['id'],
+            name: json['name'],
+            time: json['time'] != null ? DateTime.parse(json['time']) : null,
+            priority: json['priority'],
+            label: json['label'],
+            description: json['description'],
+            attributes: json['attributes'],
+            features: json['features'],
+          )
+        : null;
+  }
 
   Future<Map<String, dynamic>> convertToJson(
       RecordType eventType, TypeConverter converter) async {
@@ -58,4 +73,15 @@ class RemoteEvent {
           await FeaturesUtils.marshal(converter.featureConverter, features),
     };
   }
+
+  RemoteEvent clone() => RemoteEvent(
+        id: id,
+        name: name,
+        time: time,
+        priority: priority,
+        label: label,
+        description: description,
+        attributes: attributes != null ? Map.of(attributes) : null,
+        features: features != null ? Map.of(features) : null,
+      );
 }

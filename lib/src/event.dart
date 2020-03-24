@@ -57,22 +57,16 @@ class RemoteEvent {
         : null;
   }
 
-  Future<Map<String, dynamic>> convertToJson(
-      RecordType eventType, TypeConverter converter) async {
-    return {
-      'id': id,
-      'name': name,
-      'time': DateTimeTypeUnitConverter.marshalInstant(time),
-      'priority': priority,
-      'label': label,
-      'description': description,
-      'attributes': attributes != null
-          ? await converter.marshal(eventType, attributes)
-          : {},
-      'features':
-          await FeaturesUtils.marshal(converter.featureConverter, features),
-    };
-  }
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'name': name,
+        'time': DateTimeTypeUnitConverter.marshalInstant(time),
+        'priority': priority,
+        'label': label,
+        'description': description,
+        'attributes': attributes,
+        'features': features,
+      };
 
   RemoteEvent clone() => RemoteEvent(
         id: id,

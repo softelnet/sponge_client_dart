@@ -97,7 +97,7 @@ class SpongeUtils {
         namedOnly: namedOnly));
   }
 
-  static Future<RemoteEvent> marshalRemoteEventFields(
+  static Future<Map<String, dynamic>> marshalRemoteEvent(
     RemoteEvent event,
     TypeConverter converter, {
     @required FutureOr<RecordType> Function(String argName) eventTypeSupplier,
@@ -108,32 +108,14 @@ class SpongeUtils {
 
     event = event.clone();
 
-    var eventType = await eventTypeSupplier?.call(event.name);
-    if (eventType != null) {
-      event.attributes = await converter.marshal(eventType, event.attributes);
-    }
+    var eventType = Validate.notNull(await eventTypeSupplier?.call(event.name),
+        'Event type ${event.name} not found');
+    event.attributes = await converter.marshal(eventType, event.attributes);
 
     event.features =
         await FeaturesUtils.marshal(converter.featureConverter, event.features);
 
-    return event;
-  }
-
-  static Future<Map<String, dynamic>> marshalRemoteEvent(
-    RemoteEvent event,
-    TypeConverter converter, {
-    @required FutureOr<RecordType> Function(String argName) eventTypeSupplier,
-  }) async {
-    event = await marshalRemoteEventFields(
-      event,
-      converter,
-      eventTypeSupplier: eventTypeSupplier,
-    );
-
-    return await event.convertToJson(
-        Validate.notNull(await eventTypeSupplier?.call(event.name),
-            'Event type ${event.name} not found'),
-        converter);
+    return event.toJson();
   }
 
   static Future<RemoteEvent> unmarshalRemoteEvent(

@@ -883,19 +883,13 @@ class SpongeRestClient {
       {SpongeRequestContext context}) async {
     var body = request.body;
 
-    // Use a temporary RemoteEvent to marshal attributes and features.
-    var event = await SpongeUtils.marshalRemoteEventFields(
-        RemoteEvent(
-          name: body.name,
-          attributes: body.attributes,
-          features: body.features,
-        ),
-        typeConverter,
-        eventTypeSupplier: (eventName) => getEventType(eventName));
+    var eventType = await getEventType(body.name);
+    if (eventType != null) {
+      body.attributes = await typeConverter.marshal(eventType, body.attributes);
+    }
 
-    // Set marshalled fields.
-    body.attributes = event.attributes;
-    body.features = event.features;
+    body.features = await FeaturesUtils.marshal(
+        typeConverter.featureConverter, body.features);
 
     return await execute(SpongeClientConstants.OPERATION_SEND, request,
         (json) => SendEventResponse.fromJson(json), context);

@@ -464,7 +464,7 @@ class DataTypeUtils {
 
     // Applying features from an annotated value.
     features.addAll(
-        type.annotated && value is AnnotatedValue ? value.features : {});
+        (type.annotated && value is AnnotatedValue) ? value.features : {});
 
     return features;
   }

@@ -149,8 +149,10 @@ class SpongeRestClient {
   void handleResponseHeader(String operation, String errorCode,
       String errorMessage, String detailedErrorMessage) {
     if (errorCode != null) {
-      _logger.fine(() =>
-          'Error response for $operation ($errorCode): $errorMessage\n${detailedErrorMessage ?? ""}');
+      if (errorCode != SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN) {
+        _logger.fine(() =>
+            'Error response for $operation ($errorCode): $errorMessage\n${detailedErrorMessage ?? ""}');
+      }
 
       if (_configuration.throwExceptionOnErrorResponse) {
         switch (errorCode) {

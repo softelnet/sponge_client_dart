@@ -198,7 +198,8 @@ class ActionData {
   bool get hasCacheableArgs =>
       actionMeta.features[Features.CACHEABLE_ARGS] ?? true;
 
-  bool get hasCacheableContextArgs => hasCacheableArgs &&
+  bool get hasCacheableContextArgs =>
+      hasCacheableArgs &&
       (actionMeta.features[Features.CACHEABLE_CONTEXT_ARGS] ?? false);
 }
 

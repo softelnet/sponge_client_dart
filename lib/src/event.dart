@@ -12,11 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'dart:async';
-
 import 'package:meta/meta.dart';
-import 'package:sponge_client_dart/src/features/feature_converter.dart';
-import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_converter.dart';
 
 /// A Sponge Remote API event.

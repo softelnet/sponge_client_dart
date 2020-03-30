@@ -56,7 +56,8 @@ abstract class TypeConverter {
       );
     }
 
-    return await getInternalUnitConverterByType(type).marshal(this, type, value);
+    return await getInternalUnitConverterByType(type)
+        .marshal(this, type, value);
   }
 
   /// Unmarshals the [value] as [type].
@@ -81,7 +82,8 @@ abstract class TypeConverter {
       return annotatedValue;
     }
 
-    return await getInternalUnitConverterByType(type).unmarshal(this, type, value);
+    return await getInternalUnitConverterByType(type)
+        .unmarshal(this, type, value);
   }
 
   /// Registers the unit type converter.

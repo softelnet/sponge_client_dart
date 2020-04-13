@@ -59,21 +59,25 @@ class PageableList<E> extends ListBase<E> {
   bool get initialized => _lastOffset != null;
 
   void addPage(AnnotatedValue page) {
-    int lastOffset = page.features[Features.PROVIDE_VALUE_OFFSET];
+    Validate.isTrue(page.value is List, 'A page value should be a list');
+
+    int offset = page.features[Features.PROVIDE_VALUE_OFFSET];
     int limit = page.features[Features.PROVIDE_VALUE_LIMIT];
     int count = page.features[Features.PROVIDE_VALUE_COUNT];
     int indicatedIndex = page.features[Features.PROVIDE_VALUE_INDICATED_INDEX];
 
-    if (lastOffset < length) {
-      Validate.isTrue(lastOffset == null || lastOffset == 0,
-          'A new page has a non zero offset');
+    Validate.notNull(offset, 'The offset can\'t be null');
+
+    if (offset < length) {
+      Validate.isTrue(offset == 0,
+          'A new page has a non zero offset that is lower that the list length');
       _internal.clear();
       _lastOffset = 0;
     } else {
-      _lastOffset = lastOffset;
+      _lastOffset = offset;
     }
 
-    _internal.addAll(List.from(page.value));
+    _internal.addAll(page.value);
 
     _limit = limit;
     _count = count;

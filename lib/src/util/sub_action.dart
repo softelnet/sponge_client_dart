@@ -65,12 +65,11 @@ class SubActionSpec {
                   subActionArgMeta.name == substitution.target)),
           'Unknown target attribute');
 
+      // TODO Support context actions in dynamic types. Consider more strict type validation.
+
       // Type validation.
       argSubstitutions.asMap().forEach((i, substitution) {
-        // TODO Support context actions in dynamic types.
         var targetType = subActionMeta.getArg(substitution.target);
-        // TODO Consider more strict type validation.
-        // TODO Support context actions in dynamic types.
         Validate.isTrue(
             targetType.kind ==
                 DataTypeUtils.getSubType(sourceType, substitution.source, null)
@@ -81,7 +80,6 @@ class SubActionSpec {
     }
 
     if (resultSubstitution != null) {
-      // TODO Support context actions in dynamic types.
       var parentType = resultSubstitution != DataTypeUtils.THIS
           ? DataTypeUtils.getSubType(sourceType, resultSubstitution, null)
           : sourceType;

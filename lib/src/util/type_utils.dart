@@ -89,7 +89,12 @@ class DataTypeUtils {
   }
 
   /// Supports sub-arguments and bypasses annotated values. The `value` has to be a complex type.
-  static void setSubValue(dynamic value, String path, dynamic subValue) {
+  static void setSubValue(
+    dynamic value,
+    String path,
+    dynamic subValue, {
+    bool ignoreNullParent = false,
+  }) {
     Validate.isTrue(path != null && path.isNotEmpty, 'The path is empty');
 
     var elements = getPathElements(path);
@@ -98,6 +103,10 @@ class DataTypeUtils {
       value = _getSubValueByPathElements(
           value, elements.sublist(0, elements.length - 1),
           unwrapAnnotatedTarget: true, unwrapDynamicTarget: true);
+    }
+
+    if (value == null && ignoreNullParent) {
+      return;
     }
 
     Validate.notNull(value, 'The parent value of $path is null');

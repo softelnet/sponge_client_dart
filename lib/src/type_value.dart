@@ -107,6 +107,9 @@ class AnnotatedValue with EquatableMixin implements DecoratedValue {
         typeLabel,
         typeDescription
       ];
+
+  @override
+  String toString() => '$value';
 }
 
 /// A dynamic value that specifies its type.

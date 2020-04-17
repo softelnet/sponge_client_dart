@@ -792,15 +792,18 @@ class SpongeRestClient {
     Map<String, Object> current,
     Map<String, DataType> dynamicTypes,
     Map<String, Map<String, Object>> features,
+    bool initial,
   }) async {
     return (await provideActionArgsByRequest(ProvideActionArgsRequest(
       ProvideActionArgsRequestBody(
-          name: actionName,
-          provide: provide,
-          submit: submit,
-          current: current,
-          dynamicTypes: dynamicTypes,
-          features: features),
+        name: actionName,
+        provide: provide,
+        submit: submit,
+        current: current,
+        dynamicTypes: dynamicTypes,
+        features: features,
+        initial: initial,
+      ),
     )))
         .body
         .provided;

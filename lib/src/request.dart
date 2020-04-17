@@ -299,6 +299,7 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
     this.dynamicTypes,
     this.qualifiedVersion,
     this.features,
+    this.initial,
   });
 
   /// The action name.
@@ -324,6 +325,9 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
   /// The features for arguments (optional).
   Map<String, Map<String, Object>> features;
 
+  /// The flag indicating if this is the initial provide action arguments request.
+  bool initial;
+
   @override
   Map<String, dynamic> toJson() => {
         'name': name,
@@ -338,6 +342,7 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
             : null,
         'qualifiedVersion': qualifiedVersion,
         'features': features,
+        'initial': initial,
       };
 }
 

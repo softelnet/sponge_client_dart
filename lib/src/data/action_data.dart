@@ -106,9 +106,14 @@ class ActionData {
       );
 
   /// Supports sub-arguments and bypasses annotated values.
-  void setArgValueByName(String argName, dynamic value) {
+  void setArgValueByName(
+    String argName,
+    dynamic value, {
+    bool ignoreNullParent = false,
+  }) {
     if (argName != null) {
-      DataTypeUtils.setSubValue(argsAsRecord, argName, value);
+      DataTypeUtils.setSubValue(argsAsRecord, argName, value,
+          ignoreNullParent: ignoreNullParent);
     } else {
       // Support for setting all arguments.
       Validate.isTrue(

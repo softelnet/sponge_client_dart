@@ -1,3 +1,6 @@
+## 1.16.0 (not relesed yet)
+* API change: Added `ProvideActionArgsRequestBody.initial`.
+
 ## 1.15.0 (2020-03-30)
 * API change: Changed `submittable` type from `bool` to `SubmittableMeta` in the `ProvidedMeta`.
 * Added an `activatable` flag to an action.

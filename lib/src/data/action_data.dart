@@ -19,6 +19,7 @@ import 'package:sponge_client_dart/src/data/pageable_list.dart';
 import 'package:sponge_client_dart/src/features/features.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 
@@ -41,7 +42,13 @@ class ActionData {
   List<Object> args;
   ActionCallResultInfo resultInfo;
   bool calling = false;
+  Map<String, ProvidedValue> _providedValues = {};
   Map<String, PageableList> _pageableLists = {};
+  Map<String, Map<String, dynamic>> _additionalArgData = {};
+
+  Map<String, Map<String, dynamic>> get additionalArgData => _additionalArgData;
+  set additionalArgData(Map<String, Map<String, dynamic>> value) =>
+      _additionalArgData = Map.of(value);
 
   bool get hasResponse => resultInfo != null;
   bool get isSuccess => resultInfo != null && resultInfo.exception == null;
@@ -51,8 +58,12 @@ class ActionData {
   bool get needsRunConfirmation =>
       actionMeta.features[Features.ACTION_CONFIRMATION] ?? false;
 
-  Map<String, PageableList> get pageableLists => _pageableLists;
+  Map<String, ProvidedValue> get providedValues => _providedValues;
+  set providedValues(Map<String, ProvidedValue> value) {
+    _providedValues = Map.of(value);
+  }
 
+  Map<String, PageableList> get pageableLists => _pageableLists;
   set pageableLists(Map<String, PageableList> value) {
     _pageableLists = Map.of(value);
   }
@@ -76,7 +87,9 @@ class ActionData {
     });
     resultInfo = null;
     calling = false;
+    _providedValues.clear();
     _pageableLists.clear();
+    _additionalArgData.clear();
   }
 
   RecordType get argsAsRecordType {
@@ -125,22 +138,30 @@ class ActionData {
   ActionData clone({ActionData prototype}) =>
       (prototype ?? ActionData(actionMeta))
         ..args = DataTypeUtils.cloneValue(args)
+        .._providedValues = _providedValues
         .._pageableLists = _pageableLists
         ..calling = calling
         ..resultInfo = resultInfo != null
             ? ActionCallResultInfo(
                 result: resultInfo.result, exception: resultInfo.exception)
-            : null;
+            : null
+        .._additionalArgData = _additionalArgData;
 
-  void rebind(ActionData source,
-      {List<Object> overrideArgs,
-      ActionCallResultInfo overrideResultInfo,
-      bool overrideCalling,
-      Map<String, PageableList> overridePageableLists}) {
+  void rebind(
+    ActionData source, {
+    List<Object> overrideArgs,
+    ActionCallResultInfo overrideResultInfo,
+    bool overrideCalling,
+    Map<String, ProvidedValue> overrideProvidedValues,
+    Map<String, PageableList> overridePageableLists,
+    Map<String, Map<String, dynamic>> overrideAdditionalArgData,
+  }) {
     args = overrideArgs ?? source.args;
     resultInfo = overrideResultInfo ?? source.resultInfo;
     calling = overrideCalling ?? source.calling;
+    _providedValues = overrideProvidedValues ?? source._providedValues;
     _pageableLists = overridePageableLists ?? source._pageableLists;
+    _additionalArgData = overrideAdditionalArgData ?? source._additionalArgData;
   }
 
   static List<Object> createInitialArgs(ActionMeta action) => List.generate(
@@ -206,6 +227,17 @@ class ActionData {
   bool get hasCacheableContextArgs =>
       hasCacheableArgs &&
       (actionMeta.features[Features.CACHEABLE_CONTEXT_ARGS] ?? false);
+
+  void setAdditionalArgData(String argPath, String type, dynamic value) {
+    _additionalArgData.putIfAbsent(argPath, () => <String, dynamic>{})[type] =
+        value;
+  }
+
+  dynamic getAdditionalArgData(String argPath, String type) {
+    var argData = _additionalArgData[argPath];
+
+    return (argData?.containsKey(type) ?? false) ? argData[type] : null;
+  }
 }
 
 class _ActionArgsMap extends MapBase<String, dynamic> {

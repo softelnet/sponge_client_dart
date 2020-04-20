@@ -748,7 +748,7 @@ void main() {
       var providedFruits =
           (await client.provideActionArgs(actionName, provide: [
         'fruits'
-      ], features: {
+      ], argFeatures: {
         'fruits': {
           Features.PROVIDE_VALUE_OFFSET: 0,
           Features.PROVIDE_VALUE_LIMIT: valueLimit
@@ -765,7 +765,7 @@ void main() {
 
       providedFruits = (await client.provideActionArgs(actionName, provide: [
         'fruits'
-      ], features: {
+      ], argFeatures: {
         'fruits': {
           Features.PROVIDE_VALUE_OFFSET: valueLimit,
           Features.PROVIDE_VALUE_LIMIT: valueLimit
@@ -783,7 +783,7 @@ void main() {
 
       providedFruits = (await client.provideActionArgs(actionName, provide: [
         'fruits'
-      ], features: {
+      ], argFeatures: {
         'fruits': {
           Features.PROVIDE_VALUE_OFFSET: 2 * valueLimit,
           Features.PROVIDE_VALUE_LIMIT: valueLimit

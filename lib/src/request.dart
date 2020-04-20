@@ -298,7 +298,7 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
     this.current,
     this.dynamicTypes,
     this.qualifiedVersion,
-    this.features,
+    this.argFeatures,
     this.initial,
   });
 
@@ -323,7 +323,7 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
   ProcessorQualifiedVersion qualifiedVersion;
 
   /// The features for arguments (optional).
-  Map<String, Map<String, Object>> features;
+  Map<String, Map<String, Object>> argFeatures;
 
   /// The flag indicating if this is the initial provide action arguments request.
   bool initial;
@@ -341,7 +341,7 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
               }
             : null,
         'qualifiedVersion': qualifiedVersion,
-        'features': features,
+        'argFeatures': argFeatures,
         'initial': initial,
       };
 }

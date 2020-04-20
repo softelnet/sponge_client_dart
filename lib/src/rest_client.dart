@@ -752,8 +752,8 @@ class SpongeRestClient {
         actionMeta, request.body.current, request.body.dynamicTypes);
 
     // Clone the features and marshal all features.
-    request.body.features =
-        await _marshalProvideArgsFeaturesMap(request.body.features);
+    request.body.argFeatures =
+        await _marshalProvideArgsFeaturesMap(request.body.argFeatures);
 
     var response = await execute(
         SpongeClientConstants.OPERATION_PROVIDE_ACTION_ARGS,
@@ -791,7 +791,7 @@ class SpongeRestClient {
     List<String> submit,
     Map<String, Object> current,
     Map<String, DataType> dynamicTypes,
-    Map<String, Map<String, Object>> features,
+    Map<String, Map<String, Object>> argFeatures,
     bool initial,
   }) async {
     return (await provideActionArgsByRequest(ProvideActionArgsRequest(
@@ -801,7 +801,7 @@ class SpongeRestClient {
         submit: submit,
         current: current,
         dynamicTypes: dynamicTypes,
-        features: features,
+        argFeatures: argFeatures,
         initial: initial,
       ),
     )))

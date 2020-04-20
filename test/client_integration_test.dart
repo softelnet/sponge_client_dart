@@ -1347,7 +1347,7 @@ void main() {
       expect(
           normalizeJson(responseStringList[0]),
           matches(
-              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*"},"body":{"version":"$version"}}'));
+              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*","features":null},"body":{"version":"$version"}}'));
     });
     test('testOneRequestListeners', () async {
       var client = await getClient();
@@ -1379,7 +1379,7 @@ void main() {
       expect(
           normalizeJson(actualResponseString),
           matches(
-              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*"},"body":{"version":"$version"}}'));
+              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*","features":null},"body":{"version":"$version"}}'));
     });
   });
 }

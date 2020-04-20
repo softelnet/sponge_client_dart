@@ -1,8 +1,11 @@
 ## 1.16.0 (not relesed yet)
+
+* Added `features` to the response header.
 * API change: Added `ProvideActionArgsRequestBody.initial`.
 * API change: Renamed `ProvideActionArgsRequestBody.features` to `argFeatures`.
 
 ## 1.15.0 (2020-03-30)
+
 * API change: Changed `submittable` type from `bool` to `SubmittableMeta` in the `ProvidedMeta`.
 * Added an `activatable` flag to an action.
 * Added `features` to the request header.
@@ -13,11 +16,13 @@
 * Dependencies upgrade.
 
 ## 1.14.0+1 (2019-12-21)
+
 * Added indicatedIndex to PageableList.
 * Code cleanup.
 * Dependencies upgrade.
   
 ## 1.14.0 (2019-12-20)
+
 * API change: A payload in a request and a response has been moved to `body`.
 * API change: Renamed `label` to `valueLabel` and `description` to `valueDescription` in `AnnotatedValue`.
 * API change: Removed `SpongeRestClient.submitActionArgs`. Use `provideActionArgs` directly.

@@ -26,6 +26,7 @@ class ResponseHeader {
     this.detailedErrorMessage,
     this.requestTime,
     this.responseTime,
+    this.features,
   });
 
   /// The corresponding request id (optional).
@@ -46,6 +47,9 @@ class ResponseHeader {
   /// The optional response time.
   DateTime responseTime;
 
+  /// The response features (optional).
+  Map<String, Object> features;
+
   factory ResponseHeader.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ResponseHeader(
@@ -59,6 +63,7 @@ class ResponseHeader {
             responseTime: json['responseTime'] != null
                 ? DateTime.parse(json['responseTime'])
                 : null,
+            features: json['features'],
           )
         : null;
   }

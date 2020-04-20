@@ -3,6 +3,7 @@
 * Added `features` to the response header.
 * API change: Added `ProvideActionArgsRequestBody.initial`.
 * API change: Renamed `ProvideActionArgsRequestBody.features` to `argFeatures`.
+* API change: Added `minValue` and `maxValue` to `DateTimeType`.
 
 ## 1.15.0 (2020-03-30)
 

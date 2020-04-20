@@ -295,8 +295,8 @@ void main() {
       var client = await getClient();
       var actionMeta = await client.getActionMeta('DateTimeAction');
 
-      expect((actionMeta.args[0] as DateTimeType).dateTimeKind,
-          equals(DateTimeKind.DATE_TIME));
+      var firstType = actionMeta.args[0] as DateTimeType;
+      expect(firstType.dateTimeKind, equals(DateTimeKind.DATE_TIME));
       expect((actionMeta.args[1] as DateTimeType).dateTimeKind,
           equals(DateTimeKind.DATE_TIME_ZONE));
       expect((actionMeta.args[2] as DateTimeType).dateTimeKind,
@@ -305,6 +305,9 @@ void main() {
           equals(DateTimeKind.TIME));
       expect((actionMeta.args[4] as DateTimeType).dateTimeKind,
           equals(DateTimeKind.INSTANT));
+
+      expect(firstType.minValue, equals(DateTime(2020, 1, 1, 0, 0)));
+      expect(firstType.maxValue, equals(DateTime(2030, 1, 1, 0, 0)));
 
       var dateTime = DateTime.now();
       await initializeTimeZone();

@@ -448,6 +448,8 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
 
       t.features =
           await FeaturesUtils.marshal(converter.featureConverter, t.features);
+
+      await _marshalSpecificTypeProperties(converter, t);
     }
 
     return result;
@@ -464,9 +466,27 @@ class TypeTypeUnitConverter extends UnitTypeConverter<DataType, TypeType> {
 
       t.features =
           await FeaturesUtils.unmarshal(converter.featureConverter, t.features);
+
+      await _unmarshalSpecificTypeProperties(converter, result);
     }
 
     return result;
+  }
+
+  Future<void> _marshalSpecificTypeProperties(
+      TypeConverter converter, DataType value) async {
+    if (value is DateTimeType) {
+      value.minValue = await converter.marshal(value, value.minValue);
+      value.maxValue = await converter.marshal(value, value.maxValue);
+    }
+  }
+
+  Future<void> _unmarshalSpecificTypeProperties(
+      TypeConverter converter, DataType result) async {
+    if (result is DateTimeType) {
+      result.minValue = await converter.unmarshal(result, result.minValue);
+      result.maxValue = await converter.unmarshal(result, result.maxValue);
+    }
   }
 }
 

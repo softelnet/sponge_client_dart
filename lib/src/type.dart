@@ -302,7 +302,11 @@ enum DateTimeKind {
 
 /// A date/time type.
 class DateTimeType extends DataType<Uint8List> {
-  DateTimeType(this.dateTimeKind) : super(DataTypeKind.DATE_TIME);
+  DateTimeType(
+    this.dateTimeKind, {
+    this.minValue,
+    this.maxValue,
+  }) : super(DataTypeKind.DATE_TIME);
 
   /// The feature name for the dateTimeKind.
   static const String FEATURE_DATE_TIME_KIND = 'dateTimeKind';
@@ -310,9 +314,20 @@ class DateTimeType extends DataType<Uint8List> {
   /// The date/time kind.
   final DateTimeKind dateTimeKind;
 
+  /// The minimum value (optional).
+  dynamic minValue;
+
+  /// The maximum value (optional).
+  dynamic maxValue;
+
   factory DateTimeType.fromJson(Map<String, dynamic> json) =>
       DataType.fromJsonBase(
-          DateTimeType(_fromJsonDateTimeKind(json['dateTimeKind'])), json);
+          DateTimeType(
+            _fromJsonDateTimeKind(json['dateTimeKind']),
+            minValue: json['minValue'],
+            maxValue: json['maxValue'],
+          ),
+          json);
 
   @override
   Map<String, dynamic> toJson() => super.toJson()

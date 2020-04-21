@@ -85,9 +85,17 @@ void main() {
     test('testFeatures', () async {
       var client = await getClient();
       var features = await client.getFeatures();
-      expect(features.length, equals(2));
+      expect(features.length, equals(5));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_VERSION],
           equals(await client.getVersion()));
+
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_NAME],
+          equals('Sponge Test REST API'));
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_DESCRIPTION],
+          equals('Sponge Test REST API description'));
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_LICENSE],
+          equals('Apache 2.0'));
+
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_GRPC_ENABLED],
           isTrue);
     });

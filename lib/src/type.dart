@@ -52,6 +52,7 @@ abstract class DataType<T> {
     this.format,
     this.defaultValue,
     this.nullable = false,
+    this.readOnly = false,
     Map<String, Object> features,
     this.optional = false,
     this.provided,
@@ -87,6 +88,9 @@ abstract class DataType<T> {
   /// Tells if a value of this type may be `null`. The default is that a value must not be `null`,
   /// i.e. it is not nullable.
   bool nullable;
+
+  /// The flag specifying if a value of this type is read only. Defaults to `false`.
+  bool readOnly;
 
   /// The data type features as a map of names to values.
   Map<String, Object> features;
@@ -151,6 +155,7 @@ abstract class DataType<T> {
     type.format = json['format'];
     type.defaultValue = json['defaultValue'];
     type.nullable = json['nullable'] ?? type.nullable;
+    type.readOnly = json['readOnly'] ?? type.readOnly;
     (json['features'] as Map)
         ?.forEach((name, value) => type.features[name] = value);
     type.optional = json['optional'] ?? type.optional;
@@ -177,6 +182,7 @@ abstract class DataType<T> {
         'format': format,
         'defaultValue': defaultValue,
         'nullable': nullable,
+        'readOnly': readOnly,
         'features': features,
         'optional': optional,
         'provided': provided?.toJson(),

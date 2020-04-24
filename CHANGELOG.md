@@ -1,10 +1,12 @@
 ## 1.16.0 (not relesed yet)
 
-* Added `features` to the response header.
+* API change: Moved the `readOnly` flag from `ProvidedMeta` to `DataType`.
+* API change: Added `features` to the response header.
 * API change: Added `ProvideActionArgsRequestBody.initial`.
 * API change: Renamed `ProvideActionArgsRequestBody.features` to `argFeatures`.
 * API change: Added `minValue` and `maxValue` to `DateTimeType`.
 * Added `license` and `description` to the REST API features.
+* Dependencies upgrade.
 
 ## 1.15.0 (2020-03-30)
 

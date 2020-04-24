@@ -81,7 +81,7 @@ class ActionData {
 
   void clear({bool clearReadOnly = true}) {
     actionMeta.args?.asMap()?.forEach((i, argType) {
-      if (clearReadOnly || !(argType.provided?.readOnly ?? false)) {
+      if (clearReadOnly || !argType.readOnly) {
         args[i] = argType?.defaultValue;
       }
     });

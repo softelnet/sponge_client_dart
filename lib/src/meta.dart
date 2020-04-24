@@ -62,7 +62,6 @@ class ProvidedMeta {
     this.value = false,
     this.valueSet,
     this.dependencies,
-    this.readOnly = false,
     this.overwrite = false,
     this.elementValueSet = false,
     this.submittable,
@@ -79,9 +78,6 @@ class ProvidedMeta {
 
   /// The list of names that this provided object depends on.
   final List<String> dependencies;
-
-  /// The flag specifying if this provided object is read only. Defaults to `false`.
-  final bool readOnly;
 
   /// The flag specifying if the provided value of this object should overwrite the value set in a client code. Defaults to `false`.
   final bool overwrite;
@@ -115,7 +111,6 @@ class ProvidedMeta {
       value: json['value'],
       valueSet: ValueSetMeta.fromJson(json['valueSet']),
       dependencies: (json['dependencies'] as List)?.cast<String>()?.toList(),
-      readOnly: json['readOnly'] ?? false,
       overwrite: json['overwrite'] ?? false,
       elementValueSet: json['elementValueSet'] ?? false,
       submittable: SubmittableMeta.fromJson(json['submittable']),
@@ -129,7 +124,6 @@ class ProvidedMeta {
         'value': value,
         'valueSet': valueSet?.toJson(),
         'dependencies': dependencies,
-        'readOnly': readOnly,
         'overwrite': overwrite,
         'elementValueSet': elementValueSet,
         'submittable': submittable?.toJson(),

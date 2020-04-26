@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:meta/meta.dart';
-
 class IconInfo {
   IconInfo({
-    @required this.name,
+    this.name,
     this.color,
     this.size,
+    this.url,
   });
 
   String name;
@@ -27,11 +26,14 @@ class IconInfo {
 
   double size;
 
+  String url;
+
   factory IconInfo.fromJson(Map<String, dynamic> json) => json != null
       ? IconInfo(
           name: json['name'],
           color: json['color'],
           size: (json['size'] as num)?.toDouble(),
+          url: json['url'],
         )
       : null;
 
@@ -39,5 +41,6 @@ class IconInfo {
         'name': name,
         'color': color,
         'size': size,
+        'url': url,
       };
 }

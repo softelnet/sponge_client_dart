@@ -12,8 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-import 'package:sponge_client_dart/src/model/geo_model.dart';
-import 'package:sponge_client_dart/src/model/ui_model.dart';
+import 'package:sponge_client_dart/src/features/model/features_model.dart';
+import 'package:sponge_client_dart/src/features/model/geo_model.dart';
+import 'package:sponge_client_dart/src/features/model/ui_model.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 
 class Features {
@@ -177,6 +178,16 @@ class Features {
 
     return [];
   }
+
+  static SubAction getSubAction(
+          Map<String, Object> features, String subActionFeature) =>
+      features != null ? features[subActionFeature] as SubAction : null;
+
+  static List<SubAction> getSubActions(
+          Map<String, Object> features, String subActionsFeature) =>
+      features != null
+          ? (features[subActionsFeature] as List<SubAction> ?? [])
+          : [];
 
   static IconInfo getIcon(Map<String, Object> features) =>
       features != null ? features[ICON] as IconInfo : null;

@@ -879,6 +879,21 @@ void main() {
       expect(active[0], isFalse);
     });
 
+    test('testSubActions', () async {
+      var client = await getClient();
+      List<SubAction> subActions =
+          (await client.getActionMeta('SubActionsAction'))
+              .features[Features.CONTEXT_ACTIONS];
+      expect(subActions.length, equals(4));
+
+      expect(subActions[0].name, equals('SubAction1'));
+      expect(subActions[0].label, equals('Sub-action 1/1'));
+      expect(subActions[0].args.length, equals(1));
+      expect(subActions[0].args[0].target, equals('target1'));
+      expect(subActions[0].args[0].source, equals('arg1'));
+      expect(subActions[0].result.target, equals('arg1'));
+    });
+
     test('testTraverseActionArguments', () async {
       var client = await getClient();
       var meta = await client.getActionMeta('NestedRecordAsArgAction');

@@ -17,8 +17,10 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/features/features.dart';
-import 'package:sponge_client_dart/src/model/geo_model.dart';
-import 'package:sponge_client_dart/src/model/ui_model.dart';
+import 'package:sponge_client_dart/src/features/model/features_model.dart';
+import 'package:sponge_client_dart/src/features/model/geo_model.dart';
+import 'package:sponge_client_dart/src/features/model/ui_model.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 
 class FeaturesUtils {
   static Future<Map<String, Object>> marshal(
@@ -88,8 +90,8 @@ abstract class FeatureConverter {
   /// Registers the unit feature converter.
   void register(UnitFeatureConverter unitConverter) {
     _logger.finest(
-        'Registering ${unitConverter.name} feature converter: $unitConverter');
-    _registry[unitConverter.name] = unitConverter;
+        'Registering ${unitConverter.names} feature(s) converter: $unitConverter');
+    unitConverter.names.forEach((name) => _registry[name] = unitConverter);
   }
 
   /// Registers the unit feature converters.
@@ -105,6 +107,8 @@ class DefaultFeatureConverter extends FeatureConverter {
   DefaultFeatureConverter() {
     // Register default unit converters.
     registerAll([
+      SubActionFeatureUnitConverter(),
+      SubActionFeaturesUnitConverter(),
       IconFeatureUnitConverter(),
       GeoMapFeatureUnitConverter(),
       GeoPositionFeatureUnitConverter(),
@@ -115,10 +119,10 @@ class DefaultFeatureConverter extends FeatureConverter {
 /// An unit feature converter. All implementations should be stateless because one instance is shared
 /// by different invocations of [marshal] and [unmarshal] methods.
 abstract class UnitFeatureConverter {
-  UnitFeatureConverter(this.name);
+  UnitFeatureConverter(this.names);
 
-  /// The feature name.
-  final String name;
+  /// The feature names.
+  final List<String> names;
 
   /// Marshals the [value].
   ///
@@ -133,8 +137,87 @@ abstract class UnitFeatureConverter {
       value;
 }
 
+class SubActionFeatureUnitConverter extends UnitFeatureConverter {
+  SubActionFeatureUnitConverter()
+      : super([
+          Features.SUB_ACTION_ACTIVATE_ACTION,
+          Features.SUB_ACTION_CREATE_ACTION,
+          Features.SUB_ACTION_DELETE_ACTION,
+          Features.SUB_ACTION_READ_ACTION,
+          Features.SUB_ACTION_UPDATE_ACTION
+        ]);
+
+  @override
+  Future<dynamic> marshal(FeatureConverter converter, dynamic value) async {
+    var subAction = (value as SubAction).clone();
+
+    subAction.features =
+        await FeaturesUtils.marshal(converter, subAction.features);
+    for (var arg in subAction.args ?? []) {
+      arg.features = await FeaturesUtils.marshal(converter, arg.features);
+    }
+
+    if (subAction.result != null) {
+      subAction.result.features =
+          await FeaturesUtils.marshal(converter, subAction.result.features);
+    }
+
+    return subAction;
+  }
+
+  @override
+  Future<dynamic> unmarshal(FeatureConverter converter, dynamic value) async {
+    var subAction = SubAction.fromJson(value);
+
+    subAction.features =
+        await FeaturesUtils.unmarshal(converter, subAction.features);
+    for (var arg in subAction.args ?? []) {
+      arg.features = await FeaturesUtils.unmarshal(converter, arg.features);
+    }
+
+    if (subAction.result != null) {
+      subAction.result.features =
+          await FeaturesUtils.unmarshal(converter, subAction.result.features);
+    }
+
+    return subAction;
+  }
+}
+
+class SubActionFeaturesUnitConverter extends UnitFeatureConverter {
+  SubActionFeaturesUnitConverter() : super([Features.CONTEXT_ACTIONS]);
+
+  final _elementConverter = SubActionFeatureUnitConverter();
+
+  @override
+  Future<dynamic> marshal(FeatureConverter converter, dynamic value) async {
+    Validate.isTrue(value is List<SubAction>,
+        'The ${Features.CONTEXT_ACTIONS} feature has to be a list of sub-actions');
+
+    var subActions = [];
+    for (var subAction in (value as List<SubAction>)) {
+      subActions.add(await _elementConverter.marshal(converter, subAction));
+    }
+
+    return subActions;
+  }
+
+  @override
+  Future<dynamic> unmarshal(FeatureConverter converter, dynamic value) async {
+    Validate.isTrue(value is List,
+        'The ${Features.CONTEXT_ACTIONS} feature has to be a list of sub-actions');
+
+    var subActions = <SubAction>[];
+    for (var subAction in (value as List)) {
+      subActions.add(await _elementConverter.unmarshal(converter, subAction));
+    }
+
+    return subActions;
+  }
+}
+
 class IconFeatureUnitConverter extends UnitFeatureConverter {
-  IconFeatureUnitConverter() : super(Features.ICON);
+  IconFeatureUnitConverter() : super([Features.ICON]);
 
   @override
   Future<dynamic> marshal(FeatureConverter converter, dynamic value) async {
@@ -160,7 +243,7 @@ class IconFeatureUnitConverter extends UnitFeatureConverter {
 }
 
 class GeoMapFeatureUnitConverter extends UnitFeatureConverter {
-  GeoMapFeatureUnitConverter() : super(Features.GEO_MAP);
+  GeoMapFeatureUnitConverter() : super([Features.GEO_MAP]);
 
   @override
   Future<dynamic> marshal(FeatureConverter converter, dynamic value) async {
@@ -173,11 +256,8 @@ class GeoMapFeatureUnitConverter extends UnitFeatureConverter {
 
     geoMap.features = await FeaturesUtils.unmarshal(converter, geoMap.features);
 
-    if (geoMap.layers != null) {
-      for (var layer in geoMap.layers) {
-        layer.features =
-            await FeaturesUtils.unmarshal(converter, layer.features);
-      }
+    for (var layer in geoMap.layers ?? []) {
+      layer.features = await FeaturesUtils.unmarshal(converter, layer.features);
     }
 
     return geoMap;
@@ -185,7 +265,7 @@ class GeoMapFeatureUnitConverter extends UnitFeatureConverter {
 }
 
 class GeoPositionFeatureUnitConverter extends UnitFeatureConverter {
-  GeoPositionFeatureUnitConverter() : super(Features.GEO_POSITION);
+  GeoPositionFeatureUnitConverter() : super([Features.GEO_POSITION]);
 
   @override
   Future<dynamic> marshal(FeatureConverter converter, dynamic value) async =>

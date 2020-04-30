@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:sponge_client_dart/src/exception.dart';
+import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:test/test.dart';
@@ -9,7 +10,7 @@ void main() {
   test('getPathElements', () {
     expect(DataTypeUtils.getPathElements('a.b.c'), equals(['a', 'b', 'c']));
     expect(DataTypeUtils.getPathElements('a'), equals(['a']));
-    expect(DataTypeUtils.getPathElements('this'), equals([]));
+    expect(DataTypeUtils.getPathElements(DataTypeConstants.PATH_THIS), equals([]));
     expect(DataTypeUtils.getPathElements(null), equals([]));
   });
   test('getSubValue', () {
@@ -44,7 +45,7 @@ void main() {
           'a': {
             'b': {'c': 'test'}
           }
-        }, 'this'),
+        }, DataTypeConstants.PATH_THIS),
         equals({
           'a': {
             'b': {'c': 'test'}
@@ -92,7 +93,7 @@ void main() {
                 'b': {'c': 'test'}
               }
             }),
-            'this'),
+            DataTypeConstants.PATH_THIS),
         equals({
           'a': {
             'b': {'c': 'test'}
@@ -143,7 +144,7 @@ void main() {
                     'b': {'c': 'test'}
                   }
                 }),
-                'this',
+                DataTypeConstants.PATH_THIS,
                 unwrapAnnotatedTarget: false)
             .value,
         equals({
@@ -153,7 +154,7 @@ void main() {
         }));
 
     expect(
-        DataTypeUtils.getSubValue(AnnotatedValue(null), 'this',
+        DataTypeUtils.getSubValue(AnnotatedValue(null), DataTypeConstants.PATH_THIS,
                 unwrapAnnotatedTarget: false)
             .value,
         isNull);
@@ -201,7 +202,7 @@ void main() {
       }
     };
 
-    DataTypeUtils.setSubValue(value, 'this', {
+    DataTypeUtils.setSubValue(value, DataTypeConstants.PATH_THIS, {
       'a': {
         'b': {'c': 'test5'}
       }

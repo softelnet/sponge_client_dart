@@ -22,10 +22,8 @@ import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 
 class DataTypeUtils {
-  static const THIS = 'this';
-
   static List<String> getPathElements(String path) {
-    if (path == null || path == THIS) {
+    if (path == null || path == DataTypeConstants.PATH_THIS) {
       return [];
     }
 

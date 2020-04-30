@@ -58,7 +58,7 @@ class SubActionSpec {
     }
 
     if (subAction.result?.target != null) {
-      var parentType = subAction.result.target != DataTypeUtils.THIS
+      var parentType = subAction.result.target != DataTypeConstants.PATH_THIS
           ? DataTypeUtils.getSubType(sourceType, subAction.result.target, null)
           : sourceType;
       Validate.isTrue(

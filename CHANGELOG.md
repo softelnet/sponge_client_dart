@@ -6,6 +6,7 @@
 * API change: Renamed `ProvideActionArgsRequestBody.features` to `argFeatures`.
 * API change: Added `minValue` and `maxValue` to `DateTimeType`.
 * API change: Introduced a `SubAction` typed feature for `contextActions`, `createAction`, `readAction`, `updateAction`, `deleteAction` and `activateAction` instead of string specifications.
+* API change: Renamed the `'this'` keyword in a data type path to `'@this'`.
 * Added `license` and `description` to the REST API features.
 * Added `networkImage` to the supported `characteristic` feature values.
 * Dependencies upgrade.

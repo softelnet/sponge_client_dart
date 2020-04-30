@@ -21,6 +21,16 @@ import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 
+abstract class DataTypeConstants {
+  static const PATH_THIS = '@this';
+
+  @experimental
+  static const PATH_PARENT = '@parent';
+
+  @experimental
+  static const PATH_INDEX = '@index';
+}
+
 /// A data type kind.
 enum DataTypeKind {
   ANY,

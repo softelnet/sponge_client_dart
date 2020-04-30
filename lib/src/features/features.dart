@@ -90,7 +90,7 @@ class Features {
   static const SUB_ACTION_DELETE_ACTION = 'deleteAction';
   static const SUB_ACTION_ACTIVATE_ACTION = 'activateAction';
 
-  static const TYPE_LIST_ACTIVATE_ACTION_VALUE_SUBMIT = 'submit';
+  static const TYPE_LIST_ACTIVATE_ACTION_VALUE_SUBMIT = '@submit';
 
   static const BINARY_WIDTH = 'width';
   static const BINARY_HEIGHT = 'height';

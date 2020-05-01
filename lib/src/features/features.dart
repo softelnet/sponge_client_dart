@@ -115,8 +115,17 @@ class Features {
   static const GEO_TMS = 'tms';
   static const GEO_LAYER_NAME = 'geoLayerName';
 
-  static const String REQUEST_CHANNEL = 'channel';
-  static const String REQUEST_LANGUAGE = 'language';
+  static const REQUEST_CHANNEL = 'channel';
+  static const REQUEST_LANGUAGE = 'language';
+
+  static const SUB_ACTION_FEATURES = [
+    CONTEXT_ACTIONS,
+    SUB_ACTION_CREATE_ACTION,
+    SUB_ACTION_READ_ACTION,
+    SUB_ACTION_UPDATE_ACTION,
+    SUB_ACTION_DELETE_ACTION,
+    SUB_ACTION_ACTIVATE_ACTION
+  ];
 
   static String getCharacteristic(Map<String, Object> features) {
     var characteristic = features[TYPE_CHARACTERISTIC];

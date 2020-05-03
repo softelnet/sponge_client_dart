@@ -475,4 +475,11 @@ class DataTypeUtils {
 
     return features;
   }
+
+  /// Checks types compatibility but only for the first level.
+  static bool areTypesCompatible(DataType type1, DataType type2) =>
+      type1 != null &&
+      type2 != null &&
+      type1.kind == type2.kind &&
+      type1.annotated == type2.annotated;
 }

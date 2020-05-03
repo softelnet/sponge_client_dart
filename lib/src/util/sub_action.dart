@@ -61,17 +61,19 @@ class SubActionSpec {
           case DataTypeConstants.PATH_PARENT:
             Validate.notNull(
                 sourceParentType, 'The source parent type is unknown');
-            Validate.isTrue(targetType.kind == sourceParentType.kind,
-                'The target type for ${DataTypeConstants.PATH_PARENT} should be ${sourceParentType.kind} not ${targetType.kind}');
+            Validate.isTrue(
+                DataTypeUtils.areTypesCompatible(targetType, sourceParentType),
+                'The target type for ${DataTypeConstants.PATH_PARENT} is incompatible');
             break;
           default:
             Validate.isTrue(
-                targetType.kind ==
-                    DataTypeUtils.getSubType(
-                            sourceType, substitution.source, null)
-                        .kind,
-                'The target argument type ${targetType.kind} of ${substitution.target} in ${subActionMeta.name} is incompatible with'
-                ' the source type ${sourceType.kind} of ${substitution.source}');
+              DataTypeUtils.areTypesCompatible(
+                targetType,
+                DataTypeUtils.getSubType(sourceType, substitution.source, null),
+              ),
+              'The target type ${targetType.kind} of ${substitution.target} in ${subActionMeta.name} is incompatible with'
+              ' the source type ${sourceType.kind} of ${substitution.source}',
+            );
             break;
         }
       });
@@ -87,7 +89,8 @@ class SubActionSpec {
           Validate.notNull(
               sourceParentType, 'The source parent type is unknown');
           Validate.isTrue(
-              subActionMeta.result.kind == sourceParentType.kind,
+              DataTypeUtils.areTypesCompatible(
+                  subActionMeta.result, sourceParentType),
               'The sub-action ${subAction.name} result type ${subActionMeta.result.kind} is incompatible with'
               ' the result substitution type ${sourceParentType.kind} of ${subAction.result.target}');
           break;
@@ -99,7 +102,8 @@ class SubActionSpec {
                   : sourceType;
 
           Validate.isTrue(
-              subActionMeta.result.kind == targetType.kind,
+              DataTypeUtils.areTypesCompatible(
+                  subActionMeta.result, targetType),
               'The sub-action ${subAction.name} result type ${subActionMeta.result.kind} is incompatible with'
               ' the result substitution type ${targetType.kind} of ${subAction.result.target}');
           break;

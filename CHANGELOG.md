@@ -8,6 +8,7 @@
 * API change: Introduced a `SubAction` typed feature for `contextActions`, `createAction`, `readAction`, `updateAction`, `deleteAction` and `activateAction` instead of string specifications.
 * API change: Renamed the `'this'` keyword in a data type path to `'@this'`.
 * API change: Renamed the `'submit'` keyword in an activation action name to `'@submit'`.
+* Support for `@index` and `@parent` sub-action substitutions.
 * Added `license` and `description` to the REST API features.
 * Added `networkImage` to the supported `characteristic` feature values.
 * Dependencies upgrade.

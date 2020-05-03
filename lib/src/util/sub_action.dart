@@ -32,7 +32,11 @@ class SubActionSpec {
 
   bool get hasResultSubstitution => subAction.result?.target != null;
 
-  void setup(ActionMeta subActionMeta, DataType sourceType) {
+  void setup(
+    ActionMeta subActionMeta,
+    DataType sourceType, {
+    DataType sourceParentType,
+  }) {
     Validate.notNull(subActionMeta, 'Sub-action ${subAction.name} not found');
 
     if (hasArgSubstitutions) {
@@ -48,23 +52,58 @@ class SubActionSpec {
       // Type validation.
       subAction.args.forEach((substitution) {
         var targetType = subActionMeta.getArg(substitution.target);
-        Validate.isTrue(
-            targetType.kind ==
-                DataTypeUtils.getSubType(sourceType, substitution.source, null)
-                    .kind,
-            'The target argument type ${targetType.kind} of ${substitution.target} in ${subActionMeta.name} is incompatible with'
-            ' the source type ${sourceType.kind} of ${substitution.source}');
+
+        switch (substitution.source) {
+          case DataTypeConstants.PATH_INDEX:
+            Validate.isTrue(targetType.kind == DataTypeKind.INTEGER,
+                'The target type for ${DataTypeConstants.PATH_INDEX} should be an INTEGER');
+            break;
+          case DataTypeConstants.PATH_PARENT:
+            Validate.notNull(
+                sourceParentType, 'The source parent type is unknown');
+            Validate.isTrue(targetType.kind == sourceParentType.kind,
+                'The target type for ${DataTypeConstants.PATH_PARENT} should be ${sourceParentType.kind} not ${targetType.kind}');
+            break;
+          default:
+            Validate.isTrue(
+                targetType.kind ==
+                    DataTypeUtils.getSubType(
+                            sourceType, substitution.source, null)
+                        .kind,
+                'The target argument type ${targetType.kind} of ${substitution.target} in ${subActionMeta.name} is incompatible with'
+                ' the source type ${sourceType.kind} of ${substitution.source}');
+            break;
+        }
       });
     }
 
     if (subAction.result?.target != null) {
-      var parentType = subAction.result.target != DataTypeConstants.PATH_THIS
-          ? DataTypeUtils.getSubType(sourceType, subAction.result.target, null)
-          : sourceType;
-      Validate.isTrue(
-          subActionMeta.result.kind == parentType.kind,
-          'The sub-action ${subAction.name} result type ${subActionMeta.result.kind} is incompatible with'
-          ' the result substitution type ${parentType.kind} of ${subAction.result.target}');
+      switch (subAction.result.target) {
+        case DataTypeConstants.PATH_INDEX:
+          throw Exception(
+              'The result target ${DataTypeConstants.PATH_INDEX} is not supported');
+          break;
+        case DataTypeConstants.PATH_PARENT:
+          Validate.notNull(
+              sourceParentType, 'The source parent type is unknown');
+          Validate.isTrue(
+              subActionMeta.result.kind == sourceParentType.kind,
+              'The sub-action ${subAction.name} result type ${subActionMeta.result.kind} is incompatible with'
+              ' the result substitution type ${sourceParentType.kind} of ${subAction.result.target}');
+          break;
+        default:
+          var targetType =
+              subAction.result.target != DataTypeConstants.PATH_THIS
+                  ? DataTypeUtils.getSubType(
+                      sourceType, subAction.result.target, null)
+                  : sourceType;
+
+          Validate.isTrue(
+              subActionMeta.result.kind == targetType.kind,
+              'The sub-action ${subAction.name} result type ${subActionMeta.result.kind} is incompatible with'
+              ' the result substitution type ${targetType.kind} of ${subAction.result.target}');
+          break;
+      }
     }
   }
 }

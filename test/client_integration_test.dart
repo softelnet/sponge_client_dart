@@ -892,6 +892,27 @@ void main() {
       expect(subActions[0].args[0].target, equals('target1'));
       expect(subActions[0].args[0].source, equals('arg1'));
       expect(subActions[0].result.target, equals('arg1'));
+
+      expect(subActions[1].name, equals('SubAction1'));
+      expect(subActions[1].label,
+          equals('Sub-action 1/2 (no result substitution)'));
+      expect(subActions[1].args.length, equals(1));
+      expect(subActions[1].args[0].target, equals('target1'));
+      expect(subActions[1].args[0].source, equals('arg1'));
+      expect(subActions[1].result, isNull);
+
+      expect(subActions[2].name, equals('SubAction1'));
+      expect(subActions[2].label,
+          equals('Sub-action 1/3 (no arg and result substitution)'));
+      expect(subActions[2].args.length, equals(0));
+      expect(subActions[2].result, isNull);
+
+      expect(subActions[3].name, equals('SubAction2'));
+      expect(subActions[3].label, equals('Sub-action 2/1 (arg by value)'));
+      expect(subActions[3].args.length, equals(1));
+      expect(subActions[3].args[0].target, equals('target1'));
+      expect(subActions[3].args[0].source, equals('arg2'));
+      expect(subActions[3].result.target, equals('arg2'));
     });
 
     test('testTraverseActionArguments', () async {

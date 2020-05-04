@@ -50,6 +50,7 @@ class Features {
   static const ACTION_INTENT_VALUE_SIGN_UP = 'signUp';
   static const TYPE_INTENT_VALUE_USERNAME = 'username';
   static const TYPE_INTENT_VALUE_PASSWORD = 'password';
+  static const TYPE_INTENT_VALUE_SAVE_PASSWORD = 'savePassword';
 
   static const ACTION_INTENT_VALUE_SUBSCRIPTION = 'subscription';
   static const TYPE_INTENT_VALUE_EVENT_NAMES = 'eventNames';

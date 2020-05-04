@@ -33,10 +33,10 @@ class SpongeRestClientConfiguration {
   /// The service URL (reqired).
   String url;
 
-  /// The optional service user name.
+  /// The optional service username.
   String username;
 
-  /// The optional service user name.
+  /// The optional service username.
   String password;
 
   /// The flag telling if the client should use a request ID for all requests.

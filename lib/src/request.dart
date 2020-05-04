@@ -29,7 +29,7 @@ class RequestHeader {
   /// The request id (optional).
   String id;
 
-  /// The user name (optional).
+  /// The username (optional).
   String username;
 
   /// The user password (optional).

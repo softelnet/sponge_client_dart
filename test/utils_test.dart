@@ -39,6 +39,12 @@ void main() {
               '{"id":null,"username":"test","password":"password","authToken":null,"name":"TestAction","args":["TEST",null],"version":null}'),
           equals(
               '{"id":null,"username":"test","password":"***","authToken":null,"name":"TestAction","args":["TEST",null],"version":null}'));
+
+      expect(SpongeUtils.obfuscatePassword('{"passwordRetype":"secret!!!"}'),
+          equals('{"passwordRetype":"***"}'));
+      expect(SpongeUtils.obfuscatePassword('{"PASSwordRetype":"secret!!!"}'),
+          equals('{"PASSwordRetype":"***"}'));
+      expect(SpongeUtils.obfuscatePassword('{"a":"b"}'), equals('{"a":"b"}'));
     });
     test('isHttpSuccess', () {
       expect(SpongeUtils.isHttpSuccess(200), isTrue);

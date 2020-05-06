@@ -30,8 +30,9 @@ import 'package:timezone/timezone.dart';
 /// A set of utility methods.
 class SpongeUtils {
   /// Obfuscates a password in the JSON text of a request or response.
-  static String obfuscatePassword(String text) =>
-      text?.replaceAll(RegExp(r'"password":".*?"'), '"password":"***"');
+  static String obfuscatePassword(String text) => text?.replaceAllMapped(
+      RegExp(r'"(\w*password\w*)":".*?"', caseSensitive: false),
+      (Match m) => '"${m[1]}":"***"');
 
   /// Returns `true` if the HTTP [code] is success.
   static bool isHttpSuccess(int code) => 200 <= code && code <= 299;

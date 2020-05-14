@@ -37,7 +37,29 @@ class GeoPosition {
       };
 }
 
-enum GeoLayerType { TILE, MARKER }
+class GeoCrs {
+  GeoCrs({
+    @required this.code,
+    this.projection,
+  });
+
+  String code;
+  String projection;
+
+  factory GeoCrs.fromJson(Map<String, dynamic> json) => json != null
+      ? GeoCrs(
+          code: json['code'],
+          projection: json['projection'],
+        )
+      : null;
+
+  Map<String, dynamic> toJson() => {
+        'code': code,
+        'projection': projection,
+      };
+}
+
+enum GeoLayerType { TILE, MARKER, WMS }
 
 abstract class GeoLayer {
   GeoLayer(
@@ -73,6 +95,8 @@ abstract class GeoLayer {
         return GeoTileLayer.fromJson(json);
       case GeoLayerType.MARKER:
         return GeoMarkerLayer.fromJson(json);
+      case GeoLayerType.WMS:
+        return GeoWmsLayer.fromJson(json);
     }
 
     throw Exception('Unsupported geo layer type $type');
@@ -146,6 +170,57 @@ class GeoMarkerLayer extends GeoLayer {
       json != null ? GeoLayer.fromJsonBase(GeoMarkerLayer(), json) : null;
 }
 
+class GeoWmsLayer extends GeoLayer {
+  GeoWmsLayer({
+    @required this.baseUrl,
+    String name,
+    String label,
+    String description,
+    List<String> layers,
+    this.crs,
+    this.format,
+    this.version,
+    List<String> styles,
+    this.transparent,
+    Map<String, String> otherParameters,
+    Map<String, Object> features,
+  })  : layers = layers ?? [],
+        styles = styles ?? [],
+        otherParameters = otherParameters ?? {},
+        super(
+          GeoLayerType.WMS,
+          name: name,
+          label: label,
+          description: description,
+          features: features,
+        );
+
+  String baseUrl;
+  List<String> layers;
+  GeoCrs crs;
+  String format;
+  String version;
+  List<String> styles;
+  bool transparent;
+  Map<String, String> otherParameters;
+
+  factory GeoWmsLayer.fromJson(Map<String, dynamic> json) => json != null
+      ? GeoLayer.fromJsonBase(
+          GeoWmsLayer(
+            baseUrl: json['baseUrl'],
+            layers: List.from(json['layers'] ?? []),
+            crs: GeoCrs.fromJson(json['crs']),
+            format: json['format'],
+            version: json['version'],
+            styles: List.from(json['styles'] ?? []),
+            transparent: json['transparent'],
+            otherParameters: (json['otherParameters'] as Map)?.map(
+                (name, valueJson) => MapEntry(name, valueJson?.toString())),
+          ),
+          json)
+      : null;
+}
+
 class GeoMap {
   GeoMap({
     @required this.center,
@@ -163,8 +238,8 @@ class GeoMap {
   double minZoom;
   double maxZoom;
 
-  /// Coordinate Reference System. Currently ignored.
-  String crs;
+  /// Coordinate Reference System.
+  GeoCrs crs;
 
   List<GeoLayer> layers;
 
@@ -177,7 +252,7 @@ class GeoMap {
           zoom: (json['zoom'] as num)?.toDouble(),
           minZoom: (json['minZoom'] as num)?.toDouble(),
           maxZoom: (json['maxZoom'] as num)?.toDouble(),
-          crs: json['crs'],
+          crs: GeoCrs.fromJson(json['crs']),
           layers: (json['layers'] as List)
               ?.map((layer) => GeoLayer.fromJson(layer))
               ?.toList(),

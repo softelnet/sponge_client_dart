@@ -41,21 +41,27 @@ class GeoCrs {
   GeoCrs({
     @required this.code,
     this.projection,
-  });
+    List<double> resolutions,
+  }) : resolutions = resolutions ?? [];
 
   String code;
   String projection;
+  List<double> resolutions;
 
   factory GeoCrs.fromJson(Map<String, dynamic> json) => json != null
       ? GeoCrs(
           code: json['code'],
           projection: json['projection'],
+          resolutions: List.from(json['resolutions'] ?? [])
+              .map((r) => (r as num)?.toDouble())
+              .toList(),
         )
       : null;
 
   Map<String, dynamic> toJson() => {
         'code': code,
         'projection': projection,
+        'resolutions': resolutions,
       };
 }
 

@@ -12,9 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/// A Sponge REST API configuration.
-class SpongeRestClientConfiguration {
-  SpongeRestClientConfiguration(
+/// A Sponge Remote API configuration.
+class SpongeClientConfiguration {
+  SpongeClientConfiguration(
     this.url, {
     this.username,
     this.password,

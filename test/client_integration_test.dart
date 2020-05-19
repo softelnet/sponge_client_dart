@@ -15,23 +15,23 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:intl/intl.dart';
-import 'package:sponge_client_dart/sponge_client_dart.dart';
-import 'package:timezone/standalone.dart';
 
 import 'package:http/http.dart';
+import 'package:intl/intl.dart';
+import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/context.dart';
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/request.dart';
 import 'package:sponge_client_dart/src/response.dart';
-import 'package:sponge_client_dart/src/rest_client.dart';
-import 'package:sponge_client_dart/src/rest_client_configuration.dart';
+import 'package:sponge_client_dart/src/sponge_client.dart';
+import 'package:sponge_client_dart/src/sponge_client_configuration.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:test/test.dart';
+import 'package:timezone/standalone.dart';
 import 'package:timezone/timezone.dart';
 
 import 'complex_object.dart';
@@ -46,15 +46,15 @@ import 'test_utils.dart';
 void main() {
   configLogger();
 
-  Future<SpongeRestClient> getClient() async =>
-      SpongeRestClient(SpongeRestClientConfiguration('http://localhost:8888'));
+  Future<SpongeClient> getClient() async =>
+      SpongeClient(SpongeClientConfiguration('http://localhost:8888'));
 
-  Future<SpongeRestClient> getGuestRestClient() async => await getClient()
+  Future<SpongeClient> getGuestRestClient() async => await getClient()
     ..configuration.username = 'joe'
     ..configuration.password = 'password';
 
   // Tests mirroring BaseRestApiTestTemplate.java.
-  group('REST API Client base opertions', () {
+  group('Remote API Client base opertions', () {
     test('testVersion', () async {
       var client = await getClient();
       expect(SpongeUtils.isServerVersionCompatible(await client.getVersion()),
@@ -90,9 +90,9 @@ void main() {
           equals(await client.getVersion()));
 
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_NAME],
-          equals('Sponge Test REST API'));
+          equals('Sponge Test Remote API'));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_DESCRIPTION],
-          equals('Sponge Test REST API description'));
+          equals('Sponge Test Remote API description'));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_LICENSE],
           equals('Apache 2.0'));
 
@@ -100,7 +100,7 @@ void main() {
           isTrue);
     });
   });
-  group('REST API Client actions', () {
+  group('Remote API Client actions', () {
     test('testActions', () async {
       var client = await getClient();
       var actions = await client.getActions();
@@ -131,7 +131,7 @@ void main() {
       expect(actions[0].name, equals(name));
     });
   });
-  group('REST API Client getActionMeta', () {
+  group('Remote API Client getActionMeta', () {
     test('testGetActionMeta', () async {
       var client = await getClient();
       var actionMeta = await client.getActionMeta('UpperCase');
@@ -144,7 +144,7 @@ void main() {
       expect(actionMeta.result is StringType, isTrue);
     });
   });
-  group('REST API Client call', () {
+  group('Remote API Client call', () {
     test('testCall', () async {
       var client = await getClient();
       var arg1 = 'test1';
@@ -960,7 +960,7 @@ void main() {
       expect(identical(namedQTypes[6].type, meta.getArg('book.title')), isTrue);
     });
   });
-  group('REST API Client send', () {
+  group('Remote API Client send', () {
     test('testSend', () async {
       var client = await getGuestRestClient();
       var result = await client.send('alarm', attributes: {'attr1': 'Test'});
@@ -968,14 +968,14 @@ void main() {
     });
   });
 
-  group('REST API Client knowledgeBases', () {
+  group('Remote API Client knowledgeBases', () {
     test('testKnowledgeBases', () async {
       var client = await getClient();
       expect((await client.getKnowledgeBases()).length, equals(1));
     });
   });
 
-  group('REST API Client eventTypes', () {
+  group('Remote API Client eventTypes', () {
     test('testGetEventTypes', () async {
       var client = await getClient();
       var eventTypes = await client.getEventTypes();
@@ -985,7 +985,7 @@ void main() {
     });
   });
 
-  group('REST API Client getEventType', () {
+  group('Remote API Client getEventType', () {
     test('testGetEventType', () async {
       var client = await getClient();
       TestUtils.assertNotificationRecordType(
@@ -994,7 +994,7 @@ void main() {
   });
 
   // Tests mirroring ActionMetaCacheTest.java.
-  group('REST API Client action meta cache', () {
+  group('Remote API Client action meta cache', () {
     test('testActionCacheOn', () async {
       var client = await getClient();
       var actionName = 'UpperCase';
@@ -1059,7 +1059,7 @@ void main() {
   });
 
   // Tests mirroring EventTypeCacheTest.java.
-  group('REST API Client event type cache', () {
+  group('Remote API Client event type cache', () {
     test('testEventTypeCacheOn', () async {
       var client = await getClient();
       var eventTypeName = 'notification';
@@ -1131,7 +1131,7 @@ void main() {
   });
 
   // Tests mirroring AuthTokenExpirationTest.java.
-  group('REST API Client token expiration', () {
+  group('Remote API Client token expiration', () {
     test('testAuthTokeExpirationRelogin', () async {
       var client = await getClient();
       client.configuration
@@ -1172,7 +1172,7 @@ void main() {
   });
 
   // Tests mirroring ComplexObjectRestApiTest.java.
-  group('REST API Client complex object', () {
+  group('Remote API Client complex object', () {
     test('testRestCallComplexObject', () async {
       var client = await getClient()
         ..typeConverter.register(TestUtils.createObjectTypeUnitConverter());
@@ -1253,7 +1253,7 @@ void main() {
   });
 
   // Tests mirroring RestApiSimpleSpringSecurityTest.java.
-  group('REST API Client security', () {
+  group('Remote API Client security', () {
     test('testRestActionsUser1', () async {
       var client = await getClient()
         ..configuration.username = 'john'
@@ -1342,7 +1342,7 @@ void main() {
   });
 
   // Tests mirroring HttpErrorTest.java.
-  group('REST API Client HTTP error', () {
+  group('Remote API Client HTTP error', () {
     test('testHttpErrorInJsonParser', () async {
       var client = await getClient();
       var requestBody = '{"error_property":""}';
@@ -1364,7 +1364,7 @@ void main() {
   });
 
   // Tests mirroring ClientListenerTest.java.
-  group('REST API Client listener', () {
+  group('Remote API Client listener', () {
     String normalizeJson(String json) => json.replaceAll(RegExp(r'\s'), '');
 
     test('testGlobalListeners', () async {

@@ -22,7 +22,7 @@ import 'package:quiver/cache.dart';
 import 'package:sponge_client_dart/src/context.dart';
 import 'package:sponge_client_dart/src/event.dart';
 import 'package:sponge_client_dart/src/features/feature_converter.dart';
-import 'package:sponge_client_dart/src/rest_client_configuration.dart';
+import 'package:sponge_client_dart/src/sponge_client_configuration.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/listener.dart';
@@ -36,12 +36,12 @@ import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:sponge_client_dart/src/utils.dart';
 import 'package:synchronized/synchronized.dart';
 
-/// A Sponge REST API client.
+/// A Sponge Remote API client.
 ///
-/// SpongeRestClient performs best when you create a single instance and reuse it for all of your REST API calls.
+/// SpongeClient performs best when you create a single instance and reuse it for all of your Remote API calls.
 /// It keeps action metadata cache.
-class SpongeRestClient {
-  SpongeRestClient(
+class SpongeClient {
+  SpongeClient(
     this._configuration, {
     TypeConverter typeConverter,
     FeatureConverter featureConverter,
@@ -56,10 +56,10 @@ class SpongeRestClient {
   }
 
   static final Logger _logger = Logger('SpongeRestClient');
-  final SpongeRestClientConfiguration _configuration;
+  final SpongeClientConfiguration _configuration;
 
-  /// The REST API client configuration.
-  SpongeRestClientConfiguration get configuration => _configuration;
+  /// The Remote API client configuration.
+  SpongeClientConfiguration get configuration => _configuration;
 
   String get _url => _configuration.url;
 
@@ -272,7 +272,7 @@ class SpongeRestClient {
     var requestBody = json.encode(request.toJson());
 
     _logger.finer(() =>
-        'REST API $operation request: ${SpongeUtils.obfuscatePassword(requestBody)}');
+        'Remote API $operation request: ${SpongeUtils.obfuscatePassword(requestBody)}');
 
     _fireOnRequestSerializedListener(request, context, requestBody);
 
@@ -281,7 +281,7 @@ class SpongeRestClient {
         body: requestBody);
 
     _logger.finer(() =>
-        'REST API $operation response: ${SpongeUtils.obfuscatePassword(httpResponse.body)})');
+        'Remote API $operation response: ${SpongeUtils.obfuscatePassword(httpResponse.body)})');
 
     var isResponseRelevant =
         SpongeUtils.isHttpSuccess(httpResponse.statusCode) ||

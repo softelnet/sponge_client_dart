@@ -2,7 +2,7 @@
 
 ## Sponge client for Dart.
 
-This is the Sponge REST API client for Dart.
+This is the Sponge Remote API client for Dart.
 
 See `example/example.dart`.
 

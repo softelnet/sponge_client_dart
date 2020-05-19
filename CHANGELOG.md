@@ -1,5 +1,6 @@
 ## 1.16.0 (not released yet)
 
+* API change: The Sponge REST API has been renamed to the Sponge Remote API.
 * API change: Moved the `readOnly` flag from `ProvidedMeta` to `DataType`.
 * API change: Added `features` to the response header.
 * API change: Added `ProvideActionArgsRequestBody.initial`.
@@ -9,7 +10,7 @@
 * API change: Renamed the `'this'` keyword in a data type path to `'@this'`.
 * API change: Renamed the `'submit'` keyword in an activation action name to `'@submit'`.
 * Added support for `@index` and `@parent` sub-action substitutions.
-* Added `license` and `description` to the REST API features.
+* Added `license` and `description` to the Remote API features.
 * Added `networkImage` to the supported `characteristic` feature values.
 * Added support for `GeoCrs` and `GeoWmsLayer`.
 * Dependencies upgrade.

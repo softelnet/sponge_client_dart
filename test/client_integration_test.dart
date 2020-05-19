@@ -57,7 +57,7 @@ void main() {
   group('Remote API Client base opertions', () {
     test('testVersion', () async {
       var client = await getClient();
-      expect(SpongeUtils.isServerVersionCompatible(await client.getVersion()),
+      expect(SpongeClientUtils.isServerVersionCompatible(await client.getVersion()),
           isTrue);
     });
     test('testResponseTimes', () async {
@@ -78,7 +78,7 @@ void main() {
       expect(response.header.errorMessage, isNull);
       expect(response.header.detailedErrorMessage, isNull);
       expect(
-          SpongeUtils.isServerVersionCompatible(response.body.version), isTrue);
+          SpongeClientUtils.isServerVersionCompatible(response.body.version), isTrue);
       expect(response.header.id, equals('1'));
       expect(response.header.id, equals(request.header.id));
     });
@@ -935,7 +935,7 @@ void main() {
       expect(identical(meta.getArg('book.title'), bookType.fields[2]), isTrue);
 
       var namedQTypes = <QualifiedDataType>[];
-      SpongeUtils.traverseActionArguments(
+      SpongeClientUtils.traverseActionArguments(
           meta, (qType) => namedQTypes.add(qType),
           namedOnly: true);
 
@@ -1384,7 +1384,7 @@ void main() {
       var version = await client.getVersion();
       await client.getVersion();
 
-      expect(SpongeUtils.isServerVersionCompatible(version), isTrue);
+      expect(SpongeClientUtils.isServerVersionCompatible(version), isTrue);
       expect(requestStringList.length, equals(3));
       expect(responseStringList.length, equals(3));
       expect(
@@ -1415,7 +1415,7 @@ void main() {
           .body
           .version;
 
-      expect(SpongeUtils.isServerVersionCompatible(version), isTrue);
+      expect(SpongeClientUtils.isServerVersionCompatible(version), isTrue);
 
       await client.getVersion();
 

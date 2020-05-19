@@ -272,7 +272,7 @@ class SpongeClient {
     var requestBody = json.encode(request.toJson());
 
     _logger.finer(() =>
-        'Remote API $operation request: ${SpongeUtils.obfuscatePassword(requestBody)}');
+        'Remote API $operation request: ${SpongeClientUtils.obfuscatePassword(requestBody)}');
 
     _fireOnRequestSerializedListener(request, context, requestBody);
 
@@ -281,12 +281,12 @@ class SpongeClient {
         body: requestBody);
 
     _logger.finer(() =>
-        'Remote API $operation response: ${SpongeUtils.obfuscatePassword(httpResponse.body)})');
+        'Remote API $operation response: ${SpongeClientUtils.obfuscatePassword(httpResponse.body)})');
 
     var isResponseRelevant =
-        SpongeUtils.isHttpSuccess(httpResponse.statusCode) ||
+        SpongeClientUtils.isHttpSuccess(httpResponse.statusCode) ||
             httpResponse.statusCode == SpongeClientConstants.HTTP_CODE_ERROR &&
-                SpongeUtils.isJson(httpResponse);
+                SpongeClientUtils.isJson(httpResponse);
     if (!isResponseRelevant) {
       _logger.fine(() =>
           'HTTP error (status code ${httpResponse.statusCode}): ${httpResponse.body}');
@@ -484,7 +484,7 @@ class SpongeClient {
       }
 
       if (argValue.annotatedElementValueSet != null &&
-          SpongeUtils.supportsElementValueSet(argType)) {
+          SpongeClientUtils.supportsElementValueSet(argType)) {
         for (var annotatedValue in argValue.annotatedElementValueSet) {
           if (annotatedValue != null) {
             annotatedValue.value = await _typeConverter.unmarshal(
@@ -995,7 +995,7 @@ class SpongeClient {
 
   ObjectTypeUnitConverterMapper _createRemoteEventMarshaler() =>
       (TypeConverter converter, Object value) async {
-        return await SpongeUtils.marshalRemoteEvent(
+        return await SpongeClientUtils.marshalRemoteEvent(
           value as RemoteEvent,
           converter,
           eventTypeSupplier: (eventName) => getEventType(eventName),
@@ -1004,7 +1004,7 @@ class SpongeClient {
 
   ObjectTypeUnitConverterMapper _createRemoteEventUnmarshaler() =>
       (TypeConverter converter, Object value) async {
-        return await SpongeUtils.unmarshalRemoteEvent(
+        return await SpongeClientUtils.unmarshalRemoteEvent(
           value,
           converter,
           (eventName) => getEventType(eventName),

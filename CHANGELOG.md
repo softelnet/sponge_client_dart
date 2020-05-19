@@ -9,6 +9,7 @@
 * API change: Introduced a `SubAction` typed feature for `contextActions`, `createAction`, `readAction`, `updateAction`, `deleteAction` and `activateAction` instead of string specifications.
 * API change: Renamed the `'this'` keyword in a data type path to `'@this'`.
 * API change: Renamed the `'submit'` keyword in an activation action name to `'@submit'`.
+* API change: Renamed `SpongeUtils` to `SpongeClientUtils`.
 * Added support for `@index` and `@parent` sub-action substitutions.
 * Added `license` and `description` to the Remote API features.
 * Added `networkImage` to the supported `characteristic` feature values.

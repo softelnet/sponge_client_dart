@@ -69,7 +69,7 @@ abstract class TypeConverter {
     checkNotNull(type, message: 'The type must not be null');
 
     // Handle a wrapped annotated value.
-    if (type.annotated && SpongeUtils.isAnnotatedValueMap(value)) {
+    if (type.annotated && SpongeClientUtils.isAnnotatedValueMap(value)) {
       var annotatedValue = AnnotatedValue.fromJson(value);
       if (annotatedValue.value != null) {
         annotatedValue.value = await getInternalUnitConverterByType(type)
@@ -192,7 +192,7 @@ class DateTimeTypeUnitConverter
       case DateTimeKind.DATE_TIME:
         return (value as DateTime).toIso8601String();
       case DateTimeKind.DATE_TIME_ZONE:
-        return SpongeUtils.formatIsoDateTimeZone(value as TZDateTime);
+        return SpongeClientUtils.formatIsoDateTimeZone(value as TZDateTime);
       case DateTimeKind.DATE:
       case DateTimeKind.TIME:
         throw Exception(
@@ -216,7 +216,7 @@ class DateTimeTypeUnitConverter
       case DateTimeKind.DATE_TIME_ZONE:
         Validate.isTrue(type.format == null,
             'Format is not supported for the Dart implementation of ${type.dateTimeKind}');
-        return SpongeUtils.parseIsoDateTimeZone(stringValue);
+        return SpongeClientUtils.parseIsoDateTimeZone(stringValue);
       case DateTimeKind.DATE:
       case DateTimeKind.TIME:
         Validate.isTrue(type.format != null,

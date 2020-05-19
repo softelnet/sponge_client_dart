@@ -28,7 +28,7 @@ import 'package:sponge_client_dart/src/util/validate.dart';
 import 'package:timezone/timezone.dart';
 
 /// A set of utility methods.
-class SpongeUtils {
+class SpongeClientUtils {
   /// Obfuscates a password in the JSON text of a request or response.
   static String obfuscatePassword(String text) => text?.replaceAllMapped(
       RegExp(r'"(\w*password\w*)":".*?"', caseSensitive: false),

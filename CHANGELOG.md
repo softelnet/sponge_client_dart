@@ -10,6 +10,8 @@
 * API change: Renamed the `'this'` keyword in a data type path to `'@this'`.
 * API change: Renamed the `'submit'` keyword in an activation action name to `'@submit'`.
 * API change: Renamed `SpongeUtils` to `SpongeClientUtils`.
+* API change: Added new Remote API features: `spongeVersion` (instead of `version`) and `apiVersion`.
+* Added a new `callNamed` Remote API operation to call an action with named arguments (as a map).
 * Added support for `@index` and `@parent` sub-action substitutions.
 * Added `license` and `description` to the Remote API features.
 * Added `networkImage` to the supported `characteristic` feature values.

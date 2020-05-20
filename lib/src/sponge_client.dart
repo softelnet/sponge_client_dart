@@ -566,6 +566,52 @@ class SpongeClient {
           .body
           .result;
 
+  Future<ActionCallResponse> callNamedByRequest(
+    ActionCallNamedRequest request, {
+    ActionMeta actionMeta,
+    bool allowFetchMetadata = true,
+    SpongeRequestContext context,
+  }) async =>
+      await _doCallNamedByRequest(
+        actionMeta ??
+            await getActionMeta(request.body.name,
+                allowFetchMetadata: allowFetchMetadata),
+        request,
+        context,
+      );
+
+  Future<ActionCallResponse> _doCallNamedByRequest(ActionMeta actionMeta,
+      ActionCallNamedRequest request, SpongeRequestContext context) async {
+    _setupActionExecutionInfo(actionMeta, request.body);
+
+    // TODO validateCallArgs(actionMeta, request.body.args);
+
+    request.body.args =
+        await _marshalNamedActionCallArgs(actionMeta, request.body.args);
+
+    var response = await execute(SpongeClientConstants.OPERATION_CALL_NAMED,
+        request, (json) => ActionCallResponse.fromJson(json), context);
+
+    await _unmarshalActionCallResult(actionMeta, response);
+
+    return response;
+  }
+
+  /// Sends the `callNamed` request to the server and returns the response.
+  Future<dynamic> callNamed(
+    String actionName, [
+    Map<String, dynamic> args,
+    ActionMeta actionMeta,
+    bool allowFetchMetadata = true,
+  ]) async =>
+      (await callNamedByRequest(
+              ActionCallNamedRequest(
+                  ActionCallNamedRequestBody(name: actionName, args: args)),
+              actionMeta: actionMeta,
+              allowFetchMetadata: allowFetchMetadata))
+          .body
+          .result;
+
   void _setupActionExecutionInfo(
       ActionMeta actionMeta, ActionExecutionInfo info) {
     // Conditionally set the verification of the processor qualified version on the server side.
@@ -599,8 +645,7 @@ class SpongeClient {
     return response;
   }
 
-  /// Validates the action call arguments. This method is invoked internally by the `call` methods.
-  /// Throws exception on validation failure.
+  /// Validates the action call arguments. Throws exception on validation failure.
   void validateCallArgs(ActionMeta actionMeta, List args) {
     if (actionMeta?.args == null) {
       return;
@@ -639,6 +684,22 @@ class SpongeClient {
     var result = [];
     for (var i = 0; i < args.length; i++) {
       result.add(await _typeConverter.marshal(actionMeta.args[i], args[i]));
+    }
+
+    return result;
+  }
+
+  // Marshals the action call arguments.
+  Future<Map<String, dynamic>> _marshalNamedActionCallArgs(
+      ActionMeta actionMeta, Map<String, dynamic> args) async {
+    if (args == null || actionMeta?.args == null) {
+      return args;
+    }
+
+    var result = <String, dynamic>{};
+    for (var entry in args.entries) {
+      result[entry.key] = await typeConverter.marshal(
+          actionMeta.getArg(entry.key), entry.value);
     }
 
     return result;

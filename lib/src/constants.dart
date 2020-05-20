@@ -16,7 +16,6 @@
 abstract class SpongeClientConstants {
   static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.16';
 
-  static const int API_VERSION = 1;
   static const String CONTENT_TYPE_JSON = 'application/json;charset=utf-8';
   static const int DEFAULT_PORT = 1836;
 
@@ -27,6 +26,7 @@ abstract class SpongeClientConstants {
   static const String OPERATION_KNOWLEDGE_BASES = 'knowledgeBases';
   static const String OPERATION_ACTIONS = 'actions';
   static const String OPERATION_CALL = 'call';
+  static const String OPERATION_CALL_NAMED = 'callNamed';
   static const String OPERATION_SEND = 'send';
   static const String OPERATION_IS_ACTION_ACTIVE = 'isActionActive';
   static const String OPERATION_PROVIDE_ACTION_ARGS = 'provideActionArgs';
@@ -43,7 +43,8 @@ abstract class SpongeClientConstants {
 
   static const String ATTRIBUTE_PATH_SEPARATOR = '.';
 
-  static const String REMOTE_API_FEATURE_VERSION = 'version';
+  static const String REMOTE_API_FEATURE_SPONGE_VERSION = 'spongeVersion';
+  static const String REMOTE_API_FEATURE_API_VERSION = 'apiVersion';
   static const String REMOTE_API_FEATURE_GRPC_ENABLED = 'grpcEnabled';
   static const String REMOTE_API_FEATURE_NAME = 'name';
   static const String REMOTE_API_FEATURE_DESCRIPTION = 'description';

@@ -18,9 +18,9 @@ void main() async {
   // Create a new client for an anonymous user.
   var client = SpongeClient(SpongeClientConfiguration('http://localhost:8888'));
 
-  // Get the Sponge server version.
+  // Get the Sponge Remote API version.
   var version = await client.getVersion();
-  print('Sponge version: $version.');
+  print('Sponge Remote API version: $version.');
 
   // Get actions metadata.
   var actionsMeta = await client.getActions();

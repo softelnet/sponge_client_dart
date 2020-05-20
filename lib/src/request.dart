@@ -127,6 +127,39 @@ class ActionCallRequest extends BodySpongeRequest<ActionCallRequestBody> {
   ActionCallRequest(ActionCallRequestBody body) : super(body);
 }
 
+/// An action call with named arguments request body.
+class ActionCallNamedRequestBody implements RequestBody, ActionExecutionInfo {
+  ActionCallNamedRequestBody({
+    @required this.name,
+    this.args,
+    this.qualifiedVersion,
+  });
+
+  /// The action name.
+  @override
+  final String name;
+
+  /// The action arguments (optional).
+  Map<String, dynamic> args;
+
+  /// The action expected qualified version (optional).
+  @override
+  ProcessorQualifiedVersion qualifiedVersion;
+
+  @override
+  Map<String, dynamic> toJson() => {
+        'name': name,
+        'args': args,
+        'qualifiedVersion': qualifiedVersion,
+      };
+}
+
+/// An action call with named arguments request.
+class ActionCallNamedRequest
+    extends BodySpongeRequest<ActionCallNamedRequestBody> {
+  ActionCallNamedRequest(ActionCallNamedRequestBody body) : super(body);
+}
+
 /// A get actions request body.
 class GetActionsRequestBody implements RequestBody {
   GetActionsRequestBody({

@@ -57,7 +57,11 @@ void main() {
   group('Remote API Client base opertions', () {
     test('testVersion', () async {
       var client = await getClient();
-      expect(SpongeClientUtils.isServerVersionCompatible(await client.getVersion()),
+
+      // Works only if the API version is not set manually in the service.
+      expect(
+          SpongeClientUtils.isServerVersionCompatible(
+              await client.getVersion()),
           isTrue);
     });
     test('testResponseTimes', () async {
@@ -77,17 +81,21 @@ void main() {
       expect(response.header.errorCode, isNull);
       expect(response.header.errorMessage, isNull);
       expect(response.header.detailedErrorMessage, isNull);
-      expect(
-          SpongeClientUtils.isServerVersionCompatible(response.body.version), isTrue);
+      expect(SpongeClientUtils.isServerVersionCompatible(response.body.version),
+          isTrue);
       expect(response.header.id, equals('1'));
       expect(response.header.id, equals(request.header.id));
     });
     test('testFeatures', () async {
       var client = await getClient();
       var features = await client.getFeatures();
-      expect(features.length, equals(5));
-      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_VERSION],
+      expect(features.length, equals(6));
+
+      // Works only if the API version is not set manually in the service.
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_SPONGE_VERSION],
           equals(await client.getVersion()));
+      expect(features[SpongeClientConstants.REMOTE_API_FEATURE_API_VERSION],
+          isNull);
 
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_NAME],
           equals('Sponge Test Remote API'));
@@ -149,6 +157,13 @@ void main() {
       var client = await getClient();
       var arg1 = 'test1';
       var result = await client.call('UpperCase', [arg1]);
+      expect(result is String, isTrue);
+      expect(result, equals(arg1.toUpperCase()));
+    });
+    test('testCallNamed', () async {
+      var client = await getClient();
+      var arg1 = 'test1';
+      var result = await client.callNamed('UpperCase', {'text': arg1});
       expect(result is String, isTrue);
       expect(result, equals(arg1.toUpperCase()));
     });
@@ -1384,6 +1399,7 @@ void main() {
       var version = await client.getVersion();
       await client.getVersion();
 
+      // Works only if the API version is not set manually in the service.
       expect(SpongeClientUtils.isServerVersionCompatible(version), isTrue);
       expect(requestStringList.length, equals(3));
       expect(responseStringList.length, equals(3));
@@ -1415,6 +1431,7 @@ void main() {
           .body
           .version;
 
+      // Works only if the API version is not set manually in the service.
       expect(SpongeClientUtils.isServerVersionCompatible(version), isTrue);
 
       await client.getVersion();

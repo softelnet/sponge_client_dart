@@ -584,7 +584,7 @@ class SpongeClient {
       ActionCallNamedRequest request, SpongeRequestContext context) async {
     _setupActionExecutionInfo(actionMeta, request.body);
 
-    // TODO validateCallArgs(actionMeta, request.body.args);
+    validateCallNamedArgs(actionMeta, request.body.args);
 
     request.body.args =
         await _marshalNamedActionCallArgs(actionMeta, request.body.args);
@@ -667,12 +667,25 @@ class SpongeClient {
           ' but got $actualArgCount');
     }
 
-    // Validate non-nullable arguments.
     for (var i = 0; i < actionMeta.args.length; i++) {
-      var argType = actionMeta.args[i];
-      Validate.isTrue(argType.optional || argType.nullable || args[i] != null,
-          'The ${argType.label ?? argType.name} action argument is not set');
+      _validateCallArg(actionMeta.args[i], args[i]);
     }
+  }
+
+  void validateCallNamedArgs(ActionMeta actionMeta, Map<String, dynamic> args) {
+    if (actionMeta?.args == null) {
+      return;
+    }
+
+    args.forEach((name, value) {
+      _validateCallArg(actionMeta.args[actionMeta.getArgIndex(name)], value);
+    });
+  }
+
+  /// Validate a non-nullable argument.
+  void _validateCallArg(DataType argType, dynamic value) {
+    Validate.isTrue(argType.optional || argType.nullable || value != null,
+        'The ${argType.label ?? argType.name} action argument is not set');
   }
 
   // Marshals the action call arguments.

@@ -831,7 +831,7 @@ void main() {
           throwsA(predicate((e) =>
               e is SpongeClientException &&
               e.message ==
-                  'There is no feature offset for argument fruits in example.ViewFruitsPaging')));
+                  'There is no feature offset for argument fruits at example.ViewFruitsPaging')));
     });
 
     test('testActionsAnnotatedWithDefaultValue', () async {

@@ -13,21 +13,19 @@
 // limitations under the License.
 
 import 'package:meta/meta.dart';
+import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
+import 'package:sponge_client_dart/src/util/validate.dart';
 
 /// A request header.
 class RequestHeader {
   RequestHeader({
-    this.id,
     this.username,
     this.password,
     this.authToken,
     this.features,
   });
-
-  /// The request id (optional).
-  String id;
 
   /// The username (optional).
   String username;
@@ -42,51 +40,106 @@ class RequestHeader {
   Map<String, Object> features;
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'username': username,
-      'password': password,
-      'authToken': authToken,
-      'features': features,
-    };
+    var json = <String, dynamic>{};
+
+    if (username != null) {
+      json['username'] = username;
+    }
+
+    if (password != null) {
+      json['password'] = password;
+    }
+
+    if (authToken != null) {
+      json['authToken'] = authToken;
+    }
+
+    if (features != null) {
+      json['features'] = features;
+    }
+
+    return json;
   }
 }
 
-/// A request body.
-abstract class RequestBody {
+/// A request params.
+abstract class RequestParams {
+  RequestHeader get header;
+  set header(RequestHeader value);
+
   Map<String, dynamic> toJson();
 }
 
 /// A base request.
-abstract class SpongeRequest {
-  SpongeRequest({
-    this.header,
-  }) {
-    header ??= RequestHeader();
-  }
+abstract class SpongeRequest<T> {
+  SpongeRequest(
+    this.method, {
+    this.params,
+    this.id,
+  });
 
-  /// The request header (optional).
-  RequestHeader header;
+  /// The JSON-RPC version.
+  final String jsonrpc = '2.0';
+
+  /// The JSON-RPC method.
+  String method;
+
+  /// The JSON-RPC parameters.
+  T params;
+
+  /// The JSON-RPC request id.
+  dynamic id;
 
   Map<String, dynamic> toJson() {
     return {
-      'header': header?.toJson(),
+      'jsonrpc': jsonrpc,
+      'method': method,
+      'params': params,
+      'id': id,
     };
+  }
+
+  // TODO Remove because should be unnecessary in the client
+  T createParams();
+
+  RequestHeader get header;
+  set header(RequestHeader value);
+}
+
+/// A base request.
+abstract class TypedParamsRequest<T extends RequestParams>
+    extends SpongeRequest<T> {
+  TypedParamsRequest(
+    String method, {
+    T params,
+    dynamic id,
+  }) : super(method, params: params, id: id);
+
+  @override
+  RequestHeader get header => params?.header;
+
+  @override
+  set header(RequestHeader value) {
+    params ??= createParams();
+    params.header = value;
   }
 }
 
-/// A request with a body.
-abstract class BodySpongeRequest<T extends RequestBody> extends SpongeRequest {
-  BodySpongeRequest(this.body);
-
-  /// The request body.
-  T body;
+class BaseRequestParams implements RequestParams {
+  @override
+  RequestHeader header;
 
   @override
-  Map<String, dynamic> toJson() => super.toJson()
-    ..addAll({
-      'body': body?.toJson(),
-    });
+  Map<String, dynamic> toJson() {
+    var json = <String, dynamic>{};
+
+    var headerJson = header?.toJson();
+    if (headerJson?.isNotEmpty ?? false) {
+      json['header'] = headerJson;
+    }
+
+    return json;
+  }
 }
 
 /// An action execution related info.
@@ -96,73 +149,56 @@ abstract class ActionExecutionInfo {
 }
 
 /// An action call request body.
-class ActionCallRequestBody implements RequestBody, ActionExecutionInfo {
-  ActionCallRequestBody({
+class ActionCallParams extends BaseRequestParams
+    implements ActionExecutionInfo {
+  ActionCallParams({
     @required this.name,
-    this.args,
+    dynamic args,
     this.qualifiedVersion,
-  });
+  }) {
+    this.args = args;
+  }
 
   /// The action name.
   @override
   final String name;
 
   /// The action arguments (optional).
-  List args;
+  dynamic _args;
+
+  dynamic get args => _args;
+
+  set args(dynamic value) {
+    Validate.isTrue(args == null || args is List || args is Map,
+        'Action args should be an instance of a List or a Map');
+    _args = value;
+  }
 
   /// The action expected qualified version (optional).
   @override
   ProcessorQualifiedVersion qualifiedVersion;
 
   @override
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'args': args,
-        'qualifiedVersion': qualifiedVersion,
-      };
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'name': name,
+      'args': args,
+      'qualifiedVersion': qualifiedVersion,
+    });
 }
 
 /// An action call request.
-class ActionCallRequest extends BodySpongeRequest<ActionCallRequestBody> {
-  ActionCallRequest(ActionCallRequestBody body) : super(body);
-}
-
-/// An action call with named arguments request body.
-class ActionCallNamedRequestBody implements RequestBody, ActionExecutionInfo {
-  ActionCallNamedRequestBody({
-    @required this.name,
-    this.args,
-    this.qualifiedVersion,
-  });
-
-  /// The action name.
-  @override
-  final String name;
-
-  /// The action arguments (optional).
-  Map<String, dynamic> args;
-
-  /// The action expected qualified version (optional).
-  @override
-  ProcessorQualifiedVersion qualifiedVersion;
+class ActionCallRequest extends TypedParamsRequest<ActionCallParams> {
+  ActionCallRequest([ActionCallParams params])
+      : super(SpongeClientConstants.METHOD_CALL, params: params);
 
   @override
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'args': args,
-        'qualifiedVersion': qualifiedVersion,
-      };
+  ActionCallParams createParams() => ActionCallParams(name: null);
 }
 
-/// An action call with named arguments request.
-class ActionCallNamedRequest
-    extends BodySpongeRequest<ActionCallNamedRequestBody> {
-  ActionCallNamedRequest(ActionCallNamedRequestBody body) : super(body);
-}
-
-/// A get actions request body.
-class GetActionsRequestBody implements RequestBody {
-  GetActionsRequestBody({
+/// A get actions request params.
+class GetActionsParams extends BaseRequestParams {
+  GetActionsParams({
     this.name,
     this.metadataRequired,
     this.registeredTypes,
@@ -179,79 +215,73 @@ class GetActionsRequestBody implements RequestBody {
   bool registeredTypes;
 
   @override
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'metadataRequired': metadataRequired,
-        'registeredTypes': registeredTypes,
-      };
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'name': name,
+      'metadataRequired': metadataRequired,
+      'registeredTypes': registeredTypes,
+    });
 }
 
 /// A get actions request.
-class GetActionsRequest extends BodySpongeRequest<GetActionsRequestBody> {
-  GetActionsRequest(GetActionsRequestBody body) : super(body);
+class GetActionsRequest extends TypedParamsRequest<GetActionsParams> {
+  GetActionsRequest(GetActionsParams params)
+      : super(SpongeClientConstants.METHOD_ACTIONS, params: params);
+
+  @override
+  GetActionsParams createParams() => GetActionsParams();
+}
+
+/// A get event types request params.
+class GetEventTypesParams extends BaseRequestParams {
+  GetEventTypesParams({
+    @required this.name,
+  });
+
+  /// The event name or the regular expression.
+  final String name;
+
+  @override
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'name': name,
+    });
+}
+
+/// A get event types request.
+class GetEventTypesRequest extends TypedParamsRequest<GetEventTypesParams> {
+  GetEventTypesRequest([GetEventTypesParams params])
+      : super(SpongeClientConstants.METHOD_EVENT_TYPES, params: params);
+
+  @override
+  GetEventTypesParams createParams() => GetEventTypesParams(name: null);
+}
+
+/// A get features request
+class GetFeaturesRequest extends TypedParamsRequest<BaseRequestParams> {
+  GetFeaturesRequest([BaseRequestParams params])
+      : super(SpongeClientConstants.METHOD_FEATURES, params: params);
+
+  @override
+  BaseRequestParams createParams() => BaseRequestParams();
 }
 
 /// A get knowledge bases request.
-class GetKnowledgeBasesRequest extends SpongeRequest {}
-
-/// A get version request
-class GetVersionRequest extends SpongeRequest {}
-
-/// A get features request
-class GetFeaturesRequest extends SpongeRequest {}
-
-/// A login request.
-class LoginRequest extends SpongeRequest {
-  LoginRequest(
-    String username,
-    String password,
-  ) : super(header: RequestHeader(username: username, password: password));
-}
-
-/// A logout request.
-class LogoutRequest extends SpongeRequest {}
-
-/// A reload request.
-class ReloadRequest extends SpongeRequest {}
-
-/// A send event request body.
-class SendEventRequestBody implements RequestBody {
-  SendEventRequestBody({
-    @required this.name,
-    this.attributes,
-    this.label,
-    this.description,
-    this.features,
-  });
-
-  /// The event name.
-  final String name;
-
-  /// The event attributes (optional).
-  Map<String, Object> attributes;
-
-  /// The event label.
-  String label;
-
-  /// The event description.
-  String description;
-
-  /// The event features (optional).
-  Map<String, Object> features;
+class GetKnowledgeBasesRequest extends TypedParamsRequest<BaseRequestParams> {
+  GetKnowledgeBasesRequest([BaseRequestParams params])
+      : super(SpongeClientConstants.METHOD_KNOWLEDGE_BASES, params: params);
 
   @override
-  Map<String, dynamic> toJson() => {
-        'name': name,
-        'attributes': attributes,
-        'label': label,
-        'description': description,
-        'features': features,
-      };
+  BaseRequestParams createParams() => BaseRequestParams();
 }
 
-/// A send event request.
-class SendEventRequest extends BodySpongeRequest<SendEventRequestBody> {
-  SendEventRequest(SendEventRequestBody body) : super(body);
+/// A get version request
+class GetVersionRequest extends TypedParamsRequest<BaseRequestParams> {
+  GetVersionRequest([BaseRequestParams params])
+      : super(SpongeClientConstants.METHOD_VERSION, params: params);
+
+  @override
+  BaseRequestParams createParams() => BaseRequestParams();
 }
 
 /// An action active request entry.
@@ -304,27 +334,55 @@ class IsActionActiveEntry implements ActionExecutionInfo {
       );
 }
 
-/// An action active request body.
-class IsActionActiveRequestBody implements RequestBody {
-  IsActionActiveRequestBody({@required this.entries});
+/// An action active request params.
+class IsActionActiveParams extends BaseRequestParams {
+  IsActionActiveParams({@required this.entries});
 
   final List<IsActionActiveEntry> entries;
 
   @override
-  Map<String, dynamic> toJson() => {
-        'entries': entries?.map((entry) => entry?.toJson())?.toList(),
-      };
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'entries': entries?.map((entry) => entry?.toJson())?.toList(),
+    });
 }
 
 /// An action active request.
-class IsActionActiveRequest
-    extends BodySpongeRequest<IsActionActiveRequestBody> {
-  IsActionActiveRequest(IsActionActiveRequestBody body) : super(body);
+class IsActionActiveRequest extends TypedParamsRequest<IsActionActiveParams> {
+  IsActionActiveRequest(IsActionActiveParams params)
+      : super(SpongeClientConstants.METHOD_IS_ACTION_ACTIVE, params: params);
+
+  @override
+  IsActionActiveParams createParams() => IsActionActiveParams(entries: null);
 }
 
-/// A provide action arguments request body.
-class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
-  ProvideActionArgsRequestBody({
+/// A login request.
+class LoginRequest extends TypedParamsRequest<BaseRequestParams> {
+  LoginRequest({
+    @required String username,
+    @required String password,
+  }) : super(SpongeClientConstants.METHOD_LOGIN,
+            params: BaseRequestParams()) {
+    header = RequestHeader(username: username, password: password);
+  }
+
+  @override
+  BaseRequestParams createParams() => BaseRequestParams();
+}
+
+/// A logout request.
+class LogoutRequest extends TypedParamsRequest<BaseRequestParams> {
+  LogoutRequest([BaseRequestParams params])
+      : super(SpongeClientConstants.METHOD_LOGOUT, params: params);
+
+  @override
+  BaseRequestParams createParams() => BaseRequestParams();
+}
+
+/// A provide action arguments request params.
+class ProvideActionArgsParams extends BaseRequestParams
+    implements ActionExecutionInfo {
+  ProvideActionArgsParams({
     @required this.name,
     this.provide,
     this.submit,
@@ -362,45 +420,125 @@ class ProvideActionArgsRequestBody implements RequestBody, ActionExecutionInfo {
   bool initial;
 
   @override
-  Map<String, dynamic> toJson() => {
+  Map<String, dynamic> toJson() {
+    var json = super.toJson()
+      ..addAll({
         'name': name,
         'provide': provide,
-        'submit': submit,
-        'current': current,
-        'dynamicTypes': dynamicTypes != null
-            ? {
-                for (var entry in dynamicTypes.entries)
-                  entry.key: entry.value.toJson()
-              }
-            : null,
-        'qualifiedVersion': qualifiedVersion,
-        'argFeatures': argFeatures,
-        'initial': initial,
+      });
+
+    if (submit != null) {
+      json['submit'] = submit;
+    }
+
+    if (current != null) {
+      json['current'] = current;
+    }
+
+    if (dynamicTypes != null) {
+      json['dynamicTypes'] = {
+        for (var entry in dynamicTypes.entries) entry.key: entry.value.toJson()
       };
+    }
+
+    if (argFeatures != null) {
+      json['argFeatures'] = argFeatures;
+    }
+
+    if (qualifiedVersion != null) {
+      json['qualifiedVersion'] = qualifiedVersion;
+    }
+
+    if (initial != null) {
+      json['initial'] = initial;
+    }
+
+    return json;
+  }
 }
 
 /// A provide action arguments request.
 class ProvideActionArgsRequest
-    extends BodySpongeRequest<ProvideActionArgsRequestBody> {
-  ProvideActionArgsRequest(ProvideActionArgsRequestBody body) : super(body);
-}
-
-/// A get event types request body.
-class GetEventTypesRequestBody implements RequestBody {
-  GetEventTypesRequestBody({
-    @required this.name,
-  });
-
-  /// The event name or the regular expression.
-  final String name;
+    extends TypedParamsRequest<ProvideActionArgsParams> {
+  ProvideActionArgsRequest(ProvideActionArgsParams params)
+      : super(SpongeClientConstants.METHOD_PROVIDE_ACTION_ARGS,
+            params: params);
 
   @override
-  Map<String, dynamic> toJson() => {
-        'name': name,
-      };
+  ProvideActionArgsParams createParams() => ProvideActionArgsParams(name: null);
 }
 
-/// A get event types request.
-class GetEventTypesRequest extends BodySpongeRequest<GetEventTypesRequestBody> {
-  GetEventTypesRequest(GetEventTypesRequestBody body) : super(body);
+/// A reload request.
+class ReloadRequest extends TypedParamsRequest<BaseRequestParams> {
+  ReloadRequest([BaseRequestParams params])
+      : super(SpongeClientConstants.METHOD_RELOAD, params: params);
+
+  @override
+  BaseRequestParams createParams() => BaseRequestParams();
+}
+
+/// A send event request params.
+class SendEventParams extends BaseRequestParams {
+  SendEventParams({
+    @required this.name,
+    this.attributes,
+    this.label,
+    this.description,
+    this.features,
+  });
+
+  /// The event name.
+  final String name;
+
+  /// The event attributes (optional).
+  Map<String, Object> attributes;
+
+  /// The event label.
+  String label;
+
+  /// The event description.
+  String description;
+
+  /// The event features (optional).
+  Map<String, Object> features;
+
+  @override
+  Map<String, dynamic> toJson() => super.toJson()
+    ..addAll({
+      'name': name,
+      'attributes': attributes,
+      'label': label,
+      'description': description,
+      'features': features,
+    });
+}
+
+/// A send event request.
+class SendEventRequest extends TypedParamsRequest<SendEventParams> {
+  SendEventRequest(SendEventParams params)
+      : super(SpongeClientConstants.METHOD_SEND, params: params);
+
+  @override
+  SendEventParams createParams() => SendEventParams(name: null);
+}
+
+class GenericRequest extends SpongeRequest<Map<String, Object>> {
+  GenericRequest(
+    String method, {
+    Map<String, Object> params,
+    dynamic id,
+  }) : super(method, params: params, id: id);
+
+  @override
+  Map<String, Object> createParams() => {};
+
+  @override
+  RequestHeader get header =>
+      params != null ? params[SpongeClientConstants.PARAM_HEADER] : null;
+
+  @override
+  set header(RequestHeader value) {
+    params ??= {};
+    params[SpongeClientConstants.PARAM_HEADER] = value;
+  }
 }

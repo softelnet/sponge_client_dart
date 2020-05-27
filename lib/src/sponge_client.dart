@@ -55,7 +55,7 @@ class SpongeClient {
     _initObjectTypeMarshalers(_typeConverter);
   }
 
-  static final Logger _logger = Logger('SpongeRestClient');
+  static final Logger _logger = Logger('SpongeClient');
   final SpongeClientConfiguration _configuration;
 
   /// The Remote API client configuration.
@@ -103,19 +103,21 @@ class SpongeClient {
           OnResponseDeserializedListener listener) =>
       _onResponseDeserializedListeners.remove(listener);
 
-  String _getUrl(String operation) =>
-      _url + (_url.endsWith('/') ? '' : '/') + operation;
+  String _getUrl() =>
+      _url +
+      (_url.endsWith('/') ? '' : '/') +
+      SpongeClientConstants.ENDPOINT_JSONRPC;
 
   T setupRequest<T extends SpongeRequest>(T request) {
+    if (request.id == null) {
+      var newRequestId = ++_currentRequestId;
+      request.id = '$newRequestId';
+    }
+
     // Set empty header if none.
     request.header ??= RequestHeader();
 
     var header = request.header;
-
-    if (_configuration.useRequestId) {
-      var newRequestId = ++_currentRequestId;
-      header.id = '$newRequestId';
-    }
 
     // Must be isolate-safe.
     var authToken = _currentAuthToken;
@@ -137,40 +139,46 @@ class SpongeClient {
     return request;
   }
 
-  R _setupResponse<R extends SpongeResponse>(String operation, R response) {
+  R _setupResponse<R extends SpongeResponse>(String method, R response) {
     // Set empty header if none.
-    response.header ??= ResponseHeader();
-    handleResponseHeader(operation, response.header.errorCode,
-        response.header.errorMessage, response.header.detailedErrorMessage);
+    if (response.result != null && response.result.header == null) {
+      response.result.header = ResponseHeader();
+    }
+
+    if (response.error != null) {
+      handleErrorResponse(method, response.error);
+    }
 
     return response;
   }
 
-  void handleResponseHeader(String operation, String errorCode,
-      String errorMessage, String detailedErrorMessage) {
-    if (errorCode != null) {
-      if (errorCode != SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN) {
-        _logger.fine(() =>
-            'Error response for $operation ($errorCode): $errorMessage\n${detailedErrorMessage ?? ""}');
-      }
+  void handleErrorResponse(String method, ResponseError error) {
+    if (error.code != null) {
+      // TODO Missing in Java if (errorCode != SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN) {
+      //   _logger.fine(() =>
+      //       'Error response for $method ($errorCode): $errorMessage\n${detailedErrorMessage ?? ""}');
+      // }
 
       if (_configuration.throwExceptionOnErrorResponse) {
-        switch (errorCode) {
+        var message = error.message ?? 'Error code: ${error.code}';
+        var detailedErrorMessage = error.data?.detailedErrorMessage;
+
+        switch (error.code) {
           case SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN:
             throw InvalidAuthTokenException(
-                errorCode, errorMessage, detailedErrorMessage);
+                error.code, message, detailedErrorMessage);
           case SpongeClientConstants.ERROR_CODE_INVALID_KB_VERSION:
             throw InvalidKnowledgeBaseVersionException(
-                errorCode, errorMessage, detailedErrorMessage);
+                error.code, message, detailedErrorMessage);
           case SpongeClientConstants.ERROR_CODE_INVALID_USERNAME_PASSWORD:
             throw InvalidUsernamePasswordException(
-                errorCode, errorMessage, detailedErrorMessage);
+                error.code, message, detailedErrorMessage);
           case SpongeClientConstants.ERROR_CODE_INACTIVE_ACTION:
             throw InactiveActionException(
-                errorCode, errorMessage, detailedErrorMessage);
+                error.code, message, detailedErrorMessage);
           default:
             throw SpongeClientException(
-                errorCode, errorMessage, detailedErrorMessage);
+                error.code, message, detailedErrorMessage);
         }
       }
     }
@@ -215,7 +223,7 @@ class SpongeClient {
 
   /// Sends the request to the server and returns the response.
   Future<R> execute<T extends SpongeRequest, R extends SpongeResponse>(
-      String operation, T request, ResponseFromJsonCallback<R> fromJson,
+      T request, ResponseFromJsonCallback<R> fromJson,
       [SpongeRequestContext context]) async {
     context ??= SpongeRequestContext();
 
@@ -227,21 +235,18 @@ class SpongeClient {
         requestPassword: request.header.password,
         requestAuthToken: request.header.authToken,
         onExecute: () async =>
-            await _executeDelegate(operation, request, fromJson, context),
+            await _executeDelegate(request, fromJson, context),
         onClearAuthToken: () {
           request.header.authToken = null;
         });
   }
 
-  Future<SpongeResponse> _executeDelegate(
-      String operation,
-      SpongeRequest request,
-      ResponseFromJsonCallback fromJson,
-      SpongeRequestContext context) async {
+  Future<SpongeResponse> _executeDelegate(SpongeRequest request,
+      ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
     context ??= SpongeRequestContext();
 
-    return _setupResponse(operation,
-        await _doExecute(operation, setupRequest(request), fromJson, context));
+    return _setupResponse(request.method,
+        await _doExecute(setupRequest(request), fromJson, context));
   }
 
   void _fireOnRequestSerializedListener(
@@ -267,21 +272,21 @@ class SpongeClient {
         .forEach((listener) => listener(request, response, responseBody));
   }
 
-  Future<SpongeResponse> _doExecute(String operation, SpongeRequest request,
+  Future<SpongeResponse> _doExecute(SpongeRequest request,
       ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
     var requestBody = json.encode(request.toJson());
 
     _logger.finer(() =>
-        'Remote API $operation request: ${SpongeClientUtils.obfuscatePassword(requestBody)}');
+        'Remote API ${request.method} request: ${SpongeClientUtils.obfuscatePassword(requestBody)}');
 
     _fireOnRequestSerializedListener(request, context, requestBody);
 
-    var httpResponse = await post(_getUrl(operation),
+    var httpResponse = await post(_getUrl(),
         headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
         body: requestBody);
 
     _logger.finer(() =>
-        'Remote API $operation response: ${SpongeClientUtils.obfuscatePassword(httpResponse.body)})');
+        'Remote API ${request.method} response: ${SpongeClientUtils.obfuscatePassword(httpResponse.body)})');
 
     var isResponseRelevant =
         SpongeClientUtils.isHttpSuccess(httpResponse.statusCode) ||
@@ -306,58 +311,66 @@ class SpongeClient {
   }
 
   /// Sends the `version` request to the server and returns the response.
-  Future<GetVersionResponse> getVersionByRequest(GetVersionRequest request,
-          {SpongeRequestContext context}) async =>
-      await execute(SpongeClientConstants.OPERATION_VERSION, request,
-          (json) => GetVersionResponse.fromJson(json), context);
+  Future<GetVersionResponse> getVersionByRequest(
+    GetVersionRequest request, {
+    SpongeRequestContext context,
+  }) async =>
+      await execute(
+          request, (json) => GetVersionResponse.fromJson(json), context);
 
   /// Sends the `version` request to the server and returns the version.
   Future<String> getVersion() async =>
-      (await getVersionByRequest(GetVersionRequest())).body.version;
+      (await getVersionByRequest(GetVersionRequest())).result.value;
 
   /// Sends the `features` request to the server and returns the response.
-  Future<GetFeaturesResponse> getFeaturesByRequest(GetFeaturesRequest request,
-          {SpongeRequestContext context}) async =>
-      await execute(SpongeClientConstants.OPERATION_FEATURES, request,
-          (json) => GetFeaturesResponse.fromJson(json), context);
+  Future<GetFeaturesResponse> getFeaturesByRequest(
+    GetFeaturesRequest request, {
+    SpongeRequestContext context,
+  }) async =>
+      await execute(
+          request, (json) => GetFeaturesResponse.fromJson(json), context);
 
   /// Returns the Sponge API features by sending the `features` request to the server and returning the features or using the cache.
   Future<Map<String, dynamic>> getFeatures() async {
     _featuresCache ??=
-        (await getFeaturesByRequest(GetFeaturesRequest())).body.features;
+        (await getFeaturesByRequest(GetFeaturesRequest())).result.value;
 
     return _featuresCache;
   }
 
   /// Sends the `login` request to the server and returns the response. Sets the auth token
   /// in the client for further requests.
-  Future<LoginResponse> loginByRequest(LoginRequest request,
-      {SpongeRequestContext context}) async {
+  Future<LoginResponse> loginByRequest(
+    LoginRequest request, {
+    SpongeRequestContext context,
+  }) async {
     return await _lock.synchronized(() async {
       _currentAuthToken = null;
       LoginResponse response = await _executeDelegate(
-          SpongeClientConstants.OPERATION_LOGIN,
-          request,
-          (json) => LoginResponse.fromJson(json),
-          context);
-      _currentAuthToken = response.body.authToken;
+          request, (json) => LoginResponse.fromJson(json), context);
+      _currentAuthToken = response.result.value?.authToken;
 
       return response;
     });
   }
 
   /// Sends the `login` request to the server and returns the auth token. See [loginByRequest].
-  Future<String> login() async => (await loginByRequest(
-          LoginRequest(_configuration.username, _configuration.password)))
-      .body
-      .authToken;
+  Future<String> login() async => (await loginByRequest(LoginRequest(
+        username: _configuration.username,
+        password: _configuration.password,
+      )))
+          .result
+          .value
+          ?.authToken;
 
   /// Sends the `logout` request to the server and returns the response.
   /// Clears the auth token in the client.
-  Future<LogoutResponse> logoutByRequest(LogoutRequest request,
-      {SpongeRequestContext context}) async {
+  Future<LogoutResponse> logoutByRequest(
+    LogoutRequest request, {
+    SpongeRequestContext context,
+  }) async {
     return await _lock.synchronized(() async {
-      var response = await execute(SpongeClientConstants.OPERATION_LOGOUT,
+      var response = await execute(
           request, (json) => LogoutResponse.fromJson(json), context);
       _currentAuthToken = null;
 
@@ -372,17 +385,18 @@ class SpongeClient {
 
   /// Sends the `knowledgeBases` request to the server and returns the response.
   Future<GetKnowledgeBasesResponse> getKnowledgeBasesByRequest(
-          GetKnowledgeBasesRequest request,
-          {SpongeRequestContext context}) async =>
-      await execute(SpongeClientConstants.OPERATION_KNOWLEDGE_BASES, request,
-          (json) => GetKnowledgeBasesResponse.fromJson(json), context);
+    GetKnowledgeBasesRequest request, {
+    SpongeRequestContext context,
+  }) async =>
+      await execute(
+          request, (json) => GetKnowledgeBasesResponse.fromJson(json), context);
 
   /// Sends the `knowledgeBases` request to the server and returns the list of available
   /// knowledge bases metadata.
   Future<List<KnowledgeBaseMeta>> getKnowledgeBases() async =>
       (await getKnowledgeBasesByRequest(GetKnowledgeBasesRequest()))
-          .body
-          .knowledgeBases;
+          .result
+          .value;
 
   /// Sends the `actions` request to the server and returns the response. This method may populate
   /// the action metadata cache.
@@ -393,19 +407,24 @@ class SpongeClient {
   /// Sends the `actions` request to the server and returns the list of available actions metadata.
   Future<List<ActionMeta>> getActions(
           {String name, bool metadataRequired}) async =>
-      (await getActionsByRequest(GetActionsRequest(GetActionsRequestBody(
-              name: name, metadataRequired: metadataRequired))))
-          .body
+      (await getActionsByRequest(GetActionsRequest(
+        GetActionsParams(
+          name: name,
+          metadataRequired: metadataRequired,
+        ),
+      )))
+          .result
+          .value
           .actions;
 
   Future<GetActionsResponse> _doGetActionsByRequest(GetActionsRequest request,
       bool populateCache, SpongeRequestContext context) async {
-    var response = await execute(SpongeClientConstants.OPERATION_ACTIONS,
+    var response = await execute(
         request, (json) => GetActionsResponse.fromJson(json), context);
 
-    if (response.body.actions != null) {
+    if (response.result.value?.actions != null) {
       // Unmarshal defaultValues in action meta.
-      for (var actionMeta in response.body.actions) {
+      for (var actionMeta in response.result.value.actions) {
         await _unmarshalActionMeta(actionMeta);
       }
 
@@ -414,16 +433,16 @@ class SpongeClient {
           configuration.useActionMetaCache &&
           _actionMetaCache != null) {
         await for (var actionMeta
-            in Stream.fromIterable(response.body.actions)) {
+            in Stream.fromIterable(response.result.value.actions)) {
           await _actionMetaCache.set(actionMeta.name, actionMeta);
         }
       }
     }
 
-    if (response.body.types != null) {
-      for (var key in response.body.types.keys) {
-        response.body.types[key] =
-            await _unmarshalDataType(response.body.types[key]);
+    if (response.result.value?.types != null) {
+      for (var key in response.result.value.types.keys) {
+        response.result.value.types[key] =
+            await _unmarshalDataType(response.result.value.types[key]);
       }
     }
 
@@ -498,10 +517,15 @@ class SpongeClient {
   Future<ActionMeta> _fetchActionMeta(
       String actionName, SpongeRequestContext context) async {
     var request = GetActionsRequest(
-        GetActionsRequestBody(metadataRequired: true, name: actionName));
+      GetActionsParams(
+        metadataRequired: true,
+        name: actionName,
+      ),
+    );
     var response = await _doGetActionsByRequest(request, false, context);
 
-    return response.body.actions?.singleWhere((_) => true, orElse: () => null);
+    return response.result.value?.actions
+        ?.singleWhere((_) => true, orElse: () => null);
   }
 
   /// Returns the metadata for the specified action or `null` if there is no such action
@@ -542,75 +566,42 @@ class SpongeClient {
   /// from the server by sending an additional request. If [allowFetchMetadata] is `false` and the action
   /// metadata is `null` or is not in the cache, the marshalling of arguments and unmarshalling of the result
   /// will be suppressed.
-  Future<ActionCallResponse> callByRequest(ActionCallRequest request,
-          {ActionMeta actionMeta,
-          bool allowFetchMetadata = true,
-          SpongeRequestContext context}) async =>
+  Future<ActionCallResponse> callByRequest(
+    ActionCallRequest request, {
+    ActionMeta actionMeta,
+    bool allowFetchMetadata = true,
+    SpongeRequestContext context,
+  }) async =>
       await _doCallByRequest(
           actionMeta ??
-              await getActionMeta(request.body.name,
+              await getActionMeta(request.params.name,
                   allowFetchMetadata: allowFetchMetadata),
           request,
           context);
 
   /// Sends the `call` request to the server and returns the response. See [callByRequest].
-  Future<dynamic> call(String actionName,
-          [List args,
-          ActionMeta actionMeta,
-          bool allowFetchMetadata = true]) async =>
-      (await callByRequest(
-              ActionCallRequest(
-                  ActionCallRequestBody(name: actionName, args: args)),
-              actionMeta: actionMeta,
-              allowFetchMetadata: allowFetchMetadata))
-          .body
-          .result;
-
-  Future<ActionCallResponse> callNamedByRequest(
-    ActionCallNamedRequest request, {
+  Future<dynamic> call(
+    String actionName, {
+    List args,
+    Map<String, dynamic> namedArgs,
     ActionMeta actionMeta,
     bool allowFetchMetadata = true,
-    SpongeRequestContext context,
-  }) async =>
-      await _doCallNamedByRequest(
-        actionMeta ??
-            await getActionMeta(request.body.name,
-                allowFetchMetadata: allowFetchMetadata),
-        request,
-        context,
-      );
+  }) async {
+    Validate.isTrue(args == null || namedArgs == null,
+        'Action args and namedArgs can\'t be set both');
 
-  Future<ActionCallResponse> _doCallNamedByRequest(ActionMeta actionMeta,
-      ActionCallNamedRequest request, SpongeRequestContext context) async {
-    _setupActionExecutionInfo(actionMeta, request.body);
-
-    validateCallNamedArgs(actionMeta, request.body.args);
-
-    request.body.args =
-        await _marshalNamedActionCallArgs(actionMeta, request.body.args);
-
-    var response = await execute(SpongeClientConstants.OPERATION_CALL_NAMED,
-        request, (json) => ActionCallResponse.fromJson(json), context);
-
-    await _unmarshalActionCallResult(actionMeta, response);
-
-    return response;
+    return (await callByRequest(
+            ActionCallRequest(
+              ActionCallParams(
+                name: actionName,
+                args: namedArgs ?? args,
+              ),
+            ),
+            actionMeta: actionMeta,
+            allowFetchMetadata: allowFetchMetadata))
+        .result
+        .value;
   }
-
-  /// Sends the `callNamed` request to the server and returns the response.
-  Future<dynamic> callNamed(
-    String actionName, [
-    Map<String, dynamic> args,
-    ActionMeta actionMeta,
-    bool allowFetchMetadata = true,
-  ]) async =>
-      (await callNamedByRequest(
-              ActionCallNamedRequest(
-                  ActionCallNamedRequestBody(name: actionName, args: args)),
-              actionMeta: actionMeta,
-              allowFetchMetadata: allowFetchMetadata))
-          .body
-          .result;
 
   void _setupActionExecutionInfo(
       ActionMeta actionMeta, ActionExecutionInfo info) {
@@ -630,15 +621,22 @@ class SpongeClient {
 
   Future<ActionCallResponse> _doCallByRequest(ActionMeta actionMeta,
       ActionCallRequest request, SpongeRequestContext context) async {
-    _setupActionExecutionInfo(actionMeta, request.body);
+    _setupActionExecutionInfo(actionMeta, request.params);
 
-    validateCallArgs(actionMeta, request.body.args);
+    var args = request.params.args;
 
-    request.body.args =
-        await _marshalActionCallArgs(actionMeta, request.body.args);
+    if (args is List || args == null) {
+      validateCallArgs(actionMeta, args);
+      request.params.args = await _marshalActionCallArgs(actionMeta, args);
+    } else if (args is Map) {
+      validateCallNamedArgs(actionMeta, args);
+      request.params.args = await _marshalNamedActionCallArgs(actionMeta, args);
+    } else {
+      throw Exception('Action args should be an instance of a List or a Map');
+    }
 
-    var response = await execute(SpongeClientConstants.OPERATION_CALL, request,
-        (json) => ActionCallResponse.fromJson(json), context);
+    var response = await execute(
+        request, (json) => ActionCallResponse.fromJson(json), context);
 
     await _unmarshalActionCallResult(actionMeta, response);
 
@@ -748,20 +746,21 @@ class SpongeClient {
   /// Unmarshals the action call result.
   Future<void> _unmarshalActionCallResult(
       ActionMeta actionMeta, ActionCallResponse response) async {
-    if (actionMeta?.result == null || response.body.result == null) {
+    if (actionMeta?.result == null || response.result.value == null) {
       return;
     }
 
-    response.body.result =
-        await _typeConverter.unmarshal(actionMeta.result, response.body.result);
+    response.result.value = await _typeConverter.unmarshal(
+        actionMeta.result, response.result.value);
   }
 
   /// Sends the `isActionActive` request to the server.
   Future<IsActionActiveResponse> isActionActiveByRequest(
-      IsActionActiveRequest request,
-      {SpongeRequestContext context}) async {
-    if (request.body.entries != null) {
-      for (var entry in request.body.entries) {
+    IsActionActiveRequest request, {
+    SpongeRequestContext context,
+  }) async {
+    if (request.params.entries != null) {
+      for (var entry in request.params.entries) {
         var actionMeta = await getActionMeta(entry.name);
         _setupActionExecutionInfo(actionMeta, entry);
 
@@ -783,7 +782,7 @@ class SpongeClient {
       }
     }
 
-    return await execute(SpongeClientConstants.OPERATION_IS_ACTION_ACTIVE,
+    return await execute(
         request, (json) => IsActionActiveResponse.fromJson(json), context);
   }
 
@@ -810,34 +809,35 @@ class SpongeClient {
     entries = entries.map((entry) => entry?.clone()).toList();
 
     return (await isActionActiveByRequest(
-            IsActionActiveRequest(IsActionActiveRequestBody(entries: entries))))
-        .body
-        .active;
+      IsActionActiveRequest(
+        IsActionActiveParams(entries: entries),
+      ),
+    ))
+        .result
+        .value;
   }
 
   /// Sends the `provideActionArgs` request to the server. Fetches the provided action arguments from the server.
   Future<ProvideActionArgsResponse> provideActionArgsByRequest(
-      ProvideActionArgsRequest request,
-      {SpongeRequestContext context}) async {
-    var actionMeta = await getActionMeta(request.body.name);
-    _setupActionExecutionInfo(actionMeta, request.body);
+    ProvideActionArgsRequest request, {
+    SpongeRequestContext context,
+  }) async {
+    var actionMeta = await getActionMeta(request.params.name);
+    _setupActionExecutionInfo(actionMeta, request.params);
 
-    request.body.current = await _marshalAuxiliaryActionArgsCurrent(
-        actionMeta, request.body.current, request.body.dynamicTypes);
+    request.params.current = await _marshalAuxiliaryActionArgsCurrent(
+        actionMeta, request.params.current, request.params.dynamicTypes);
 
     // Clone the features and marshal all features.
-    request.body.argFeatures =
-        await _marshalProvideArgsFeaturesMap(request.body.argFeatures);
+    request.params.argFeatures =
+        await _marshalProvideArgsFeaturesMap(request.params.argFeatures);
 
     var response = await execute(
-        SpongeClientConstants.OPERATION_PROVIDE_ACTION_ARGS,
-        request,
-        (json) => ProvideActionArgsResponse.fromJson(json),
-        context);
+        request, (json) => ProvideActionArgsResponse.fromJson(json), context);
 
     if (actionMeta != null) {
       await _unmarshalProvidedActionArgValues(
-          actionMeta, response.body.provided, request.body.dynamicTypes);
+          actionMeta, response.result.value, request.params.dynamicTypes);
     }
 
     return response;
@@ -869,7 +869,7 @@ class SpongeClient {
     bool initial,
   }) async {
     return (await provideActionArgsByRequest(ProvideActionArgsRequest(
-      ProvideActionArgsRequestBody(
+      ProvideActionArgsParams(
         name: actionName,
         provide: provide,
         submit: submit,
@@ -879,8 +879,8 @@ class SpongeClient {
         initial: initial,
       ),
     )))
-        .body
-        .provided;
+        .result
+        .value;
   }
 
   /// Sends the `eventTypes` request to the server.
@@ -888,20 +888,21 @@ class SpongeClient {
       GetEventTypesRequest request,
       bool populateCache,
       SpongeRequestContext context) async {
-    var response = await execute(SpongeClientConstants.OPERATION_EVENT_TYPES,
+    var response = await execute(
         request, (json) => GetEventTypesResponse.fromJson(json), context);
 
-    if (response?.body?.eventTypes != null) {
-      for (var key in response.body.eventTypes.keys) {
-        response.body.eventTypes[key] =
-            await _unmarshalDataType(response.body.eventTypes[key]);
+    var types = response.result.value;
+
+    if (types != null) {
+      for (var key in types.keys) {
+        types[key] = await _unmarshalDataType(types[key]);
       }
 
       // Populate the event type cache.
       if (populateCache &&
           configuration.useEventTypeCache &&
           _eventTypeCache != null) {
-        for (var entry in response.body.eventTypes.entries) {
+        for (var entry in types.entries) {
           await _eventTypeCache.set(entry.key, entry.value);
         }
       }
@@ -918,18 +919,24 @@ class SpongeClient {
 
   /// Sends the `eventTypes` request to the server.
   Future<Map<String, RecordType>> getEventTypes({String name}) async =>
-      (await getEventTypesByRequest(
-              GetEventTypesRequest(GetEventTypesRequestBody(name: name))))
-          .body
-          .eventTypes;
+      (await getEventTypesByRequest(GetEventTypesRequest(
+        GetEventTypesParams(
+          name: name,
+        ),
+      )))
+          .result
+          .value;
 
   /// Returns the event type for the specified event type name or `null` if there is no such event type.
   ///
   /// This method may fetch the event type from the server or use the event type cache if configured.
   /// If you want to prevent fetching the event type from the server, set [allowFetchEventType] to `false`.
   /// The default value is `true`.
-  Future<RecordType> getEventType(String eventTypeName,
-      {bool allowFetchEventType = true, SpongeRequestContext context}) async {
+  Future<RecordType> getEventType(
+    String eventTypeName, {
+    bool allowFetchEventType = true,
+    SpongeRequestContext context,
+  }) async {
     allowFetchEventType = allowFetchEventType ?? true;
     if (_configuration.useEventTypeCache && _eventTypeCache != null) {
       var eventType = await _eventTypeCache.get(eventTypeName);
@@ -951,27 +958,33 @@ class SpongeClient {
           String eventTypeName, SpongeRequestContext context) async =>
       (await _doGetEventTypesByRequest(
               GetEventTypesRequest(
-                  GetEventTypesRequestBody(name: eventTypeName)),
+                GetEventTypesParams(
+                  name: eventTypeName,
+                ),
+              ),
               false,
               context))
-          .body
-          .eventTypes[eventTypeName];
+          .result
+          .value[eventTypeName];
 
   /// Sends the `send` request to the server and returns the response.
-  Future<SendEventResponse> sendByRequest(SendEventRequest request,
-      {SpongeRequestContext context}) async {
-    var body = request.body;
+  Future<SendEventResponse> sendByRequest(
+    SendEventRequest request, {
+    SpongeRequestContext context,
+  }) async {
+    var params = request.params;
 
-    var eventType = await getEventType(body.name);
+    var eventType = await getEventType(params.name);
     if (eventType != null) {
-      body.attributes = await typeConverter.marshal(eventType, body.attributes);
+      params.attributes =
+          await typeConverter.marshal(eventType, params.attributes);
     }
 
-    body.features = await FeaturesUtils.marshal(
-        typeConverter.featureConverter, body.features);
+    params.features = await FeaturesUtils.marshal(
+        typeConverter.featureConverter, params.features);
 
-    return await execute(SpongeClientConstants.OPERATION_SEND, request,
-        (json) => SendEventResponse.fromJson(json), context);
+    return await execute(
+        request, (json) => SendEventResponse.fromJson(json), context);
   }
 
   /// Sends the event named [eventName] with optional [attributes], [label], [description] and [features] to the server.
@@ -982,21 +995,26 @@ class SpongeClient {
     String description,
     Map<String, Object> features,
   }) async =>
-      (await sendByRequest(SendEventRequest(SendEventRequestBody(
-        name: eventName,
-        attributes: attributes,
-        label: label,
-        description: description,
-        features: features,
-      ))))
-          .body
-          .eventId;
+      (await sendByRequest(
+        SendEventRequest(
+          SendEventParams(
+            name: eventName,
+            attributes: attributes,
+            label: label,
+            description: description,
+            features: features,
+          ),
+        ),
+      ))
+          .result
+          .value;
 
   /// Sends the `reload` request to the server and returns the response.
-  Future<ReloadResponse> reloadByRequest(ReloadRequest request,
-          {SpongeRequestContext context}) async =>
-      await execute(SpongeClientConstants.OPERATION_RELOAD, request,
-          (json) => ReloadResponse.fromJson(json), context);
+  Future<ReloadResponse> reloadByRequest(
+    ReloadRequest request, {
+    SpongeRequestContext context,
+  }) async =>
+      await execute(request, (json) => ReloadResponse.fromJson(json), context);
 
   /// Sends the `reload` request to the server.
   Future<void> reload() async {

@@ -1,6 +1,6 @@
 ## 1.16.0 (not released yet)
 
-* API change: The Sponge REST API has been renamed to the Sponge Remote API.
+* API change: The Sponge REST API has been renamed to the Sponge Remote API. The Sponge Remote API is intended to be JSON-RPC 2.0 compatible.
 * API change: Moved the `readOnly` flag from `ProvidedMeta` to `DataType`.
 * API change: Added `features` to the response header.
 * API change: Added `ProvideActionArgsRequestBody.initial`.
@@ -11,7 +11,7 @@
 * API change: Renamed the `'submit'` keyword in an activation action name to `'@submit'`.
 * API change: Renamed `SpongeUtils` to `SpongeClientUtils`.
 * API change: Added new Remote API features: `spongeVersion` (instead of `version`) and `apiVersion`.
-* Added a new `callNamed` Remote API operation to call an action with named arguments (as a map).
+* Added support for named action arguments (as a map) to the `call` Remote API method.
 * Added support for `@index` and `@parent` sub-action substitutions.
 * Added `license` and `description` to the Remote API features.
 * Added `networkImage` to the supported `characteristic` feature values.

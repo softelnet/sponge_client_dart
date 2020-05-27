@@ -49,11 +49,11 @@ void main() {
   Future<SpongeClient> getClient() async =>
       SpongeClient(SpongeClientConfiguration('http://localhost:8888'));
 
-  Future<SpongeClient> getGuestRestClient() async => await getClient()
+  Future<SpongeClient> getGuestSpongeClient() async => await getClient()
     ..configuration.username = 'joe'
     ..configuration.password = 'password';
 
-  // Tests mirroring BaseRestApiTestTemplate.java.
+  // Tests mirroring BaseRemoteApiTestTemplate.java.
   group('Remote API Client base opertions', () {
     test('testVersion', () async {
       var client = await getClient();
@@ -67,24 +67,22 @@ void main() {
     test('testResponseTimes', () async {
       var client = await getClient();
       var response = await client.getVersionByRequest(GetVersionRequest());
-      expect(response.header.requestTime, isNotNull);
-      expect(response.header.responseTime, isNotNull);
-      expect(response.header.responseTime.isBefore(response.header.requestTime),
+      expect(response.result.header.requestTime, isNotNull);
+      expect(response.result.header.responseTime, isNotNull);
+      expect(
+          response.result.header.responseTime
+              .isBefore(response.result.header.requestTime),
           isFalse);
     });
     test('testVersionWithId', () async {
       var client = await getClient();
-      client.configuration.useRequestId = true;
-
       var request = GetVersionRequest();
       var response = await client.getVersionByRequest(request);
-      expect(response.header.errorCode, isNull);
-      expect(response.header.errorMessage, isNull);
-      expect(response.header.detailedErrorMessage, isNull);
-      expect(SpongeClientUtils.isServerVersionCompatible(response.body.version),
+      expect(response.error, isNull);
+      expect(SpongeClientUtils.isServerVersionCompatible(response.result.value),
           isTrue);
-      expect(response.header.id, equals('1'));
-      expect(response.header.id, equals(request.header.id));
+      expect(response.id, equals('1'));
+      expect(response.id, equals(request.id));
     });
     test('testFeatures', () async {
       var client = await getClient();
@@ -156,14 +154,14 @@ void main() {
     test('testCall', () async {
       var client = await getClient();
       var arg1 = 'test1';
-      var result = await client.call('UpperCase', [arg1]);
+      var result = await client.call('UpperCase', args: [arg1]);
       expect(result is String, isTrue);
       expect(result, equals(arg1.toUpperCase()));
     });
     test('testCallNamed', () async {
       var client = await getClient();
       var arg1 = 'test1';
-      var result = await client.callNamed('UpperCase', {'text': arg1});
+      var result = await client.call('UpperCase', namedArgs: {'text': arg1});
       expect(result is String, isTrue);
       expect(result, equals(arg1.toUpperCase()));
     });
@@ -174,15 +172,15 @@ void main() {
       actionMeta.qualifiedVersion = ProcessorQualifiedVersion(1, 1);
 
       try {
-        await client.call('UpperCase', [arg1]);
+        await client.call('UpperCase', args: [arg1]);
         fail('$InvalidKnowledgeBaseVersionException expected');
       } catch (e) {
         expect(e is InvalidKnowledgeBaseVersionException, isTrue);
         expect(
-            (e as InvalidKnowledgeBaseVersionException).errorMessage,
+            (e as InvalidKnowledgeBaseVersionException).message,
             equals(
                 'The expected action qualified version (1.1) differs from the actual (2.2)'));
-        expect(e.errorCode,
+        expect(e.code,
             equals(SpongeClientConstants.ERROR_CODE_INVALID_KB_VERSION));
       }
     });
@@ -190,7 +188,7 @@ void main() {
       var client = await getClient();
       var image = Uint8List.fromList(
           await File('test/resources/image.png').readAsBytes());
-      Uint8List resultImage = await client.call('EchoImage', [image]);
+      Uint8List resultImage = await client.call('EchoImage', args: [image]);
       expect(image, equals(resultImage));
     });
     test('testCallLanguageError', () async {
@@ -199,9 +197,9 @@ void main() {
         await client.call('LangErrorAction');
         fail('$SpongeClientException expected');
       } on SpongeClientException catch (e) {
-        expect(e.errorCode, equals(SpongeClientConstants.ERROR_CODE_GENERIC));
+        expect(e.code, equals(SpongeClientConstants.ERROR_CODE_GENERIC));
         expect(
-            e.errorMessage,
+            e.message,
             startsWith(
                 'NameError: global name \'throws_error\' is not defined in'));
         expect(
@@ -218,9 +216,8 @@ void main() {
         await client.call('KnowledgeBaseErrorAction');
         fail('$SpongeClientException expected');
       } on SpongeClientException catch (e) {
-        expect(e.errorCode, equals(SpongeClientConstants.ERROR_CODE_GENERIC));
-        expect(e.errorMessage,
-            startsWith('Exception: Knowledge base exception in'));
+        expect(e.code, equals(SpongeClientConstants.ERROR_CODE_GENERIC));
+        expect(e.message, startsWith('Exception: Knowledge base exception in'));
         expect(
             e.detailedErrorMessage,
             startsWith(
@@ -232,7 +229,7 @@ void main() {
     test('testCallContentCharset', () async {
       var client = await getClient();
       var arg1 = 'íñäöüèąśęćżźółń';
-      var result = await client.call('UpperCase', [arg1]);
+      var result = await client.call('UpperCase', args: [arg1]);
       expect(result is String, isTrue);
       expect(result, equals(arg1.toUpperCase()));
     });
@@ -241,7 +238,7 @@ void main() {
       var annotatedArg =
           AnnotatedValue(true, features: {'argFeature1': 'argFeature1Value1'});
       AnnotatedValue result =
-          await client.call('AnnotatedTypeAction', [annotatedArg]);
+          await client.call('AnnotatedTypeAction', args: [annotatedArg]);
       expect(result.value, equals('RESULT'));
       expect(result.features.length, equals(2));
       expect(result.features['feature1'], equals('value1'));
@@ -259,12 +256,12 @@ void main() {
       expect(resultType.kind, equals(DataTypeKind.DYNAMIC));
 
       DynamicValue resultForString =
-          await client.call(actionMeta.name, ['string']);
+          await client.call(actionMeta.name, args: ['string']);
       expect(resultForString.value, equals('text'));
       expect(resultForString.type.kind, equals(DataTypeKind.STRING));
 
       DynamicValue resultForBoolean =
-          await client.call(actionMeta.name, ['boolean']);
+          await client.call(actionMeta.name, args: ['boolean']);
       expect(resultForBoolean.value, equals(true));
       expect(resultForBoolean.type.kind, equals(DataTypeKind.BOOLEAN));
     });
@@ -274,10 +271,13 @@ void main() {
       var resultType = actionMeta.result;
       expect(resultType.kind, equals(DataTypeKind.TYPE));
 
-      expect(await client.call(actionMeta.name, ['string', null]) is StringType,
+      expect(
+          await client.call(actionMeta.name, args: ['string', null])
+              is StringType,
           isTrue);
       expect(
-          await client.call(actionMeta.name, ['boolean', null]) is BooleanType,
+          await client.call(actionMeta.name, args: ['boolean', null])
+              is BooleanType,
           isTrue);
 
       var stringType = StringType()
@@ -285,7 +285,7 @@ void main() {
         ..defaultValue = 'DEF';
 
       StringType resultStringType =
-          await client.call(actionMeta.name, ['arg', stringType]);
+          await client.call(actionMeta.name, args: ['arg', stringType]);
       expect(resultStringType.name, equals(stringType.name));
       expect(resultStringType.defaultValue, equals(stringType.defaultValue));
 
@@ -301,7 +301,7 @@ void main() {
         ..name = 'record';
 
       RecordType resultRecordType =
-          await client.call(actionMeta.name, ['arg', recordType]);
+          await client.call(actionMeta.name, args: ['arg', recordType]);
       expect(resultRecordType.name, equals(recordType.name));
       expect(resultRecordType.fields.length, equals(2));
 
@@ -339,8 +339,8 @@ void main() {
       var time = DateFormat(actionMeta.args[3].format).parse('15:15:00');
       var instant = DateTime.now().toUtc();
 
-      List<dynamic> dates = await client
-          .call(actionMeta.name, [dateTime, dateTimeZone, date, time, instant]);
+      List<dynamic> dates = await client.call(actionMeta.name,
+          args: [dateTime, dateTimeZone, date, time, instant]);
       expect(dates[0].value is DateTime, isTrue);
       expect(dates[0].value, equals(dateTime));
 
@@ -362,7 +362,7 @@ void main() {
       var actionMeta = await client.getActionMeta('RecordAsResultAction');
       TestUtils.assertBookRecordType(actionMeta.result as RecordType);
 
-      Map<String, Object> book1 = await client.call(actionMeta.name, [1]);
+      Map<String, Object> book1 = await client.call(actionMeta.name, args: [1]);
       expect(book1.length, equals(4));
       expect(book1['id'], equals(1));
       expect(book1['author'], equals('James Joyce'));
@@ -381,7 +381,7 @@ void main() {
       };
 
       Map<String, Object> book3 =
-          await client.call('RecordAsArgAction', [book2]);
+          await client.call('RecordAsArgAction', args: [book2]);
       expect(book3.length, equals(4));
       book2.forEach((key, value) => expect(book3[key], equals(value)));
       expect(book3['comment'], isNull);
@@ -414,41 +414,44 @@ void main() {
       var arg = {'id': 1, 'name': 'Name 1"'};
 
       Map<String, dynamic> mapResult =
-          await client.call(actionMeta.name, [arg]);
+          await client.call(actionMeta.name, args: [arg]);
       expect(mapResult['id'], equals(arg['id']));
       expect(mapResult['name'], equals((arg['name'] as String).toUpperCase()));
     });
 
     test('testRegisteredTypeArgAction', () async {
       var client = await getClient();
-      var request = GetActionsRequest(GetActionsRequestBody(
+      var request = GetActionsRequest(GetActionsParams(
         name: 'RegisteredTypeArgAction',
         registeredTypes: true,
       ));
 
-      var types = (await client.getActionsByRequest(request)).body.types;
+      var types =
+          (await client.getActionsByRequest(request)).result.value.types;
       expect(types.length, equals(1));
       TestUtils.assertPersonRecordType(types['Person'] as RecordType);
 
-      String surname = await client.call('RegisteredTypeArgAction', [
+      String surname = await client.call('RegisteredTypeArgAction', args: [
         {'firstName': 'James', 'surname': 'Joyce'}
       ]);
       expect(surname, equals('Joyce'));
     });
     test('testInheritedRegisteredTypeArgAction', () async {
       var client = await getClient();
-      var request = GetActionsRequest(GetActionsRequestBody(
+      var request = GetActionsRequest(GetActionsParams(
         name: 'InheritedRegisteredTypeArgAction',
         registeredTypes: true,
       ));
 
-      var types = (await client.getActionsByRequest(request)).body.types;
+      var types =
+          (await client.getActionsByRequest(request)).result.value.types;
       expect(types.length, equals(2));
 
       TestUtils.assertPersonRecordType(types['Person'] as RecordType);
       TestUtils.assertCitizenRecordType(types['Citizen'] as RecordType);
 
-      String sentence = await client.call('InheritedRegisteredTypeArgAction', [
+      String sentence =
+          await client.call('InheritedRegisteredTypeArgAction', args: [
         {'firstName': 'John', 'surname': 'Brown', 'country': 'UK'}
       ]);
       expect(sentence, equals('John comes from UK'));
@@ -489,7 +492,7 @@ void main() {
       expect(argType.fields[2].name, equals('title'));
       expect(argType.fields[2].label, equals('Title'));
 
-      String bookSummary = await client.call(actionMeta.name, [
+      String bookSummary = await client.call(actionMeta.name, args: [
         {
           'author': {'firstName': 'James', 'surname': 'Joyce'},
           'title': 'Ulysses'
@@ -520,7 +523,7 @@ void main() {
       expect(argTypes[3].provided, isNull);
 
       // Reset the test state.
-      await client.call(actionName, ['A', false, null, 1]);
+      await client.call(actionName, args: ['A', false, null, 1]);
 
       var providedArgs = await client.provideActionArgs(actionName,
           provide: ['actuator1', 'actuator2', 'actuator3']);
@@ -540,7 +543,7 @@ void main() {
       expect(providedArgs['actuator3'].valuePresent, isTrue);
       expect(providedArgs['actuator4'], isNull);
 
-      await client.call(actionName, ['B', true, null, 10]);
+      await client.call(actionName, args: ['B', true, null, 10]);
 
       providedArgs = await client.provideActionArgs(actionName,
           provide: ['actuator1', 'actuator2', 'actuator3']);
@@ -576,7 +579,7 @@ void main() {
       var actionName = 'SetActuatorDepends';
 
       // Reset the test state.
-      await client.call(actionName, ['A', false, 1, 1, 'X']);
+      await client.call(actionName, args: ['A', false, 1, 1, 'X']);
 
       var argTypes = (await client.getActionMeta(actionName)).args;
 
@@ -633,7 +636,7 @@ void main() {
       expect(providedArgs['actuator5'].valueSet, equals(['X', 'Y', 'Z', 'A']));
       expect(providedArgs['actuator5'].valuePresent, isTrue);
 
-      await client.call(actionName, ['B', true, 5, 10, 'Y']);
+      await client.call(actionName, args: ['B', true, 5, 10, 'Y']);
 
       providedArgs =
           await client.provideActionArgs(actionName, provide: ['actuator1']);
@@ -668,8 +671,8 @@ void main() {
       var values = (await client
               .provideActionArgs(actionMeta.name, provide: ['value']))['value']
           .valueSet;
-      expect(
-          await client.call(actionMeta.name, [values.last]), equals('value3'));
+      expect(await client.call(actionMeta.name, args: [values.last]),
+          equals('value3'));
     });
     test('testProvideActionArgsElementValueSet', () async {
       var client = await getClient();
@@ -695,7 +698,7 @@ void main() {
       expect(elementValueSet[2].valueLabel, equals('Lemon'));
 
       expect(
-          await client.call(actionName, [
+          await client.call(actionName, args: [
             ['apple', 'lemon']
           ]),
           equals(2));
@@ -706,7 +709,7 @@ void main() {
       var actionName = 'SetActuatorSubmit';
 
       // Reset the test state.
-      await client.call(actionName, ['A', false]);
+      await client.call(actionName, args: ['A', false]);
 
       var argTypes = (await client.getActionMeta(actionName)).args;
       expect(argTypes[0].provided.value, isTrue);
@@ -745,7 +748,7 @@ void main() {
               .value,
           equals('B'));
 
-      await client.call(actionName, ['C', true]);
+      await client.call(actionName, args: ['C', true]);
       expect(
           (await client.provideActionArgs(actionName,
                   provide: ['actuator1']))['actuator1']
@@ -753,7 +756,7 @@ void main() {
           equals('C'));
 
       // Reset the test state.
-      await client.call(actionName, ['A', false]);
+      await client.call(actionName, args: ['A', false]);
     });
 
     test('testProvideActionArgsPagingMeta', () async {
@@ -844,7 +847,8 @@ void main() {
 
       var newValue = 'NEW VALUE';
 
-      expect(await client.call(actionMeta.name, [AnnotatedValue(newValue)]),
+      expect(
+          await client.call(actionMeta.name, args: [AnnotatedValue(newValue)]),
           equals(newValue));
     });
     test('testActionsProvidedWithCurrentAndLazyUpdate', () async {
@@ -977,7 +981,7 @@ void main() {
   });
   group('Remote API Client send', () {
     test('testSend', () async {
-      var client = await getGuestRestClient();
+      var client = await getGuestSpongeClient();
       var result = await client.send('alarm', attributes: {'attr1': 'Test'});
       expect(result, isNotNull);
     });
@@ -1180,21 +1184,21 @@ void main() {
         fail('$InvalidAuthTokenException expected');
       } catch (e) {
         expect(e is InvalidAuthTokenException, isTrue);
-        expect(e.errorCode,
+        expect(e.code,
             equals(SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN));
       }
     });
   });
 
-  // Tests mirroring ComplexObjectRestApiTest.java.
+  // Tests mirroring ComplexObjectRemoteApiTest.java.
   group('Remote API Client complex object', () {
-    test('testRestCallComplexObject', () async {
+    test('testCallComplexObject', () async {
       var client = await getClient()
         ..typeConverter.register(TestUtils.createObjectTypeUnitConverter());
       var compoundObject = TestUtils.createTestCompoundComplexObject();
 
       CompoundComplexObject result =
-          await client.call('ComplexObjectAction', [compoundObject]);
+          await client.call('ComplexObjectAction', args: [compoundObject]);
       expect(result.id, equals(compoundObject.id + 1));
       expect(result.name, equals(compoundObject.name));
       expect(result.complexObject.id, equals(compoundObject.complexObject.id));
@@ -1205,13 +1209,13 @@ void main() {
       expect(
           result.complexObject.date, equals(compoundObject.complexObject.date));
     });
-    test('testRestCallComplexObjectNoMeta', () async {
+    test('testCallComplexObjectNoMeta', () async {
       var client = await getClient()
         ..typeConverter.register(TestUtils.createObjectTypeUnitConverter());
       var compoundObject = TestUtils.createTestCompoundComplexObject();
 
-      var value = (await client.call(
-          'ComplexObjectAction', [compoundObject], null, false));
+      var value = (await client.call('ComplexObjectAction',
+          args: [compoundObject], allowFetchMetadata: false));
 
       expect(value is Map, isTrue);
 
@@ -1227,12 +1231,12 @@ void main() {
       expect(
           result.complexObject.date, equals(compoundObject.complexObject.date));
     });
-    test('testRestCallComplexObjectList', () async {
+    test('testCallComplexObjectList', () async {
       var client = await getClient()
         ..typeConverter.register(TestUtils.createObjectTypeUnitConverter());
       var compoundObject = TestUtils.createTestCompoundComplexObject();
 
-      List resultList = await client.call('ComplexObjectListAction', [
+      List resultList = await client.call('ComplexObjectListAction', args: [
         [compoundObject]
       ]);
       expect(resultList.length, equals(1));
@@ -1247,14 +1251,15 @@ void main() {
       expect(
           result.complexObject.date, equals(compoundObject.complexObject.date));
     });
-    test('testRestCallComplexObjectList', () async {
+    test('testCallComplexObjectList', () async {
       var client = await getClient()
         ..typeConverter.register(TestUtils.createObjectTypeUnitConverter(true));
 
       var compoundObject = TestUtils.createTestCompoundComplexObject();
       var map = <String, CompoundComplexObject>{'first': compoundObject};
 
-      var returnValue = await client.call('ComplexObjectHierarchyAction', [
+      var returnValue =
+          await client.call('ComplexObjectHierarchyAction', args: [
         'String',
         100,
         ['a', 'b', 'c'],
@@ -1267,16 +1272,16 @@ void main() {
     });
   });
 
-  // Tests mirroring RestApiSimpleSpringSecurityTest.java.
+  // Tests mirroring RemoteApiSimpleSpringSecurityTest.java.
   group('Remote API Client security', () {
-    test('testRestActionsUser1', () async {
+    test('testRemoteActionsUser1', () async {
       var client = await getClient()
         ..configuration.username = 'john'
         ..configuration.password = 'password';
       expect((await client.getActions()).length,
           equals(TestConstants.ADMIN_ACTIONS_COUNT));
     });
-    test('testRestActionsUser2', () async {
+    test('testRemoteActionsUser2', () async {
       var client = await getClient()
         ..configuration.username = 'joe'
         ..configuration.password = 'password';
@@ -1365,14 +1370,14 @@ void main() {
           headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
           body: requestBody);
 
-      expect(httpResponse.statusCode, equals(500));
+      expect(httpResponse.statusCode,
+          equals(SpongeClientConstants.HTTP_CODE_ERROR));
       // Use a fake response.
-      var apiResponse =
-          GetVersionResponse.fromJson(json.decode(httpResponse.body));
-      expect(apiResponse.header.errorCode,
-          equals(SpongeClientConstants.ERROR_CODE_GENERIC));
+      var apiResponse = ErrorResponse.fromJson(json.decode(httpResponse.body));
+      expect(apiResponse.error.code,
+          equals(JsonRpcConstants.ERROR_CODE_INVALID_REQUEST));
       expect(
-          apiResponse.header.errorMessage
+          apiResponse.error.message
               .contains('Unrecognized field "error_property"'),
           isTrue);
     });
@@ -1406,11 +1411,11 @@ void main() {
       expect(
           normalizeJson(requestStringList[0]),
           equals(
-              '{"header":{"id":null,"username":null,"password":null,"authToken":null,"features":null}}'));
+              '{"jsonrpc":"2.0","method":"version","params":{},"id":"1"}'));
       expect(
           normalizeJson(responseStringList[0]),
           matches(
-              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*","features":null},"body":{"version":"$version"}}'));
+              '{"jsonrpc":"2.0","result":{"header":{"requestTime":".*","responseTime":".*"},"value":"$version"},"id":"1"}'));
     });
     test('testOneRequestListeners', () async {
       var client = await getClient();
@@ -1428,8 +1433,8 @@ void main() {
                 actualResponseString = responseString);
       var version = (await client.getVersionByRequest(GetVersionRequest(),
               context: context))
-          .body
-          .version;
+          .result
+          .value;
 
       // Works only if the API version is not set manually in the service.
       expect(SpongeClientUtils.isServerVersionCompatible(version), isTrue);
@@ -1439,11 +1444,11 @@ void main() {
       expect(
           normalizeJson(actualRequestString),
           equals(
-              '{"header":{"id":null,"username":null,"password":null,"authToken":null,"features":null}}'));
+              '{"jsonrpc":"2.0","method":"version","params":{},"id":"2"}'));
       expect(
           normalizeJson(actualResponseString),
           matches(
-              '{"header":{"id":null,"errorCode":null,"errorMessage":null,"detailedErrorMessage":null,"requestTime":".*","responseTime":".*","features":null},"body":{"version":"$version"}}'));
+              '{"jsonrpc":"2.0","result":{"header":{"requestTime":".*","responseTime":".*"},"value":"$version"},"id":"2"}'));
     });
   });
 }

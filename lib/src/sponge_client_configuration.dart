@@ -18,7 +18,6 @@ class SpongeClientConfiguration {
     this.url, {
     this.username,
     this.password,
-    this.useRequestId = false,
     this.autoUseAuthToken = false,
     this.relogin = true,
     this.verifyProcessorVersion = true,
@@ -38,9 +37,6 @@ class SpongeClientConfiguration {
 
   /// The optional service username.
   String password;
-
-  /// The flag telling if the client should use a request ID for all requests.
-  bool useRequestId;
 
   /// The flag telling if the client should automatically use auth token authentication (i.e. the login
   /// operation won't be required to use the auth token authentication). Defaults to `false`.

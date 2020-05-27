@@ -25,23 +25,22 @@ class SpongeException implements Exception {
 /// A Sponge client exception.
 class SpongeClientException extends SpongeException {
   const SpongeClientException([
-    this.errorCode,
-    String errorMessage,
+    this.code,
+    String message,
     this.detailedErrorMessage,
-  ]) : super(errorMessage);
+  ]) : super(message);
 
-  final String errorCode;
-  String get errorMessage => super.message;
+  final int code;
   final String detailedErrorMessage;
 
   @override
-  String toString() => errorMessage ?? 'Sponge error, code: $errorCode';
+  String toString() => message ?? 'Sponge error, code: $code';
 }
 
 /// A Sponge client exception for invalid knowledge base version.
 class InvalidKnowledgeBaseVersionException extends SpongeClientException {
   const InvalidKnowledgeBaseVersionException([
-    String errorCode,
+    int errorCode,
     String errorMessage,
     String detailedErrorMessage,
   ]) : super(errorCode, errorMessage, detailedErrorMessage);
@@ -50,7 +49,7 @@ class InvalidKnowledgeBaseVersionException extends SpongeClientException {
 /// A Sponge client exception for invalid auth token.
 class InvalidAuthTokenException extends SpongeClientException {
   const InvalidAuthTokenException([
-    String errorCode,
+    int errorCode,
     String errorMessage,
     String detailedErrorMessage,
   ]) : super(errorCode, errorMessage, detailedErrorMessage);
@@ -59,7 +58,7 @@ class InvalidAuthTokenException extends SpongeClientException {
 /// A Sponge client exception for invalid username or password version.
 class InvalidUsernamePasswordException extends SpongeClientException {
   const InvalidUsernamePasswordException([
-    String errorCode,
+    int errorCode,
     String errorMessage,
     String detailedErrorMessage,
   ]) : super(errorCode, errorMessage, detailedErrorMessage);
@@ -68,7 +67,7 @@ class InvalidUsernamePasswordException extends SpongeClientException {
 /// A Sponge client exception for inactive action.
 class InactiveActionException extends SpongeClientException {
   const InactiveActionException([
-    String errorCode,
+    int errorCode,
     String errorMessage,
     String detailedErrorMessage,
   ]) : super(errorCode, errorMessage, detailedErrorMessage);

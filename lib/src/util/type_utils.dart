@@ -16,7 +16,6 @@ import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
 import 'package:sponge_client_dart/src/constants.dart';
-import 'package:sponge_client_dart/src/exception.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
@@ -152,7 +151,7 @@ class DataTypeUtils {
             'The list element type name \'${subType.name}\' is different that \'$element\'');
         value = null;
       } else {
-        throw SpongeClientException(
+        throw Exception(
             'The element \'${subType.name ?? subType.kind}\' is not a record or a list');
       }
     });

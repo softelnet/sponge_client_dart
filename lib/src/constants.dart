@@ -53,7 +53,9 @@ abstract class SpongeClientConstants {
   static const String REMOTE_EVENT_OBJECT_TYPE_CLASS_NAME =
       'org.openksavi.sponge.remoteapi.model.RemoteEvent';
 
-  static const int HTTP_CODE_ERROR = 500;
+  static const int HTTP_RESPONSE_CODE_OK = 200;
+  static const int HTTP_RESPONSE_CODE_ERROR = 500;
+  static const int HTTP_RESPONSE_CODE_NO_RESPONSE = 204;
 
   static const String SERVICE_DISCOVERY_TYPE = '_sponge._tcp';
 

@@ -1371,7 +1371,7 @@ void main() {
           body: requestBody);
 
       expect(httpResponse.statusCode,
-          equals(SpongeClientConstants.HTTP_CODE_ERROR));
+          equals(SpongeClientConstants.HTTP_RESPONSE_CODE_ERROR));
       // Use a fake response.
       var apiResponse = ErrorResponse.fromJson(json.decode(httpResponse.body));
       expect(apiResponse.error.code,

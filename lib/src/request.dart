@@ -361,8 +361,7 @@ class LoginRequest extends TypedParamsRequest<BaseRequestParams> {
   LoginRequest({
     @required String username,
     @required String password,
-  }) : super(SpongeClientConstants.METHOD_LOGIN,
-            params: BaseRequestParams()) {
+  }) : super(SpongeClientConstants.METHOD_LOGIN, params: BaseRequestParams()) {
     header = RequestHeader(username: username, password: password);
   }
 
@@ -461,8 +460,7 @@ class ProvideActionArgsParams extends BaseRequestParams
 class ProvideActionArgsRequest
     extends TypedParamsRequest<ProvideActionArgsParams> {
   ProvideActionArgsRequest(ProvideActionArgsParams params)
-      : super(SpongeClientConstants.METHOD_PROVIDE_ACTION_ARGS,
-            params: params);
+      : super(SpongeClientConstants.METHOD_PROVIDE_ACTION_ARGS, params: params);
 
   @override
   ProvideActionArgsParams createParams() => ProvideActionArgsParams(name: null);

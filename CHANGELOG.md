@@ -1,4 +1,4 @@
-## 1.16.0 (not released yet)
+## 1.16.0 (2020-06-12)
 
 * API change: The Sponge REST API has been renamed to the Sponge Remote API. The Sponge Remote API is intended to be JSON-RPC 2.0 compatible.
 * API change: Moved the `readOnly` flag from `ProvidedMeta` to `DataType`.

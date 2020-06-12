@@ -290,7 +290,8 @@ class SpongeClient {
 
     var isResponseRelevant =
         SpongeClientUtils.isHttpSuccess(httpResponse.statusCode) ||
-            httpResponse.statusCode == SpongeClientConstants.HTTP_RESPONSE_CODE_ERROR &&
+            httpResponse.statusCode ==
+                    SpongeClientConstants.HTTP_RESPONSE_CODE_ERROR &&
                 SpongeClientUtils.isJson(httpResponse);
     if (!isResponseRelevant) {
       _logger.fine(() =>

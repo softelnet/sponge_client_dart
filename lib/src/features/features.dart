@@ -110,6 +110,8 @@ class Features {
   static const PROVIDE_VALUE_COUNT = 'count';
   static const PROVIDE_VALUE_INDICATED_INDEX = 'indicatedIndex';
 
+  static const SUBMITTABLE_BLOCKING = 'submittableBlocking';
+
   static const GEO_MAP = 'geoMap';
   static const GEO_POSITION = 'geoPosition';
   static const GEO_ATTRIBUTION = 'attribution';

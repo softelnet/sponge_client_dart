@@ -1,3 +1,8 @@
+
+## 1.16.1 (not released yet)
+* Added support for the `submittableBlocking` feature.
+* Dependencies upgrade.
+
 ## 1.16.0 (2020-06-12)
 
 * API change: The Sponge REST API has been renamed to the Sponge Remote API. The Sponge Remote API is intended to be JSON-RPC 2.0 compatible.

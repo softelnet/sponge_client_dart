@@ -1,5 +1,5 @@
 
-## 1.16.1 (not released yet)
+## 1.16.1 (2020-07-29)
 * Added support for the `submittableBlocking` feature.
 * Dependencies upgrade.
 

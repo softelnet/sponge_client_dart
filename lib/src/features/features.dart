@@ -101,6 +101,12 @@ class Features {
 
   static const WIDGET_SLIDER = 'slider';
   static const WIDGET_SWITCH = 'switch';
+  static const WIDGET_TOGGLE_BUTTON = 'toggleButton';
+
+  static const ALIGN = 'align';
+  static const ALIGN_LEFT = 'left';
+  static const ALIGN_CENTER = 'center';
+  static const ALIGN_RIGHT = 'right';
 
   static const SCROLL = 'scroll';
 

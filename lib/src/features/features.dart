@@ -42,6 +42,7 @@ class Features {
   static const TYPE_CHARACTERISTIC_DRAWING = 'drawing';
   static const TYPE_CHARACTERISTIC_COLOR = 'color';
   static const TYPE_CHARACTERISTIC_NETWORK_IMAGE = 'networkImage';
+  static const TYPE_CHARACTERISTIC_URL = 'url';
 
   static const TYPE_FILENAME = 'filename';
 

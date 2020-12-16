@@ -19,6 +19,7 @@ import 'package:http/http.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/cache.dart';
+import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_client_dart/src/context.dart';
 import 'package:sponge_client_dart/src/event.dart';
 import 'package:sponge_client_dart/src/features/feature_converter.dart';
@@ -681,10 +682,16 @@ class SpongeClient {
     });
   }
 
-  /// Validate a non-nullable argument.
+  /// Validate non-nullable arguments recursively (handling records).
   void _validateCallArg(DataType argType, dynamic value) {
-    Validate.isTrue(argType.optional || argType.nullable || value != null,
-        'The ${argType.label ?? argType.name} action argument is not set');
+    DataTypeUtils.traverseValue(QualifiedDataType(argType), value,
+        (_qType, _value) {
+      Validate.isTrue(
+          _qType.type.optional || _qType.type.nullable || _value != null,
+          'The ${_qType.type.label ?? _qType.type.name} is not set');
+
+      return _value;
+    });
   }
 
   // Marshals the action call arguments.

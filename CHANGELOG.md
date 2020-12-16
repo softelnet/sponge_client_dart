@@ -1,3 +1,6 @@
+## 1.16.3 (not released yet)
+* Validation of non-nullable arguments recursively (handling records) in an action call.
+
 ## 1.16.2 (2020-08-27)
 * Added a new type feature `align` (with values `left`, `center`, `right`) and a feature value `toggleButton` for the `widget` feature for the `BooleanType`.
 

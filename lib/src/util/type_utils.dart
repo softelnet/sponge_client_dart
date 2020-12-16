@@ -282,8 +282,13 @@ class DataTypeUtils {
     }
   }
 
-  static dynamic traverseValue<T>(QualifiedDataType qType, dynamic value,
-      dynamic Function(QualifiedDataType _qType, dynamic _value) onValue) {
+  /// It is important to return a value from the `onValue`!
+  /// Traverses also through record fields that are not set in the `value` map.
+  static dynamic traverseValue<T>(
+    QualifiedDataType qType,
+    dynamic value,
+    dynamic Function(QualifiedDataType _qType, dynamic _value) onValue,
+  ) {
     // OnValue may change the value.
     value = onValue(qType, value);
 
@@ -303,14 +308,24 @@ class DataTypeUtils {
       switch (qType.type.kind) {
         case DataTypeKind.RECORD:
           var valueMap = value as Map<String, dynamic>;
-          valueMap.forEach((String fieldName, dynamic fieldValue) {
-            valueMap[fieldName] = traverseValue(
-                qType.createChild(
-                    (qType.type as RecordType).getFieldType(fieldName)),
-                fieldValue,
-                onValue);
+          var recordType = qType.type as RecordType;
+
+          recordType.fields.forEach((_type) {
+            var fieldName = _type.name;
+            var fieldType = recordType.getFieldType(fieldName);
+
+            var traverseResult = traverseValue(
+              qType.createChild(fieldType),
+              valueMap[fieldName],
+              onValue,
+            );
+
+            if (valueMap.containsKey(fieldName)) {
+              valueMap[fieldName] = traverseResult;
+            }
           });
           break;
+        // TODO Optionally traverseValue via LIST, OBJECT with a companion type, DYNAMIC, MAP.
         default:
           break;
       }

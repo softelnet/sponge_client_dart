@@ -1,10 +1,13 @@
-## 1.16.3 (not released yet)
+## 1.16.3 (2020-12-21)
+
 * Validation of non-nullable arguments recursively (handling records) in an action call.
 
 ## 1.16.2 (2020-08-27)
+
 * Added a new type feature `align` (with values `left`, `center`, `right`) and a feature value `toggleButton` for the `widget` feature for the `BooleanType`.
 
 ## 1.16.1 (2020-07-29)
+
 * Added support for the `submittableBlocking` feature.
 * Dependencies upgrade.
 

@@ -55,10 +55,9 @@ class SpongeClientUtils {
     return contentType.startsWith('application/json');
   }
 
-  /// Returns `true` if the Sponge server version [serverVersion] is compatible with the client.
-  static bool isServerVersionCompatible(String serverVersion) =>
-      serverVersion.startsWith(
-          '${SpongeClientConstants.SUPPORTED_SPONGE_VERSION_MAJOR_MINOR}.');
+  /// Returns `true` if the Sponge server protocol version [protocolVersion] is compatible with the client.
+  static bool isServerVersionCompatible(String protocolVersion) =>
+      protocolVersion == SpongeClientConstants.PROTOCOL_VERSION;
 
   /// Formats a timezoned date/time to a Java compatible format.
   static String formatIsoDateTimeZone(TZDateTime tzDateTime) {

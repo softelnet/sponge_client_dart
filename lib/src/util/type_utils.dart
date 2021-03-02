@@ -20,7 +20,26 @@ import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/type_value.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
 
+class RefTypeBundle {
+  RefTypeBundle(this.rootType, this.parentType);
+
+  final DataType rootType;
+  final DataType parentType;
+}
+
+class RefTypeValueBundle {
+  RefTypeValueBundle(
+      this.rootType, this.rootValue, this.parentType, this.parentValue);
+
+  final DataType rootType;
+  final dynamic rootValue;
+  final DataType parentType;
+  final dynamic parentValue;
+}
+
 class DataTypeUtils {
+  static const String ROOT_PATH_PREFIX = '/';
+
   static List<String> getPathElements(String path) {
     if (path == null || path == DataTypeConstants.PATH_THIS) {
       return [];
@@ -496,4 +515,14 @@ class DataTypeUtils {
       type2 != null &&
       type1.kind == type2.kind &&
       type1.annotated == type2.annotated;
+
+  static bool isPathRelativeToRoot(String path) {
+    return path.startsWith(ROOT_PATH_PREFIX);
+  }
+
+  static String getRootRelativePath(String path) {
+    return isPathRelativeToRoot(path)
+        ? path.substring(ROOT_PATH_PREFIX.length)
+        : path;
+  }
 }

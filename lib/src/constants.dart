@@ -14,7 +14,7 @@
 
 /// The Sponge client constants.
 abstract class SpongeClientConstants {
-  static const String SUPPORTED_SPONGE_VERSION_MAJOR_MINOR = '1.16';
+  static const String PROTOCOL_VERSION = '1';
 
   static const String CONTENT_TYPE_JSON = 'application/json;charset=utf-8';
   static const int DEFAULT_PORT = 1836;
@@ -45,6 +45,7 @@ abstract class SpongeClientConstants {
 
   static const String REMOTE_API_FEATURE_SPONGE_VERSION = 'spongeVersion';
   static const String REMOTE_API_FEATURE_API_VERSION = 'apiVersion';
+  static const String REMOTE_API_FEATURE_PROTOCOL_VERSION = 'protocolVersion';
   static const String REMOTE_API_FEATURE_GRPC_ENABLED = 'grpcEnabled';
   static const String REMOTE_API_FEATURE_NAME = 'name';
   static const String REMOTE_API_FEATURE_DESCRIPTION = 'description';

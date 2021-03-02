@@ -58,11 +58,7 @@ void main() {
     test('testVersion', () async {
       var client = await getClient();
 
-      // Works only if the API version is not set manually in the service.
-      expect(
-          SpongeClientUtils.isServerVersionCompatible(
-              await client.getVersion()),
-          isTrue);
+      await client.getVersion();
     });
     test('testResponseTimes', () async {
       var client = await getClient();
@@ -79,21 +75,22 @@ void main() {
       var request = GetVersionRequest();
       var response = await client.getVersionByRequest(request);
       expect(response.error, isNull);
-      expect(SpongeClientUtils.isServerVersionCompatible(response.result.value),
-          isTrue);
       expect(response.id, equals('1'));
       expect(response.id, equals(request.id));
     });
     test('testFeatures', () async {
       var client = await getClient();
       var features = await client.getFeatures();
-      expect(features.length, equals(6));
+      expect(features.length, equals(7));
 
       // Works only if the API version is not set manually in the service.
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_SPONGE_VERSION],
           equals(await client.getVersion()));
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_API_VERSION],
           isNull);
+      expect(
+          features[SpongeClientConstants.REMOTE_API_FEATURE_PROTOCOL_VERSION],
+          equals(SpongeClientConstants.PROTOCOL_VERSION));
 
       expect(features[SpongeClientConstants.REMOTE_API_FEATURE_NAME],
           equals('Sponge Test Remote API'));
@@ -1404,14 +1401,10 @@ void main() {
       var version = await client.getVersion();
       await client.getVersion();
 
-      // Works only if the API version is not set manually in the service.
-      expect(SpongeClientUtils.isServerVersionCompatible(version), isTrue);
       expect(requestStringList.length, equals(3));
       expect(responseStringList.length, equals(3));
-      expect(
-          normalizeJson(requestStringList[0]),
-          equals(
-              '{"jsonrpc":"2.0","method":"version","params":{},"id":"1"}'));
+      expect(normalizeJson(requestStringList[0]),
+          equals('{"jsonrpc":"2.0","method":"version","params":{},"id":"1"}'));
       expect(
           normalizeJson(responseStringList[0]),
           matches(
@@ -1436,15 +1429,10 @@ void main() {
           .result
           .value;
 
-      // Works only if the API version is not set manually in the service.
-      expect(SpongeClientUtils.isServerVersionCompatible(version), isTrue);
-
       await client.getVersion();
 
-      expect(
-          normalizeJson(actualRequestString),
-          equals(
-              '{"jsonrpc":"2.0","method":"version","params":{},"id":"2"}'));
+      expect(normalizeJson(actualRequestString),
+          equals('{"jsonrpc":"2.0","method":"version","params":{},"id":"2"}'));
       expect(
           normalizeJson(actualResponseString),
           matches(

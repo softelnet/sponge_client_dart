@@ -52,10 +52,9 @@ void main() {
     });
     test('isServerVersionCompatible', () {
       expect(
-          SpongeClientUtils.isServerVersionCompatible(
-              '${SpongeClientConstants.SUPPORTED_SPONGE_VERSION_MAJOR_MINOR}.5'),
+          SpongeClientUtils.isServerVersionCompatible(SpongeClientConstants.PROTOCOL_VERSION),
           isTrue);
-      expect(SpongeClientUtils.isServerVersionCompatible('0.4.3'), isFalse);
+      expect(SpongeClientUtils.isServerVersionCompatible('0'), isFalse);
     });
     test('formatIsoDateTimeZone', () async {
       await initializeTimeZone();

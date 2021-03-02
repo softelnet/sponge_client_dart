@@ -1,3 +1,6 @@
+## 1.71.0 (not released yet)
+* Added new Remote API feature `protocolVersion`. For compatibility, both a server and a client should use the same protocol version.
+
 ## 1.16.3 (2020-12-21)
 
 * Validation of non-nullable arguments recursively (handling records) in an action call.

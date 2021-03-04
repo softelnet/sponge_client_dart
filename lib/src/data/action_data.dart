@@ -262,7 +262,7 @@ class _ActionArgsMap extends MapBase<String, dynamic> {
 
   @override
   void clear() {
-    throw Exception('Clear is not allowed');
+    actionData.clear();
   }
 
   @override

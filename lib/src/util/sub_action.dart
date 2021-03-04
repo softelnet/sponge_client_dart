@@ -42,8 +42,9 @@ class SubActionSpec {
     if (hasArgSubstitutions) {
       subAction.args.forEach((substitution) {
         Validate.isTrue(
-            subActionMeta.args.any((subActionArgMeta) =>
-                subActionArgMeta.name == substitution.target),
+            substitution.target == DataTypeUtils.ROOT_PATH_PREFIX ||
+                subActionMeta.args.any((subActionArgMeta) =>
+                    subActionArgMeta.name == substitution.target),
             'Unknown target attribute: ${substitution.target}');
       });
 
@@ -60,11 +61,14 @@ class SubActionSpec {
           Validate.notNull(
               sourceTypeBundle.parentType, 'The source parent type is unknown');
           Validate.isTrue(
-              DataTypeUtils.areTypesCompatible(targetType, sourceTypeBundle.parentType),
+              DataTypeUtils.areTypesCompatible(
+                  targetType, sourceTypeBundle.parentType),
               'The target type for ${DataTypeConstants.PATH_PARENT} is incompatible');
-        } else if (substitution.source.startsWith('/')) {
+        } else if (DataTypeUtils.isPathRelativeToRoot(substitution.source)) {
           var sourceSubType = DataTypeUtils.getSubType(
-              sourceTypeBundle.rootType, substitution.source.substring(1), null);
+              sourceTypeBundle.rootType,
+              DataTypeUtils.getRootRelativePath(substitution.source),
+              null);
           Validate.isTrue(
             DataTypeUtils.areTypesCompatible(
               targetType,
@@ -92,12 +96,20 @@ class SubActionSpec {
         throw Exception(
             'The result target ${DataTypeConstants.PATH_INDEX} is not supported');
       } else if (target == DataTypeConstants.PATH_PARENT) {
-        Validate.notNull(sourceTypeBundle.parentType, 'The source parent type is unknown');
+        Validate.notNull(
+            sourceTypeBundle.parentType, 'The source parent type is unknown');
         Validate.isTrue(
             DataTypeUtils.areTypesCompatible(
                 subActionMeta.result, sourceTypeBundle.parentType),
             'The sub-action ${subAction.name} result type ${subActionMeta.result.kind} is incompatible with'
             ' the result substitution type ${sourceTypeBundle.parentType.kind} of ${subAction.result.target}');
+      } else if (DataTypeUtils.isPathRelativeToRoot(target)) {
+        var targetType = DataTypeUtils.getSubType(sourceTypeBundle.rootType,
+            DataTypeUtils.getRootRelativePath(target), null);
+        Validate.isTrue(
+            DataTypeUtils.areTypesCompatible(subActionMeta.result, targetType),
+            'The sub-action ${subAction.name} result type ${subActionMeta.result.kind} is incompatible with'
+            ' the result substitution type ${targetType.kind} of ${subAction.result.target}');
       } else {
         var targetType = subAction.result.target != DataTypeConstants.PATH_THIS
             ? DataTypeUtils.getSubType(

@@ -41,7 +41,10 @@ class DataTypeUtils {
   static const String ROOT_PATH_PREFIX = '/';
 
   static List<String> getPathElements(String path) {
-    if (path == null || path == DataTypeConstants.PATH_THIS) {
+    if (path == null ||
+        path.isEmpty ||
+        path == ROOT_PATH_PREFIX ||
+        path == DataTypeConstants.PATH_THIS) {
       return [];
     }
 
@@ -111,8 +114,6 @@ class DataTypeUtils {
     dynamic subValue, {
     bool ignoreNullParent = false,
   }) {
-    Validate.isTrue(path != null && path.isNotEmpty, 'The path is empty');
-
     var elements = getPathElements(path);
 
     if (elements.length > 1) {

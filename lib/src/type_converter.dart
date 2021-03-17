@@ -126,7 +126,8 @@ class DefaultTypeConverter extends TypeConverter {
       NumberTypeUnitConverter(),
       ObjectTypeUnitConverter(),
       RecordTypeUnitConverter(),
-      StreamTypeUnitConverter(),
+      OutputStreamTypeUnitConverter(),
+      InputStreamTypeUnitConverter(),
       StringTypeUnitConverter(),
       TypeTypeUnitConverter(),
       VoidTypeUnitConverter(),
@@ -424,8 +425,12 @@ class RecordTypeUnitConverter
       {for (var field in type.fields) field.name: field};
 }
 
-class StreamTypeUnitConverter extends UnitTypeConverter<String, StreamType> {
-  StreamTypeUnitConverter() : super(DataTypeKind.STREAM);
+class OutputStreamTypeUnitConverter extends UnitTypeConverter<String, OutputStreamType> {
+  OutputStreamTypeUnitConverter() : super(DataTypeKind.OUTPUT_STREAM);
+}
+
+class InputStreamTypeUnitConverter extends UnitTypeConverter<String, InputStreamType> {
+  InputStreamTypeUnitConverter() : super(DataTypeKind.INPUT_STREAM);
 }
 
 class StringTypeUnitConverter extends UnitTypeConverter<String, StringType> {

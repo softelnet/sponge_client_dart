@@ -44,7 +44,8 @@ enum DataTypeKind {
   NUMBER,
   OBJECT,
   RECORD,
-  STREAM,
+  OUTPUT_STREAM,
+  INPUT_STREAM,
   STRING,
   TYPE,
   VOID,
@@ -139,8 +140,10 @@ abstract class DataType<T> {
         return ObjectType.fromJson(json);
       case DataTypeKind.RECORD:
         return RecordType.fromJson(json);
-      case DataTypeKind.STREAM:
-        return StreamType.fromJson(json);
+      case DataTypeKind.OUTPUT_STREAM:
+        return OutputStreamType.fromJson(json);
+      case DataTypeKind.INPUT_STREAM:
+        return InputStreamType.fromJson(json);
       case DataTypeKind.STRING:
         return StringType.fromJson(json);
       case DataTypeKind.TYPE:
@@ -629,18 +632,32 @@ class RecordType extends DataType<Map<String, dynamic>> {
       )..update(this);
 }
 
-/// A stream type.
-class StreamType extends DataType<dynamic> {
-  StreamType() : super(DataTypeKind.STREAM);
+/// An output stream type.
+class OutputStreamType extends DataType<dynamic> {
+  OutputStreamType() : super(DataTypeKind.OUTPUT_STREAM);
 
-  factory StreamType.fromJson(Map<String, dynamic> json) =>
-      DataType.fromJsonBase(StreamType(), json);
+  factory OutputStreamType.fromJson(Map<String, dynamic> json) =>
+      DataType.fromJsonBase(OutputStreamType(), json);
 
   @override
   Map<String, dynamic> toJson() => super.toJson();
 
   @override
-  StreamType clone() => StreamType()..update(this);
+  OutputStreamType clone() => OutputStreamType()..update(this);
+}
+
+/// An input stream type.
+class InputStreamType extends DataType<dynamic> {
+  InputStreamType() : super(DataTypeKind.INPUT_STREAM);
+
+  factory InputStreamType.fromJson(Map<String, dynamic> json) =>
+      DataType.fromJsonBase(InputStreamType(), json);
+
+  @override
+  Map<String, dynamic> toJson() => super.toJson();
+
+  @override
+  InputStreamType clone() => InputStreamType()..update(this);
 }
 
 /// A string type.

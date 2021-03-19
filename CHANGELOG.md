@@ -1,4 +1,4 @@
-## 1.71.0 (not released yet)
+## 1.17.0 (2021-03-19)
 * API change: Renamed `StreamType` to `OutputStreamType`.
 * Added new Remote API feature `protocolVersion`. For compatibility, both a server and a client should use the same protocol version.
 * Added support for `/argumentName` and `/` sub-action substitutions.

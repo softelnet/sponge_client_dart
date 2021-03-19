@@ -425,11 +425,13 @@ class RecordTypeUnitConverter
       {for (var field in type.fields) field.name: field};
 }
 
-class OutputStreamTypeUnitConverter extends UnitTypeConverter<String, OutputStreamType> {
+class OutputStreamTypeUnitConverter
+    extends UnitTypeConverter<String, OutputStreamType> {
   OutputStreamTypeUnitConverter() : super(DataTypeKind.OUTPUT_STREAM);
 }
 
-class InputStreamTypeUnitConverter extends UnitTypeConverter<String, InputStreamType> {
+class InputStreamTypeUnitConverter
+    extends UnitTypeConverter<String, InputStreamType> {
   InputStreamTypeUnitConverter() : super(DataTypeKind.INPUT_STREAM);
 }
 

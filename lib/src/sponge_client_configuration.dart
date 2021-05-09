@@ -27,6 +27,7 @@ class SpongeClientConfiguration {
     this.eventTypeCacheMaxSize = -1,
     this.throwExceptionOnErrorResponse = true,
     this.features,
+    this.httpHeaders,
   });
 
   /// The service URL (reqired).
@@ -70,6 +71,9 @@ class SpongeClientConfiguration {
 
   /// The request header features.
   Map<String, Object> features;
+
+  /// The HTTP request headers.
+  Map<String, Object> httpHeaders;
 
   /// Returns true if the connection URL is HTTPS.
   bool get secure => url != null && url.toLowerCase().startsWith('https');

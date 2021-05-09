@@ -16,7 +16,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:http/http.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:intl/intl.dart';
 import 'package:sponge_client_dart/sponge_client_dart.dart';
 import 'package:sponge_client_dart/src/constants.dart';
@@ -1363,14 +1363,19 @@ void main() {
     test('testHttpErrorInJsonParser', () async {
       var client = await getClient();
       var requestBody = '{"error_property":""}';
-      var httpResponse = await post('${client.configuration.url}/actions',
-          headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
-          body: requestBody);
-
+      var httpResponse = await dio.Dio().post(
+        '${client.configuration.url}/actions',
+        data: requestBody,
+        options: dio.Options(
+          responseType: dio.ResponseType.plain,
+          validateStatus: (_) => true,
+        ),
+      );
       expect(httpResponse.statusCode,
           equals(SpongeClientConstants.HTTP_RESPONSE_CODE_ERROR));
       // Use a fake response.
-      var apiResponse = ErrorResponse.fromJson(json.decode(httpResponse.body));
+      var apiResponse =
+          ErrorResponse.fromJson(json.decode(httpResponse.data?.toString()));
       expect(apiResponse.error.code,
           equals(JsonRpcConstants.ERROR_CODE_INVALID_REQUEST));
       expect(
@@ -1418,12 +1423,12 @@ void main() {
 
       await client.getVersion();
 
-      var context = SpongeRequestContext()
-        ..onRequestSerializedListener =
-            ((request, requestString) => actualRequestString = requestString)
-        ..onResponseDeserializedListener =
-            ((request, response, responseString) =>
-                actualResponseString = responseString);
+      var context = SpongeRequestContext(
+        onRequestSerializedListener: ((request, requestString) =>
+            actualRequestString = requestString),
+        onResponseDeserializedListener: ((request, response, responseString) =>
+            actualResponseString = responseString),
+      );
       var version = (await client.getVersionByRequest(GetVersionRequest(),
               context: context))
           .result

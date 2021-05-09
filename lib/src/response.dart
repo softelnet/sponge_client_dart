@@ -166,6 +166,12 @@ class ActionCallResponse extends SpongeResponse<dynamic> {
       ActionCallResponse._()..setupFromJson(json);
 }
 
+class OutputStreamActionCallResponse extends ActionCallResponse {
+  OutputStreamActionCallResponse(this.value) : super._();
+
+  final ClientOutputStreamValue value;
+}
+
 class GetActionsValue {
   GetActionsValue({
     @required this.actions,

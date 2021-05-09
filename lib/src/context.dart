@@ -15,9 +15,29 @@
 import 'package:sponge_client_dart/src/listener.dart';
 
 class SpongeRequestContext {
-  SpongeRequestContext(
-      {this.onRequestSerializedListener, this.onResponseDeserializedListener});
+  SpongeRequestContext({
+    bool expectsResponseStream,
+    this.onRequestSerializedListener,
+    this.onResponseDeserializedListener,
+  }) : expectsResponseStream = expectsResponseStream ?? false;
 
-  OnRequestSerializedListener onRequestSerializedListener;
-  OnResponseDeserializedListener onResponseDeserializedListener;
+  factory SpongeRequestContext.overwrite(
+    SpongeRequestContext context, {
+    bool expectsResponseStream,
+    OnRequestSerializedListener onRequestSerializedListener,
+    OnResponseDeserializedListener onResponseDeserializedListener,
+  }) {
+    return SpongeRequestContext(
+      expectsResponseStream:
+          expectsResponseStream ?? context?.expectsResponseStream,
+      onRequestSerializedListener:
+          onRequestSerializedListener ?? context?.onRequestSerializedListener,
+      onResponseDeserializedListener: onResponseDeserializedListener ??
+          context?.onResponseDeserializedListener,
+    );
+  }
+
+  final bool expectsResponseStream;
+  final OnRequestSerializedListener onRequestSerializedListener;
+  final OnResponseDeserializedListener onResponseDeserializedListener;
 }

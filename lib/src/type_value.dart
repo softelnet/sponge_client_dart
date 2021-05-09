@@ -12,7 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+import 'dart:typed_data';
+
 import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/type.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 
@@ -184,4 +187,18 @@ class ProvidedValue<T> {
             ?.map((arg) => AnnotatedValue.fromJson(arg))
             ?.toList(),
       );
+}
+
+class ClientOutputStreamValue {
+  ClientOutputStreamValue({
+    @required this.stream,
+    @required this.headers,
+    this.contentType,
+    this.filename,
+  });
+
+  final Stream<Uint8List> stream;
+  final String contentType;
+  final String filename;
+  final Map<String, List<String>> headers;
 }

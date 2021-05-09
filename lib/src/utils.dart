@@ -14,7 +14,7 @@
 
 import 'dart:async';
 
-import 'package:http/http.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:meta/meta.dart';
 import 'package:sponge_client_dart/src/constants.dart';
 import 'package:sponge_client_dart/src/event.dart';
@@ -29,6 +29,9 @@ import 'package:timezone/timezone.dart';
 
 /// A set of utility methods.
 class SpongeClientUtils {
+  static final CONTENT_TYPE_FILENAME_REG_EXP =
+      RegExp(r'^.*;\s*filename\s*=\s*"(.*)".*$', caseSensitive: false);
+
   /// Obfuscates a password in the JSON text of a request or response.
   static String obfuscatePassword(String text) => text?.replaceAllMapped(
       RegExp(r'"(\w*password\w*)":".*?"', caseSensitive: false),
@@ -38,21 +41,15 @@ class SpongeClientUtils {
   static bool isHttpSuccess(int code) => 200 <= code && code <= 299;
 
   /// Returns `true` if the HTTP response content type is `application/json`.
-  static bool isJson(Response httpResponse) {
+  static bool isJson(dio.Response httpResponse) {
     if (httpResponse == null) {
       return false;
     }
 
-    var contentType = httpResponse.headers.entries
-        .firstWhere((entry) => entry.key?.toLowerCase() == 'content-type',
-            orElse: () => null)
-        ?.value;
+    var contentType =
+        httpResponse.headers[dio.Headers.contentTypeHeader]?.first;
 
-    if (contentType == null) {
-      return false;
-    }
-
-    return contentType.startsWith('application/json');
+    return contentType?.startsWith('application/json') ?? false;
   }
 
   /// Returns `true` if the Sponge server protocol version [protocolVersion] is compatible with the client.
@@ -138,5 +135,14 @@ class SpongeClientUtils {
         converter.featureConverter, event.features);
 
     return event;
+  }
+
+  static String getFilenameFromContentDisposition(String contentDisposition) {
+    if (contentDisposition == null) {
+      return null;
+    }
+
+    var match = CONTENT_TYPE_FILENAME_REG_EXP.firstMatch(contentDisposition);
+    return match != null && match.groupCount > 0 ? match.group(1) : null;
   }
 }

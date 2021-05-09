@@ -27,7 +27,9 @@ void main() {
           SpongeClientUtils.obfuscatePassword(
               '{"username":"test","password":"secret"}'),
           equals('{"username":"test","password":"***"}'));
-      expect(SpongeClientUtils.obfuscatePassword('{"username":null,"password":null}'),
+      expect(
+          SpongeClientUtils.obfuscatePassword(
+              '{"username":null,"password":null}'),
           equals('{"username":null,"password":null}'));
       expect(
           SpongeClientUtils.obfuscatePassword(
@@ -40,11 +42,14 @@ void main() {
           equals(
               '{"id":null,"username":"test","password":"***","authToken":null,"name":"TestAction","args":["TEST",null],"version":null}'));
 
-      expect(SpongeClientUtils.obfuscatePassword('{"passwordRetype":"secret!!!"}'),
+      expect(
+          SpongeClientUtils.obfuscatePassword('{"passwordRetype":"secret!!!"}'),
           equals('{"passwordRetype":"***"}'));
-      expect(SpongeClientUtils.obfuscatePassword('{"PASSwordRetype":"secret!!!"}'),
+      expect(
+          SpongeClientUtils.obfuscatePassword('{"PASSwordRetype":"secret!!!"}'),
           equals('{"PASSwordRetype":"***"}'));
-      expect(SpongeClientUtils.obfuscatePassword('{"a":"b"}'), equals('{"a":"b"}'));
+      expect(SpongeClientUtils.obfuscatePassword('{"a":"b"}'),
+          equals('{"a":"b"}'));
     });
     test('isHttpSuccess', () {
       expect(SpongeClientUtils.isHttpSuccess(200), isTrue);
@@ -52,7 +57,8 @@ void main() {
     });
     test('isServerVersionCompatible', () {
       expect(
-          SpongeClientUtils.isServerVersionCompatible(SpongeClientConstants.PROTOCOL_VERSION),
+          SpongeClientUtils.isServerVersionCompatible(
+              SpongeClientConstants.PROTOCOL_VERSION),
           isTrue);
       expect(SpongeClientUtils.isServerVersionCompatible('0'), isFalse);
     });
@@ -85,6 +91,20 @@ void main() {
 
       expect(SpongeClientUtils.isAnnotatedValueMap(exampleMap), isTrue);
       expect(SpongeClientUtils.isAnnotatedValueMap({'value': null}), isFalse);
+    });
+    test('shouldContentDispositionHaveFilename', () {
+      expect(
+        SpongeClientUtils.getFilenameFromContentDisposition(
+            'Content-Disposition: attachment; filename="filename.jpg"'),
+        equals('filename.jpg'),
+      );
+    });
+    test('shouldContentDispositionHaveFilenameNone', () {
+      expect(
+        SpongeClientUtils.getFilenameFromContentDisposition(
+            'Content-Disposition: attachment;'),
+        isNull,
+      );
     });
   });
 }

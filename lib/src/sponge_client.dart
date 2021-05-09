@@ -15,7 +15,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:http/http.dart';
+import 'package:dio/dio.dart' as dio;
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
 import 'package:quiver/cache.dart';
@@ -224,8 +224,10 @@ class SpongeClient {
 
   /// Sends the request to the server and returns the response.
   Future<R> execute<T extends SpongeRequest, R extends SpongeResponse>(
-      T request, ResponseFromJsonCallback<R> fromJson,
-      [SpongeRequestContext context]) async {
+    T request,
+    ResponseCreateCallback<R> fromJson, [
+    SpongeRequestContext context,
+  ]) async {
     context ??= SpongeRequestContext();
 
     // Set empty header if none.
@@ -242,12 +244,14 @@ class SpongeClient {
         });
   }
 
-  Future<SpongeResponse> _executeDelegate(SpongeRequest request,
-      ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
+  Future<SpongeResponse> _executeDelegate(
+      SpongeRequest request,
+      ResponseCreateCallback fromHttpReponse,
+      SpongeRequestContext context) async {
     context ??= SpongeRequestContext();
 
     return _setupResponse(request.method,
-        await _doExecute(setupRequest(request), fromJson, context));
+        await _doExecute(setupRequest(request), fromHttpReponse, context));
   }
 
   void _fireOnRequestSerializedListener(
@@ -273,8 +277,11 @@ class SpongeClient {
         .forEach((listener) => listener(request, response, responseBody));
   }
 
-  Future<SpongeResponse> _doExecute(SpongeRequest request,
-      ResponseFromJsonCallback fromJson, SpongeRequestContext context) async {
+  Future<SpongeResponse> _doExecute(
+    SpongeRequest request,
+    ResponseCreateCallback fromHttpReponse,
+    SpongeRequestContext context,
+  ) async {
     var requestBody = json.encode(request.toJson());
 
     _logger.finer(() =>
@@ -282,32 +289,48 @@ class SpongeClient {
 
     _fireOnRequestSerializedListener(request, context, requestBody);
 
-    var httpResponse = await post(_getUrl(),
-        headers: {'Content-type': SpongeClientConstants.CONTENT_TYPE_JSON},
-        body: requestBody);
+    var httpResponse = await dio.Dio().post(
+      _getUrl(),
+      data: requestBody,
+      options: dio.Options(
+        headers: {
+          ...?configuration.httpHeaders,
+        },
+        responseType: context.expectsResponseStream
+            ? dio.ResponseType.stream
+            : dio.ResponseType.plain,
+        // Don't valide HTTP response code here.
+        validateStatus: (_) => true,
+      ),
+    );
 
-    _logger.finer(() =>
-        'Remote API ${request.method} response: ${SpongeClientUtils.obfuscatePassword(httpResponse.body)})');
+    bool expectsNonResponseStream = !(context?.expectsResponseStream ?? false);
+
+    if (expectsNonResponseStream) {
+      _logger.finer(() =>
+          'Remote API ${request.method} response: ${SpongeClientUtils.obfuscatePassword(httpResponse.data)})');
+    }
 
     var isResponseRelevant =
         SpongeClientUtils.isHttpSuccess(httpResponse.statusCode) ||
             httpResponse.statusCode ==
                     SpongeClientConstants.HTTP_RESPONSE_CODE_ERROR &&
                 SpongeClientUtils.isJson(httpResponse);
-    if (!isResponseRelevant) {
+    if (!isResponseRelevant && expectsNonResponseStream) {
       _logger.fine(() =>
-          'HTTP error (status code ${httpResponse.statusCode}): ${httpResponse.body}');
+          'HTTP error (status code ${httpResponse.statusCode}): ${httpResponse.data}');
     }
     Validate.isTrue(isResponseRelevant,
         'HTTP error (status code ${httpResponse.statusCode})');
 
-    var responseBody = httpResponse.body;
     SpongeResponse response;
     try {
-      response = fromJson(json.decode(responseBody));
+      response = fromHttpReponse(httpResponse);
     } finally {
-      _fireOnResponseDeserializedListener(
-          request, context, response, responseBody);
+      if (expectsNonResponseStream) {
+        _fireOnResponseDeserializedListener(
+            request, context, response, httpResponse.data);
+      }
     }
     return response;
   }
@@ -318,7 +341,10 @@ class SpongeClient {
     SpongeRequestContext context,
   }) async =>
       await execute(
-          request, (json) => GetVersionResponse.fromJson(json), context);
+          request,
+          (httpResponse) =>
+              GetVersionResponse.fromJson(json.decode(httpResponse.data)),
+          context);
 
   /// Sends the `version` request to the server and returns the version.
   Future<String> getVersion() async =>
@@ -330,7 +356,10 @@ class SpongeClient {
     SpongeRequestContext context,
   }) async =>
       await execute(
-          request, (json) => GetFeaturesResponse.fromJson(json), context);
+          request,
+          (httpResponse) =>
+              GetFeaturesResponse.fromJson(json.decode(httpResponse.data)),
+          context);
 
   /// Returns the Sponge API features by sending the `features` request to the server and returning the features or using the cache.
   Future<Map<String, dynamic>> getFeatures() async {
@@ -349,7 +378,10 @@ class SpongeClient {
     return await _lock.synchronized(() async {
       _currentAuthToken = null;
       LoginResponse response = await _executeDelegate(
-          request, (json) => LoginResponse.fromJson(json), context);
+          request,
+          (httpResponse) =>
+              LoginResponse.fromJson(json.decode(httpResponse.data)),
+          context);
       _currentAuthToken = response.result.value?.authToken;
 
       return response;
@@ -373,7 +405,10 @@ class SpongeClient {
   }) async {
     return await _lock.synchronized(() async {
       var response = await execute(
-          request, (json) => LogoutResponse.fromJson(json), context);
+          request,
+          (httpResponse) =>
+              LogoutResponse.fromJson(json.decode(httpResponse.data)),
+          context);
       _currentAuthToken = null;
 
       return response;
@@ -391,7 +426,10 @@ class SpongeClient {
     SpongeRequestContext context,
   }) async =>
       await execute(
-          request, (json) => GetKnowledgeBasesResponse.fromJson(json), context);
+          request,
+          (httpResponse) => GetKnowledgeBasesResponse.fromJson(
+              json.decode(httpResponse.data)),
+          context);
 
   /// Sends the `knowledgeBases` request to the server and returns the list of available
   /// knowledge bases metadata.
@@ -422,7 +460,10 @@ class SpongeClient {
   Future<GetActionsResponse> _doGetActionsByRequest(GetActionsRequest request,
       bool populateCache, SpongeRequestContext context) async {
     var response = await execute(
-        request, (json) => GetActionsResponse.fromJson(json), context);
+        request,
+        (httpResponse) =>
+            GetActionsResponse.fromJson(json.decode(httpResponse.data)),
+        context);
 
     if (response.result.value?.actions != null) {
       // Unmarshal defaultValues in action meta.
@@ -575,11 +616,15 @@ class SpongeClient {
     SpongeRequestContext context,
   }) async =>
       await _doCallByRequest(
-          actionMeta ??
-              await getActionMeta(request.params.name,
-                  allowFetchMetadata: allowFetchMetadata),
-          request,
-          context);
+        actionMeta ??
+            await getActionMeta(request.params.name,
+                allowFetchMetadata: allowFetchMetadata),
+        request,
+        SpongeRequestContext.overwrite(
+          context,
+          expectsResponseStream: _isActionResultStream(actionMeta),
+        ),
+      );
 
   /// Sends the `call` request to the server and returns the response. See [callByRequest].
   Future<dynamic> call(
@@ -592,17 +637,19 @@ class SpongeClient {
     Validate.isTrue(args == null || namedArgs == null,
         'Action args and namedArgs can\'t be set both');
 
-    return (await callByRequest(
-            ActionCallRequest(
-              ActionCallParams(
-                name: actionName,
-                args: namedArgs ?? args,
-              ),
-            ),
-            actionMeta: actionMeta,
-            allowFetchMetadata: allowFetchMetadata))
-        .result
-        .value;
+    var response = await callByRequest(
+        ActionCallRequest(
+          ActionCallParams(
+            name: actionName,
+            args: namedArgs ?? args,
+          ),
+        ),
+        actionMeta: actionMeta,
+        allowFetchMetadata: allowFetchMetadata);
+
+    return _isActionResultNotStream(actionMeta)
+        ? response.result.value
+        : (response as OutputStreamActionCallResponse).value;
   }
 
   void _setupActionExecutionInfo(
@@ -621,6 +668,12 @@ class SpongeClient {
         'the action name ${info?.name} in the request');
   }
 
+  bool _isActionResultNotStream(ActionMeta actionMeta) =>
+      !_isActionResultStream(actionMeta);
+
+  bool _isActionResultStream(ActionMeta actionMeta) =>
+      actionMeta?.result?.kind == DataTypeKind.OUTPUT_STREAM;
+
   Future<ActionCallResponse> _doCallByRequest(ActionMeta actionMeta,
       ActionCallRequest request, SpongeRequestContext context) async {
     _setupActionExecutionInfo(actionMeta, request.params);
@@ -637,10 +690,30 @@ class SpongeClient {
       throw Exception('Action args should be an instance of a List or a Map');
     }
 
-    var response = await execute(
-        request, (json) => ActionCallResponse.fromJson(json), context);
-
-    await _unmarshalActionCallResult(actionMeta, response);
+    ActionCallResponse response;
+    if (_isActionResultNotStream(actionMeta)) {
+      response = await execute(
+          request,
+          (httpResponse) =>
+              ActionCallResponse.fromJson(json.decode(httpResponse.data)),
+          context);
+      await _unmarshalActionCallResult(actionMeta, response);
+    } else {
+      response = await execute(request, (httpResponse) {
+        var data = httpResponse.data as dio.ResponseBody;
+        return OutputStreamActionCallResponse(ClientOutputStreamValue(
+          stream: data.stream,
+          headers: data.headers,
+          contentType:
+              httpResponse.headers[dio.Headers.contentTypeHeader]?.first,
+          filename: SpongeClientUtils.getFilenameFromContentDisposition(
+            httpResponse
+                .headers[SpongeClientConstants.HTTP_HEADER_CONTENT_DISPOSITION]
+                ?.first,
+          ),
+        ));
+      }, context);
+    }
 
     return response;
   }
@@ -791,7 +864,10 @@ class SpongeClient {
     }
 
     return await execute(
-        request, (json) => IsActionActiveResponse.fromJson(json), context);
+        request,
+        (httpResponse) =>
+            IsActionActiveResponse.fromJson(json.decode(httpResponse.data)),
+        context);
   }
 
   /// Fetches activity statuses for actions specified in the entries.
@@ -841,7 +917,10 @@ class SpongeClient {
         await _marshalProvideArgsFeaturesMap(request.params.argFeatures);
 
     var response = await execute(
-        request, (json) => ProvideActionArgsResponse.fromJson(json), context);
+        request,
+        (httpResponse) =>
+            ProvideActionArgsResponse.fromJson(json.decode(httpResponse.data)),
+        context);
 
     if (actionMeta != null) {
       await _unmarshalProvidedActionArgValues(
@@ -897,7 +976,10 @@ class SpongeClient {
       bool populateCache,
       SpongeRequestContext context) async {
     var response = await execute(
-        request, (json) => GetEventTypesResponse.fromJson(json), context);
+        request,
+        (httpResponse) =>
+            GetEventTypesResponse.fromJson(json.decode(httpResponse.data)),
+        context);
 
     var types = response.result.value;
 
@@ -992,7 +1074,10 @@ class SpongeClient {
         typeConverter.featureConverter, params.features);
 
     return await execute(
-        request, (json) => SendEventResponse.fromJson(json), context);
+        request,
+        (httpResponse) =>
+            SendEventResponse.fromJson(json.decode(httpResponse.data)),
+        context);
   }
 
   /// Sends the event named [eventName] with optional [attributes], [label], [description] and [features] to the server.
@@ -1022,7 +1107,11 @@ class SpongeClient {
     ReloadRequest request, {
     SpongeRequestContext context,
   }) async =>
-      await execute(request, (json) => ReloadResponse.fromJson(json), context);
+      await execute(
+          request,
+          (httpResponse) =>
+              ReloadResponse.fromJson(json.decode(httpResponse.data)),
+          context);
 
   /// Sends the `reload` request to the server.
   Future<void> reload() async {
@@ -1112,5 +1201,5 @@ class SpongeClient {
       };
 }
 
-typedef ResponseFromJsonCallback<R extends SpongeResponse> = R Function(
-    Map<String, dynamic> json);
+typedef ResponseCreateCallback<R extends SpongeResponse> = R Function(
+    dio.Response httpResponse);

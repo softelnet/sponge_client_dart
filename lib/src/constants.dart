@@ -63,6 +63,8 @@ abstract class SpongeClientConstants {
   static const String SERVICE_DISCOVERY_PROPERTY_UUID = 'uuid';
   static const String SERVICE_DISCOVERY_PROPERTY_NAME = 'name';
   static const String SERVICE_DISCOVERY_PROPERTY_URL = 'url';
+
+  static const String HTTP_HEADER_CONTENT_DISPOSITION = 'Content-Disposition';
 }
 
 /// JSON-RPC 2.0 constants.

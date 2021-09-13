@@ -65,6 +65,8 @@ abstract class SpongeClientConstants {
   static const String SERVICE_DISCOVERY_PROPERTY_URL = 'url';
 
   static const String HTTP_HEADER_CONTENT_DISPOSITION = 'Content-Disposition';
+
+  static const String ERROR_DATA_FIELD_DETAILED_ERROR_MESSAGE = 'detailedErrorMessage';
 }
 
 /// JSON-RPC 2.0 constants.

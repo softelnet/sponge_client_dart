@@ -32,32 +32,14 @@ class ResponseError {
   final String message;
 
   /// The error data.
-  final ErrorData data;
+  final Map<String, dynamic> data;
 
   factory ResponseError.fromJson(Map<String, dynamic> json) {
     return json != null
         ? ResponseError(
             json['code'],
             json['message'],
-            data: ErrorData.fromJson(json['data']),
-          )
-        : null;
-  }
-}
-
-/// An error data.
-class ErrorData {
-  ErrorData({
-    this.detailedErrorMessage,
-  });
-
-  /// The detailed error message.
-  final String detailedErrorMessage;
-
-  factory ErrorData.fromJson(Map<String, dynamic> json) {
-    return json != null
-        ? ErrorData(
-            detailedErrorMessage: json['detailedErrorMessage'],
+            data: json['data'] ?? {},
           )
         : null;
   }

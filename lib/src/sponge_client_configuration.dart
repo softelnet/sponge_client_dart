@@ -26,6 +26,7 @@ class SpongeClientConfiguration {
     this.useEventTypeCache = true,
     this.eventTypeCacheMaxSize = -1,
     this.throwExceptionOnErrorResponse = true,
+    this.allowFetchActionMetadataInActionCall = true,
     this.features,
     this.httpHeaders,
   });
@@ -71,6 +72,8 @@ class SpongeClientConfiguration {
 
   /// The request header features.
   Map<String, Object> features;
+
+  bool allowFetchActionMetadataInActionCall;
 
   /// The HTTP request headers.
   Map<String, Object> httpHeaders;

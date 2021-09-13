@@ -1,3 +1,9 @@
+
+## 1.18.0 (not released yet)
+* Added a new flag `allowFetchActionMetadataInActionCall` to the Remote API client. The flag allows fetching action metadata from the server before an action call (if not already cached). Defaults to `true`.
+* The Remote API JSON-RPC 2.0 error response data is now represented as a map. The previous, optional `detailedErrorMessage` field is now an optional entry in the map with the `detailedErrorMessage` key.
+* Dependencies upgrade.
+
 ## 1.17.0 (2021-03-19)
 * API change: Renamed `StreamType` to `OutputStreamType`.
 * Added new Remote API feature `protocolVersion`. For compatibility, both a server and a client should use the same protocol version.

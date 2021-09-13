@@ -162,24 +162,20 @@ class SpongeClient {
 
       if (_configuration.throwExceptionOnErrorResponse) {
         var message = error.message ?? 'Error code: ${error.code}';
-        var detailedErrorMessage = error.data?.detailedErrorMessage;
 
         switch (error.code) {
           case SpongeClientConstants.ERROR_CODE_INVALID_AUTH_TOKEN:
-            throw InvalidAuthTokenException(
-                error.code, message, detailedErrorMessage);
+            throw InvalidAuthTokenException(error.code, message, error.data);
           case SpongeClientConstants.ERROR_CODE_INVALID_KB_VERSION:
             throw InvalidKnowledgeBaseVersionException(
-                error.code, message, detailedErrorMessage);
+                error.code, message, error.data);
           case SpongeClientConstants.ERROR_CODE_INVALID_USERNAME_PASSWORD:
             throw InvalidUsernamePasswordException(
-                error.code, message, detailedErrorMessage);
+                error.code, message, error.data);
           case SpongeClientConstants.ERROR_CODE_INACTIVE_ACTION:
-            throw InactiveActionException(
-                error.code, message, detailedErrorMessage);
+            throw InactiveActionException(error.code, message, error.data);
           default:
-            throw SpongeClientException(
-                error.code, message, detailedErrorMessage);
+            throw SpongeClientException(error.code, message, error.data);
         }
       }
     }
@@ -612,13 +608,14 @@ class SpongeClient {
   Future<ActionCallResponse> callByRequest(
     ActionCallRequest request, {
     ActionMeta actionMeta,
-    bool allowFetchMetadata = true,
+    bool allowFetchMetadata,
     SpongeRequestContext context,
   }) async =>
       await _doCallByRequest(
         actionMeta ??
             await getActionMeta(request.params.name,
-                allowFetchMetadata: allowFetchMetadata),
+                allowFetchMetadata: allowFetchMetadata ??
+                    _configuration.allowFetchActionMetadataInActionCall),
         request,
         SpongeRequestContext.overwrite(
           context,
@@ -632,7 +629,7 @@ class SpongeClient {
     List args,
     Map<String, dynamic> namedArgs,
     ActionMeta actionMeta,
-    bool allowFetchMetadata = true,
+    bool allowFetchMetadata,
   }) async {
     Validate.isTrue(args == null || namedArgs == null,
         'Action args and namedArgs can\'t be set both');

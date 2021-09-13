@@ -15,7 +15,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:quiver/check.dart';
 import 'package:sponge_client_dart/src/features/feature_converter.dart';
 import 'package:sponge_client_dart/src/util/type_utils.dart';
 import 'package:sponge_client_dart/src/util/validate.dart';
@@ -40,7 +39,7 @@ abstract class TypeConverter {
       return null;
     }
 
-    checkNotNull(type, message: 'The type must not be null');
+    ArgumentError.checkNotNull(type, 'type');
 
     if (type.annotated && value is AnnotatedValue) {
       return AnnotatedValue(
@@ -66,7 +65,7 @@ abstract class TypeConverter {
       return null;
     }
 
-    checkNotNull(type, message: 'The type must not be null');
+    ArgumentError.checkNotNull(type, 'type');
 
     // Handle a wrapped annotated value.
     if (type.annotated && SpongeClientUtils.isAnnotatedValueMap(value)) {

@@ -200,7 +200,7 @@ void main() {
             startsWith(
                 'NameError: global name \'throws_error\' is not defined in'));
         expect(
-            e.detailedErrorMessage,
+            e.errorData[SpongeClientConstants.ERROR_DATA_FIELD_DETAILED_ERROR_MESSAGE],
             startsWith(
                 'org.openksavi.sponge.engine.WrappedException: NameError: global name \'throws_error\' is not defined in'));
       } catch (e) {
@@ -216,7 +216,7 @@ void main() {
         expect(e.code, equals(SpongeClientConstants.ERROR_CODE_GENERIC));
         expect(e.message, startsWith('Exception: Knowledge base exception in'));
         expect(
-            e.detailedErrorMessage,
+            e.errorData[SpongeClientConstants.ERROR_DATA_FIELD_DETAILED_ERROR_MESSAGE],
             startsWith(
                 'org.openksavi.sponge.engine.WrappedException: Exception: Knowledge base exception in'));
       } catch (e) {

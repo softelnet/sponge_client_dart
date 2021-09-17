@@ -28,7 +28,8 @@ class SpongeClientException extends SpongeException {
     this.code,
     String message,
     Map<String, dynamic> errorData,
-  ]) : errorData = errorData ?? const {}, super(message);
+  ])  : errorData = errorData ?? const {},
+        super(message);
 
   final int code;
   final Map<String, dynamic> errorData;
